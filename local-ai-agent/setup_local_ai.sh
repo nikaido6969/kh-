@@ -5,6 +5,8 @@
 #          pbpaste > ~/setup_local_ai.sh && bash ~/setup_local_ai.sh
 # =============================================================
 set -e
+# パイプ実行(curl | bash)でも途中で止まらないよう、全体を関数にして最後に実行
+main() {
 DIR="$HOME/local-ai-agent"
 step(){ echo ""; echo "▶▶ [$1/7] $2"; }
 
@@ -19,7 +21,7 @@ echo "✅ Homebrew OK"
 
 # ---------- 2. Python / Ollama / tmux ----------
 step 2 "Python3.12・Ollama・tmux インストール"
-brew install python@3.12 ollama tmux || true
+brew install python@3.12 ollama tmux </dev/null || true
 echo "✅ インストール OK"
 
 # ---------- 3. フォルダ・仮想環境・ライブラリ ----------
@@ -350,3 +352,5 @@ echo "  停止                  : bash ~/local-ai-agent/stop.sh"
 echo "  結果フォルダを開く    : open ~/local-ai-agent/results"
 echo "=================================================="
 open "$DIR" 2>/dev/null || true
+}
+main "$@" </dev/null
