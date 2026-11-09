@@ -925,6 +925,9 @@ async function callAI(input,opt){
   }
   throw{code:'empty'};
 }
+// AIが使えないときは、アプリに入っている中2の内容から答える
+function kbAnswer(es){const e=es[0];if(!e)return '';
+  return `【こたえ】（${e.s}・${e.u}）\n${e.p.slice(0,4).map(x=>'・'+x).join('\n')}${e.k?`\n【覚え方のコツ】${e.k}`:''}\n【有名な解き方】${e.h}\n【よくあるミス】${e.m}\n【考えてみよう】この中で、いちばん自信がないのはどれかな？そこから一緒に考えよう！`}
 function aiErr(e){const c=e&&e.code;return c==='rate_limited'?'混み合っているみたい。少し待ってからもう一度送ってね':c==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':c==='images_unavailable'?'写真はいま送れないみたい。文字で書いてね':'うまく答えられなかった。もう一度送ってみてね'}
 function fmtAns(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#+\s*/gm,'').replace(/【([^】]{1,12})】/g,'<b style="display:block;margin-top:6px;color:var(--focus)">【$1】</b>').replace(/^\s*<b style="display:block;margin-top:6px/,'<b style="display:block;margin-top:0')}
 const QUICK=['ヒントちょうだい','もっと小さいヒント','考え方の手順だけ教えて','答え合わせして','似た練習問題を出して'];
@@ -940,10 +943,9 @@ async function freeAI(input,opt={}){
   let r;
   for(let i=0;i<4;i++){
     r=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'openai',messages:msgs,private:true}),signal:opt.signal});
+      body:JSON.stringify({model:'openai-fast',messages:msgs,private:true,reasoning_effort:'low'}),signal:opt.signal});
     if(r.status!==429&&r.status!==402&&r.status<500)break;
-    if(opt.onText)opt.onText({text:'混み合っているので、少し待ってから答えるね…',delta:''});
-    await new Promise(res=>setTimeout(res,[6000,12000,20000,0][i]));
+    await new Promise(res=>setTimeout(res,[2500,5000,8000,0][i]));
   }
   if(r.status===429||r.status===402)throw{code:"rate_limited"};if(!r.ok)throw{code:'http_'+r.status};
   const j=await r.json();const t=((j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'').trim();
@@ -984,7 +986,7 @@ async function askAI(text){
     const t=await callAI(msgs,opt);
     CHAT.push({role:'assistant',content:t});saveChat();
   }catch(e){
-    CHAT.pop();box.remove();toast(aiErr(e));
+    const t=kbAnswer(kbSearch(text));if(t&&!(e&&e.code==='not_granted')){CHAT.push({role:'assistant',content:t});saveChat()}else{CHAT.pop();box.remove();toast(t?aiErr(e):'単元名（例：一次関数）を入れて、もう一度送ってみてね')}
     if(e&&e.code==='not_granted'){$('aiSend').disabled=true;$('aiNote').textContent='AIの利用が許可されていません（右上のメニューから許可できます）'}
   }
   aiBusy=false;drawAI();
@@ -1082,7 +1084,7 @@ ${q}`;
     const [body,fig]=split(t);box.innerHTML=fmtAns(body);
     if(fig){try{const j=JSON.parse(fig.slice(fig.indexOf('{'),fig.lastIndexOf('}')+1));$('kbFig').innerHTML=figHTML(j.figure||j)}catch(e){}}
     kbQ=q;kbA=body.trim();$('kbMore').style.display='';
-  }catch(e){box.textContent=aiErr(e)}
+  }catch(e){const t=kbAnswer(hits);if(t){box.innerHTML=fmtAns(t);kbQ=q;kbA=t;$('kbMore').style.display=''}else box.textContent='単元名（例：一次関数、不定詞、前線）を入れて、もう一度聞いてみてね'}
   kbBusy=false;$('kbAsk').disabled=false;
 }
 $('kbMore').onclick=()=>{CHAT.push({role:'user',content:kbQ},{role:'assistant',content:kbA});saveChat();go('ai')};
