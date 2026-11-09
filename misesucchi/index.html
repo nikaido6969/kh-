@@ -237,12 +237,19 @@ const ITEMS={
  phones:{n:'ヘッドホン',e:'🎧',r:'R',t:'head'},
  cap:{n:'ハカセぼうし',e:'🎓',r:'R',t:'head'},
  crown:{n:'おうかん',e:'👑',r:'SSR',t:'head'},
+ santa:{n:'サンタぼうし',e:'🎅',r:'R',t:'head'},
+ apple_hat:{n:'りんごぼうし',e:'🍎',r:'SR',t:'head'},
+ orange_hat:{n:'みかんぼうし',e:'🍊',r:'R',t:'head'},
+ deer:{n:'しかのつの',e:'🦌',r:'SR',t:'head'},
+ maple:{n:'もみじかざり',e:'🍁',r:'N',t:'head'},
  glass:{n:'まるメガネ',e:'👓',r:'N',t:'face'},
  shades:{n:'サングラス',e:'🕶️',r:'R',t:'face'},
  star:{n:'ほっぺスター',e:'⭐',r:'SR',t:'face'},
  mic:{n:'マイク',e:'🎤',r:'R',t:'hand'},
  guitar:{n:'ギター',e:'🎸',r:'SR',t:'hand'},
  wand:{n:'ほしのステッキ',e:'🪄',r:'SR',t:'hand'},
+ present:{n:'プレゼント',e:'🎁',r:'N',t:'hand'},
+ cane:{n:'キャンディケイン',e:'🍭',r:'R',t:'hand'},
  bg_park:{n:'はらっぱ',e:'🌳',r:'N',t:'bg',bg:'linear-gradient(#cfe9f7,#e9f6d8)'},
  bg_lib:{n:'としょしつ',e:'📚',r:'R',t:'bg',bg:'linear-gradient(#f3e3c8,#e7d2ad)'},
  bg_gym:{n:'たいいくかん',e:'🏀',r:'R',t:'bg',bg:'linear-gradient(#fbe2c8,#f2c79c)'},
@@ -355,8 +362,10 @@ function petSVG(){
    star:'<text x="50" y="140" font-size="18">⭐</text><text x="132" y="140" font-size="18">⭐</text>'};
   const HD={mic:'<g transform="translate(160 120) rotate(20)"><rect x="-4" y="0" width="8" height="34" rx="4" fill="#555"/><circle r="11" fill="#bbb"/></g>',
    guitar:'<g transform="translate(150 150) rotate(-35)"><rect x="-3" y="-60" width="6" height="50" fill="#8a5a2b"/><ellipse cx="0" cy="0" rx="16" ry="20" fill="#e07b4f"/><circle cx="0" cy="-2" r="5" fill="#3b3a33"/></g>',
+   present:'<g transform="translate(152 158)"><rect x="-16" y="-14" width="32" height="28" fill="#4fa86a"/><rect x="-3" y="-14" width="6" height="28" fill="#e2453c"/><rect x="-16" y="-3" width="32" height="6" fill="#e2453c"/></g>',
+   cane:'<g transform="translate(150 110)"><path d="M0 70V10q0-16 14-16t14 16" fill="none" stroke="#e2453c" stroke-width="8" stroke-linecap="round"/><path d="M0 70V10q0-16 14-16t14 16" fill="none" stroke="#fff" stroke-width="8" stroke-dasharray="6 8"/></g>',
    wand:'<g transform="translate(160 130) rotate(25)"><rect x="-2" y="-10" width="4" height="40" fill="#c79cef"/><text x="-12" y="-6" font-size="22">⭐</text></g>'};
-  if(S.chara&&S.chara!=='apple')return chibi(S.chara,sc,sad,happy,(eq.head?H[eq.head]:'')+(eq.face?F[eq.face]:'')+(eq.hand?HD[eq.hand]:''),st);
+  if(S.chara&&S.chara!=='apple')return chibi(S.chara,sc,sad,happy,(eq.head?(H[eq.head]||HATS[eq.head]):'')+(eq.face?F[eq.face]:'')+(eq.hand?HD[eq.hand]:''),st);
   return `<svg viewBox="0 0 200 200"><defs><radialGradient id="shine" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></radialGradient><pattern id="mesh" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0l4 4" stroke="#888"/></pattern></defs>
   <ellipse cx="100" cy="190" rx="${55*sc}" ry="8" fill="rgba(0,0,0,.08)"/>
   <g transform="translate(100 190) scale(${sc}) translate(-100 -190)">
@@ -367,13 +376,21 @@ function petSVG(){
    ${eyes}<ellipse cx="66" cy="128" rx="9" ry="5" fill="#f3a6b3" opacity=".8"/><ellipse cx="134" cy="128" rx="9" ry="5" fill="#f3a6b3" opacity=".8"/>
    ${mouth}
    <path d="M42 140q-14 4-10 18" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M158 140q14 4 10 18" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
-   ${extra}${eq.head?H[eq.head]:''}${eq.face?F[eq.face]:''}${eq.hand?HD[eq.hand]:''}
+   ${extra}${eq.head?(H[eq.head]||HATS[eq.head]):''}${eq.face?F[eq.face]:''}${eq.hand?HD[eq.hand]:''}
    ${sad?'<text x="140" y="80" font-size="20">💧</text>':''}
   </g></svg>`;
 }
 
 // ===== ミニキャラ =====
-const CHARAS={apple:'🍏 りんご',a:'🩶 シルバーっち',b:'🩷 ピンクっち',c:'🌈 レインボーっち'};
+const HATS={
+ santa:'<path d="M48 64Q100 -4 152 64Z" fill="#e2453c"/><path d="M104 26Q150 18 166 62" stroke="#e2453c" stroke-width="16" fill="none" stroke-linecap="round"/><rect x="42" y="56" width="116" height="15" rx="7.5" fill="#fff"/><circle cx="167" cy="66" r="10" fill="#fff"/>',
+ apple_hat:'<path d="M50 64Q100 0 150 64Z" fill="#e2453c"/><rect x="46" y="58" width="108" height="10" rx="5" fill="#c9372f"/><path d="M100 20q2-10 8-14" stroke="#7a4a2a" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M106 14q14-10 24 0q-12 8-24 0z" fill="#5fae4e"/><g transform="translate(130 44)"><circle r="4" fill="#fff"/><circle cx="-6" r="4" fill="#fff"/><circle cx="6" r="4" fill="#fff"/><circle cy="-6" r="4" fill="#fff"/><circle cy="6" r="4" fill="#fff"/><circle r="3" fill="#f1c75a"/></g>',
+ orange_hat:'<path d="M50 64Q100 0 150 64Z" fill="#f39a2b"/><rect x="46" y="58" width="108" height="10" rx="5" fill="#de8420"/><circle cx="80" cy="44" r="2" fill="#de8420"/><circle cx="116" cy="38" r="2" fill="#de8420"/><path d="M100 22q14-12 26-2q-14 8-26 2z" fill="#5fae4e"/>',
+ deer:'<g fill="none" stroke="#8a5a2b" stroke-width="7" stroke-linecap="round"><path d="M74 56L62 20M66 34L50 28M64 26l6-14"/><path d="M126 56l12-36M134 34l16-6M136 26l-6-14"/></g><ellipse cx="54" cy="70" rx="12" ry="7" fill="#a8774a" transform="rotate(-25 54 70)"/><ellipse cx="146" cy="70" rx="12" ry="7" fill="#a8774a" transform="rotate(25 146 70)"/>',
+ maple:'<text x="122" y="74" font-size="30">🍁</text>',
+};
+
+const CHARAS={apple:'🍏 りんご',a:'🩶 シルバーっち',b:'🩷 ピンクっち',c:'🌈 レインボーっち',d:'🎅 ブラウンっち',e:'🎄 ブラックっち',f:'⭐ ブロンドっち'};
 function chibi(c,sc,sad,happy,acc,st){
   const skin='#ffe3d1',ink='#3a2a2a';
   const eyesN=`<g class="eye"><ellipse cx="78" cy="110" rx="8" ry="11" fill="${ink}"/><circle cx="81" cy="106" r="3.2" fill="#fff"/><circle cx="76" cy="114" r="1.5" fill="#fff"/></g><g class="eye"><ellipse cx="122" cy="110" rx="8" ry="11" fill="${ink}"/><circle cx="125" cy="106" r="3.2" fill="#fff"/><circle cx="120" cy="114" r="1.5" fill="#fff"/></g>`;
@@ -398,7 +415,29 @@ function chibi(c,sc,sad,happy,acc,st){
       front:'<path d="M42 100q4-58 58-60q54 2 58 60q-10-16-20-8q-8-18-20-8q-10-16-18-4q-10-14-20 0q-10-12-20 4q-10-8-18 16z" fill="url(#hC)"/>',
       cloth:'#5fb07a',cs:'#3f8a5a',extra:'<g transform="translate(120 162)"><circle r="7" fill="#f7a9c4"/><circle cx="-7" cy="-3" r="5" fill="#f7a9c4"/><circle cx="6" cy="-6" r="5" fill="#f7a9c4"/><circle r="3" fill="#e46a9a"/></g>',
       eyes:eyesH,mouth:mLaugh},
+   d:{defs:'',xmas:1,
+      back:'<path d="M44 106q-6-62 56-66q62 4 56 66l-4 22q-6 4-10 0V108H58v20q-4 4-10 0z" fill="#7a4a2a"/>',
+      front:'<path d="M46 102q4-54 54-56q50 2 54 56q-12-10-16-26q-10 18-30 22q4-14 2-24q-10 20-34 24q-12 2-30 4z" fill="#8a5632" stroke="#5e3a20" stroke-width="2"/>',
+      cloth:'#3f74c4',cs:'#2c5596',extra:'<path d="M74 152q26 10 52 0" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M66 176h68" stroke="#4a3020" stroke-width="5"/>',
+      prop:'<g transform="translate(148 168)"><path d="M-12-22h20v26q0 12 12 12v12h-18q-14 0-14-14z" fill="#e2453c"/><rect x="-14" y="-28" width="24" height="10" rx="4" fill="#fff"/><path d="M-12-10h20" stroke="#4fa86a" stroke-width="4"/><rect x="-10" y="-46" width="16" height="16" fill="#e2453c"/><path d="M-2-46v16M-10-38h16" stroke="#e8b84a" stroke-width="3"/></g>',
+      eyes:'dot',mouth:'small'},
+   e:{defs:'',xmas:1,
+      back:'<path d="M42 108q-6-64 58-68q64 4 58 68l-4 26q-8 4-14-2V108H60v24q-6 6-14 2z" fill="#22232b"/>',
+      front:'<path d="M44 104q2-58 60-60q52 4 52 60q-30-34-70-30q-14 14-42 30z" fill="#2b2c35"/><path d="M80 56q20-6 36 2" stroke="#6b6e80" stroke-width="4" fill="none" stroke-linecap="round"/>',
+      cloth:'#e2453c',cs:'#b8322b',extra:'<path d="M72 152q28 10 56 0" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M100 156v30" stroke="#fff" stroke-width="5"/>',
+      prop:'<g transform="translate(146 160) rotate(-8)"><rect x="-20" y="-16" width="40" height="32" rx="3" fill="#4fa86a"/><path d="M-20-6l40 18M-20 6l30 12M-10-16l30 14" stroke="#9fd38c" stroke-width="4"/><rect x="-3" y="-16" width="6" height="32" fill="#e2453c"/><rect x="2" y="-36" width="20" height="18" fill="#e8b84a"/></g>',
+      eyes:'dot',mouth:'small'},
+   f:{defs:'',xmas:1,
+      back:'<path d="M40 108q-6-66 60-70q66 4 60 70v50q-10 6-18 0V108H58v50q-8 6-18 0z" fill="#d4a849"/>',
+      front:'<path d="M44 104q2-60 56-62q54 2 56 62q-14-24-50-56l-6 0q-36 32-56 56z" fill="#e0b656" stroke="#b88a30" stroke-width="2"/>',
+      cloth:'#f1cf3a',cs:'#c9a520',extra:'<path d="M70 150q30 10 60 0" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round"/><rect x="74" y="174" width="52" height="14" fill="#4fa86a"/>',
+      prop:'<g transform="translate(128 120)"><path d="M0 70V10q0-18 16-18t16 18" fill="none" stroke="#e2453c" stroke-width="9" stroke-linecap="round"/><path d="M0 70V10q0-18 16-18t16 18" fill="none" stroke="#fff" stroke-width="9" stroke-dasharray="6 8" stroke-linecap="butt"/></g>',
+      eyes:'dot',mouth:'small'},
   }[c];
+  const eyesD=`<g class="eye"><ellipse cx="80" cy="112" rx="5" ry="6.5" fill="${ink}"/><circle cx="82" cy="110" r="1.8" fill="#fff"/></g><g class="eye"><ellipse cx="120" cy="112" rx="5" ry="6.5" fill="${ink}"/><circle cx="122" cy="110" r="1.8" fill="#fff"/></g>`;
+  const mSmall='<path d="M94 128q6 6 12 0" fill="none" stroke="#3a2a2a" stroke-width="3" stroke-linecap="round"/>';
+  if(C.eyes==='dot'){C.eyes=eyesD;C.mouth=mSmall}
+  if(C.xmas){if(!S.eq.head)C.front+=HATS.santa;if(!S.eq.hand)C.extra+=C.prop}
   const eyes=sad?eyesN:C.eyes, mouth=sad?mSad:C.mouth;
   return `<svg viewBox="0 0 200 200"><defs>${C.defs}</defs>
   <ellipse cx="100" cy="190" rx="${55*sc}" ry="8" fill="rgba(0,0,0,.08)"/>
