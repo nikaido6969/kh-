@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="ミセスッち">
 <meta name="theme-color" content="#f6f1e7">
 <title>ミセスッち 勉強タイマー</title>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Hachi+Maru+Pop&family=Yomogi&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f6f1e7;--card:#fffdf8;--ink:#3b3a33;--sub:#8a8574;--line:#e9e1cf;--focus:#e46a5a;--focus2:#f39a7b;--rest:#5fae7a;--rest2:#9fd3a8;--gold:#e8b84a;--shadow:0 6px 20px rgba(120,100,60,.12)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -224,6 +224,29 @@ h1 span{color:var(--focus)}
 .pz .dl{position:absolute;top:-7px;right:-7px;background:#c94a64;color:#fff;border-radius:99px;width:20px;height:20px;font-size:13px;line-height:20px;text-align:center}
 .pz.add{border-style:dashed;flex-direction:column;color:var(--sub);font-size:22px}
 .pz.add small{font-size:10px;font-weight:700}
+.fig{margin-top:12px;background:#fffaf3 repeating-linear-gradient(0deg,transparent 0 27px,#f6e3e3 27px 28px);border:2.5px dashed #f2a7bb;border-radius:255px 18px 225px 18px/18px 225px 18px 255px;padding:30px 16px 18px;position:relative;font-family:"Yomogi","M PLUS Rounded 1c",sans-serif;color:#5a4a4f}
+.fig::before{content:'';position:absolute;top:-10px;left:50%;width:96px;height:22px;margin-left:-48px;background:repeating-linear-gradient(45deg,#ffd1dc 0 8px,#ffe6ec 8px 16px);opacity:.9;transform:rotate(-3deg);border-radius:3px}
+.fig h4{font-family:"Hachi Maru Pop",cursive;font-weight:400;font-size:17px;margin:0 0 14px;text-align:center;color:#e26b8f}
+.fig h4::before{content:'✿ '}.fig h4::after{content:' ✿'}
+.fstep{display:flex;flex-direction:column;align-items:center;gap:4px}
+.fstep .bx{width:92%;background:#fff;border:2px solid #b8e0d2;border-radius:20px 8px 18px 10px/10px 18px 8px 20px;padding:8px 12px;font-size:15px;display:flex;gap:10px;align-items:center;box-shadow:3px 3px 0 #ffd6e0}
+.fstep .bx:nth-child(4n+3){border-color:#ffc4d3;box-shadow:3px 3px 0 #c9ecdf}
+.fstep .no{font-family:"Hachi Maru Pop",cursive;flex:none;width:28px;height:28px;border-radius:50%;background:#ffe1ea;color:#e26b8f;display:flex;align-items:center;justify-content:center;font-size:14px}
+.fstep .ar{color:#f2a7bb;font-size:18px;line-height:1}
+.fcmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fcmp>div{background:#fff;border:2px solid #ffc4d3;border-radius:22px 10px 20px 12px/12px 20px 10px 22px;padding:10px}
+.fcmp>div+div{border-color:#b8d8f2}
+.fcmp b{display:block;font-family:"Hachi Maru Pop",cursive;font-weight:400;text-align:center;font-size:15px;margin-bottom:6px;color:#e26b8f}
+.fcmp>div+div b{color:#6a9bd1}
+.fcmp li{font-size:14px;margin:4px 0;line-height:1.5}.fcmp ul{margin:0;padding-left:18px}
+.fpts{display:grid;gap:9px}
+.fpts>div{display:flex;gap:10px;align-items:center;background:#fff;border-radius:18px 8px 16px 10px/10px 16px 8px 18px;padding:8px 12px;border:2px solid #f7d58a;font-size:15px;line-height:1.5}
+.fpts>div:nth-child(2n){border-color:#cdb8ff}
+.fpts i{font-style:normal;font-size:24px}
+.fml{text-align:center;font-family:"Hachi Maru Pop",cursive;font-size:21px;background:#fff;border:2.5px solid #b8e0d2;border-radius:30px 12px 28px 14px/14px 28px 12px 30px;padding:12px 8px;margin-bottom:12px;color:#4f8f7a;box-shadow:4px 4px 0 #ffe1ea}
+.fml+.fpts>div{font-size:14px}
+.fig .deco{position:absolute;font-size:16px;opacity:.75}
+.fig svg text{font-family:"Yomogi",sans-serif}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -269,7 +292,7 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       <div class="sec">🔎 AIでヒント検索 <small>中2の内容入り</small></div>
       <div class="srch"><input id="kbIn" placeholder="例：一次関数の傾き、不定詞、前線" enterkeyhint="search"><button id="kbAsk">AIに聞く</button></div>
       <div id="kbRes"></div>
-      <div class="aians" id="kbAns"></div>
+      <div class="aians" id="kbAns"></div><div id="kbFig"></div>
       <button class="chip" id="kbMore" style="display:none;margin-top:8px">💡 ヒント先生でつづける</button>
     </div>
     <div class="card">
@@ -742,15 +765,67 @@ let kbQ='',kbA='';
 $('kbIn').oninput=e=>{const q=e.target.value;drawKB(kbSearch(q))};
 $('kbIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();kbAsk()}};
 $('kbAsk').onclick=()=>kbAsk();
+const FIG_RULE=`
+返事は次の形のJSONだけで出すこと（前後に文章を書かない）:
+{"hint":"ヒント文（150文字まで。答えは言わない。最後に考えるための質問を1つ）","figure":null か 下のどれか1つ}
+図やインフォグラフィックのほうがわかりやすい時だけ figure を入れる（手順・比較・公式・グラフ・まとめ向き）。図にも問題の答えは書かない。
+- 手順: {"type":"steps","title":"20文字まで","steps":["各20文字まで",…3〜5こ]}
+- 比較: {"type":"compare","title":"…","left":{"label":"…","items":["…",…2〜4こ]},"right":{"label":"…","items":[…]}}
+- まとめ: {"type":"points","title":"…","points":[{"icon":"絵文字1こ","text":"30文字まで"},…2〜4こ]}
+- 公式: {"type":"formula","title":"…","formula":"例: 電力 = 電圧 × 電流","parts":[{"icon":"絵文字","text":"記号や単位の説明"},…]}
+- 一次関数のグラフ: {"type":"graph","title":"…","a":数,"b":数,"note":"20文字まで"}（説明用の例の値だけ。問題の答えになる値は使わない。a,bは-5〜5の整数か0.5きざみ）`;
+const E=t=>esc(String(t==null?'':t)).slice(0,120);
+function figHTML(f){
+  if(!f||typeof f!=='object')return'';
+  const arr=x=>Array.isArray(x)?x.slice(0,5):[];
+  const deco='<span class="deco" style="right:12px;top:8px">♡</span><span class="deco" style="left:12px;bottom:8px">☆</span>';
+  let body='';
+  if(f.type==='steps'){const st=arr(f.steps);if(!st.length)return'';
+    body='<div class="fstep">'+st.map((x,i)=>(i?'<div class="ar">▼</div>':'')+`<div class="bx"><span class="no">${i+1}</span><span>${E(x)}</span></div>`).join('')+'</div>';}
+  else if(f.type==='compare'){const L=f.left||{},R=f.right||{};if(!arr(L.items).length&&!arr(R.items).length)return'';
+    body=`<div class="fcmp">${[L,R].map(c=>`<div><b>${E(c.label)}</b><ul>${arr(c.items).map(x=>`<li>${E(x)}</li>`).join('')}</ul></div>`).join('')}</div>`;}
+  else if(f.type==='points'){const ps=arr(f.points);if(!ps.length)return'';
+    body='<div class="fpts">'+ps.map(x=>`<div><i>${E(x.icon||'🌷').slice(0,4)}</i><span>${E(x.text)}</span></div>`).join('')+'</div>';}
+  else if(f.type==='formula'){if(!f.formula)return'';
+    body=`<div class="fml">${E(f.formula)}</div><div class="fpts">${arr(f.parts).map(x=>`<div><i>${E(x.icon||'✏️').slice(0,4)}</i><span>${E(x.text)}</span></div>`).join('')}</div>`;}
+  else if(f.type==='graph'){const a=+f.a,b=+f.b;if(!isFinite(a)||!isFinite(b))return'';body=graphSVG(Math.max(-5,Math.min(5,a)),Math.max(-5,Math.min(5,b)),f.note);}
+  else return'';
+  return `<div class="fig">${deco}<h4>${E(f.title||'ずかいで見てみよう')}</h4>${body}</div>`;
+}
+function graphSVG(a,b,note){
+  const S2=22,O=130,px=x=>O+x*S2,py=y=>O-y*S2;let grid='';
+  for(let i=-5;i<=5;i++)grid+=`<path d="M${px(i)} ${py(5.4)}V${py(-5.4)}M${px(-5.4)} ${py(i)}H${px(5.4)}" stroke="#f3dbe2" stroke-width="1"/>`;
+  const x1=-5.4,x2=5.4,y1=a*x1+b,y2=a*x2+b;
+  const fx=b,ax=a;const lab=`y = ${a===1?'':a===-1?'-':a}x ${b<0?'− '+(-b):'+ '+b}`;
+  return `<svg viewBox="0 0 260 260" style="width:100%;max-width:300px;display:block;margin:0 auto"><defs><filter id="wob"><feTurbulence baseFrequency=".03" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.5"/></filter><clipPath id="gc"><rect x="${px(-5.4)}" y="${py(5.4)}" width="${10.8*S2}" height="${10.8*S2}"/></clipPath></defs>
+  <g filter="url(#wob)">${grid}
+  <path d="M${px(-5.6)} ${O}H${px(5.6)}M${O} ${py(5.6)}V${py(-5.6)}" stroke="#8a7a80" stroke-width="2"/>
+  <path d="M${px(5.6)-6} ${O-5}l6 5-6 5M${O-5} ${py(5.6)+6}l5-6 5 6" stroke="#8a7a80" stroke-width="2" fill="none"/>
+  <g clip-path="url(#gc)"><path d="M${px(x1)} ${py(y1)}L${px(x2)} ${py(y2)}" stroke="#ff8fab" stroke-width="4" stroke-linecap="round"/></g>
+  <circle cx="${O}" cy="${py(b)}" r="6" fill="#fff" stroke="#6cc3a5" stroke-width="3"/>
+  ${Math.abs(b+a)<=5?`<path d="M${px(0)} ${py(b)}H${px(1)}V${py(b+a)}" stroke="#7fb3e6" stroke-width="2.5" stroke-dasharray="5 4" fill="none"/>`:''}
+  </g>
+  <text x="${px(5.5)}" y="${O+18}" font-size="13" fill="#8a7a80">x</text><text x="${O+8}" y="${py(5.3)}" font-size="13" fill="#8a7a80">y</text><text x="${O-14}" y="${O+16}" font-size="12" fill="#8a7a80">O</text>
+  <text x="${O-8}" y="${py(b)+(a>0?18:-10)}" text-anchor="end" font-size="13" fill="#4f8f7a">切片 ${b}</text>
+  ${Math.abs(b+a)<=5?`<text x="${px(1)+6}" y="${py(b+a/2)+4}" font-size="13" fill="#6a9bd1">傾き ${a}</text>`:''}
+  <text x="10" y="20" font-size="15" fill="#e26b8f">${esc(lab)}</text>
+  </svg>${note?`<p style="text-align:center;margin:6px 0 0;font-size:14px">♡ ${E(note)}</p>`:''}`;
+}
 async function kbAsk(){
   const q=$('kbIn').value.trim();if(!q){toast('ききたいことを書いてね');return}
   const hits=kbSearch(q);drawKB(hits);
-  const box=$('kbAns');box.style.display='block';
+  const box=$('kbAns');box.style.display='block';$('kbFig').innerHTML='';
   if(!sampleFn){box.textContent='AIはclaude.aiで開いたときに使えます。上の「中2の内容」を見てみてね。';return}
-  box.innerHTML='<span class="dots">考え中</span>';$('kbMore').style.display='none';
-  const prompt=AI_RULES+`\n\n参考にする中学2年の学習内容:\n${kbText(hits.length?hits:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit)))}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）\n\n--- 生徒の質問 ---\n${q}`;
-  try{const r=await sampleFn(prompt,{cache:false,onText:({text})=>{box.textContent=text}});kbQ=q;kbA=r.text;$('kbMore').style.display='';}
-  catch(e){box.textContent=e&&e.code==='rate_limited'?'ちょっと待ってからもう一度ためしてね':e&&e.code==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':'うまく聞けなかった。もう一度ためしてね'}
+  box.innerHTML='<span class="dots">考え中（図もかいてるよ）</span>';$('kbMore').style.display='none';
+  const prompt=AI_RULES+`\n\n参考にする中学2年の学習内容:\n${kbText(hits.length?hits:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit)))}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）\n${FIG_RULE}\n\n--- 生徒の質問 ---\n${q}`;
+  try{
+    let r;
+    try{r=await sampleFn.json(prompt,{cache:false})}
+    catch(e){if(e&&e.code==='invalid_json'&&e.text){r={hint:e.text.replace(/[{}"]/g,'').slice(0,300),figure:null}}else throw e}
+    const hint=(r&&r.hint)||'';box.textContent=hint;
+    const fh=figHTML(r&&r.figure);$('kbFig').innerHTML=fh;
+    kbQ=q;kbA=hint;$('kbMore').style.display='';
+  }catch(e){box.textContent=e&&e.code==='rate_limited'?'ちょっと待ってからもう一度ためしてね':e&&e.code==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':'うまく聞けなかった。もう一度ためしてね'}
 }
 $('kbMore').onclick=()=>{CHAT.push({role:'user',content:kbQ},{role:'assistant',content:kbA});saveChat();go('ai')};
 
