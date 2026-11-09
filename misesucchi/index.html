@@ -390,8 +390,8 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
   <!-- ごほうび -->
   <section class="page" id="p-reward">
     <div class="card">
-      <div class="sec">🎰 ミセスッちガチャ <small>🍅1こで1回</small></div>
-      <div class="tk">🎫 ガチャけん <b id="gTk">0</b> まい</div>
+      <div class="sec">🎰 ミセスッちガチャ <small>🪙コイン1まいで1回</small></div>
+      <div class="tk">🪙 コイン <b id="gTk">0</b> まい</div>
       <div class="gm" id="gm"><div id="gmSvg"></div><div class="knobHit" id="knob"></div><div class="outCap" id="outCap"><div class="wob"><div class="cap"><div class="t" id="outT"></div><div class="b"></div><div class="ln"></div></div></div></div></div>
       <p class="ghint" id="gHint">ハンドルを指でぐるっと1回まわしてね ↻</p>
     </div>
@@ -500,7 +500,7 @@ const TALK={
 const jst=(t=Date.now())=>new Date(t).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 // ===== セーブ =====
 const KEY='misesucchi_pomo_v1',IKEY='misesucchi_pomo_imgs';
-const fresh=()=>({tickets:1,got:{},onboarded:false,party:[],ems:[],set:{focus:25,short:5,long:15,goal:8,auto:false,sound:'chime'},mode:'focus',run:false,endAt:0,remain:25*60,cycle:0,subj:'数学',unit:'',test:'',logs:[],st:{},chara:'apple',lastDay:null,streak:0});
+const fresh=()=>({tickets:0,got:{},onboarded:false,party:[],ems:[],set:{focus:25,short:5,long:15,goal:8,auto:false,sound:'chime'},mode:'focus',run:false,endAt:0,remain:25*60,cycle:0,subj:'数学',unit:'',test:'',logs:[],st:{},chara:'apple',lastDay:null,streak:0});
 let S;try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=fresh()}
 let IMGS=[];try{IMGS=JSON.parse(localStorage.getItem(IKEY)||'[]')}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -592,7 +592,7 @@ function finish(skipped){
     chime();confetti(st[1]==='SSR'?90:45);bounce();
     const today=todayCount();
     S.tickets=(S.tickets||0)+1;
-    modal('🍅',`🍅 ${total()}こ目 達成！`,`🎰 ガチャけん +1まい<br>`+`${S.subj}${S.unit?'（'+S.unit+'）':''}を${min}分がんばったね！<br>ごほうびシール <span style="font-size:28px">${st[0]}</span> <b>${st[1]}</b>${isNew?' 🆕':''}`+(lvUp?`<br>🎉 レベルアップ！「${LV[levelOf(total())][2]}」になった`:'')+(today===S.set.goal?'<br>🎯 きょうの目標たっせい！':''));
+    modal('🍅',`🍅 ${total()}こ目 達成！`,`🪙 コイン +1まい（ガチャが1回まわせるよ）<br>`+`${S.subj}${S.unit?'（'+S.unit+'）':''}を${min}分がんばったね！<br>ごほうびシール <span style="font-size:28px">${st[0]}</span> <b>${st[1]}</b>${isNew?' 🆕':''}`+(lvUp?`<br>🎉 レベルアップ！「${LV[levelOf(total())][2]}」になった`:'')+(today===S.set.goal?'<br>🎯 きょうの目標たっせい！':''));
     setMode(S.cycle%4===0?'long':'short',S.set.auto);
   }else if(was!=='focus'&&!skipped){
     chime();bounce();modal('⏰','きゅうけい おわり！','つぎの🍅をはじめよう！');setMode('focus',S.set.auto);
@@ -608,7 +608,7 @@ const todayCount=()=>S.logs.filter(l=>l.d===jst()).length;
 function levelOf(n){let i=0;LV.forEach((l,k)=>{if(n>=l[0])i=k});return i}
 function dayCheck(){
   const d=jst();if(S.lastDay===d)return;
-  const y=jst(Date.now()-864e5);S.streak=S.lastDay===y?S.streak+1:(S.lastDay?1:1);S.lastDay=d;save();
+  const y=jst(Date.now()-864e5);S.streak=S.lastDay===y?S.streak+1:(S.lastDay?1:1);S.lastDay=d;S.tickets=(S.tickets||0)+1;save();setTimeout(()=>toast('🪙 きょうのコイン +1まい！'),1500);
 }
 
 // ===== キャラの日常アクション =====
@@ -955,7 +955,7 @@ function machineSVG(){
   <rect x="36" y="216" width="228" height="26" rx="12" fill="#4e9e45"/>
   <rect x="34" y="236" width="232" height="178" rx="26" fill="url(#bodyG)" stroke="#4e9e45" stroke-width="4"/>
   <rect x="62" y="250" width="176" height="30" rx="15" fill="#fff"/><text x="150" y="271" text-anchor="middle" font-size="15" font-weight="800" fill="#4e9e45" font-family="M PLUS Rounded 1c,sans-serif">ミセスッち ガチャ</text>
-  <circle cx="240" cy="306" r="19" fill="#f1c75a" stroke="#d49a2a" stroke-width="2"/><text x="240" y="312" text-anchor="middle" font-size="15">🎫</text>
+  <circle cx="240" cy="306" r="19" fill="#f1c75a" stroke="#d49a2a" stroke-width="2"/><text x="240" y="312" text-anchor="middle" font-size="15">🪙</text>
   <circle cx="150" cy="320" r="48" fill="#4e9e45" opacity=".35"/>
   <g id="knobG" transform="rotate(0 150 320)"><circle cx="150" cy="320" r="44" fill="#fff" stroke="#e5e0d2" stroke-width="4"/><rect x="112" y="311" width="76" height="18" rx="9" fill="#e46a7f"/><circle cx="150" cy="320" r="8" fill="#fff" stroke="#e5e0d2" stroke-width="2"/><circle cx="182" cy="320" r="4" fill="#fff"/></g>
   <rect x="96" y="372" width="108" height="34" rx="14" fill="#2f3a2c"/><rect x="100" y="376" width="100" height="10" rx="5" fill="#46523f"/>
@@ -968,7 +968,7 @@ function drawGacha(){
   const n=PRIZES.length;$('pCount').textContent=n?`${PRIZES.filter(x=>S.got[x.id]).length} / ${n}`:'';
   $('pEdit').textContent=pEditing?'✅ へんしゅうをおわる':'✏️ ガチャの中身をへんしゅう';
   $('pGrid').innerHTML=PRIZES.map(x=>{const c=S.got[x.id]||0,show=pEditing||c;return `<div class="pz ${show?'':'lock'}" data-id="${x.id}"><img src="${x.d}" alt=""><span class="rb ${x.r}">${x.r}</span>${c?`<span class="ct">×${c}</span>`:''}${pEditing?`<span class="dl" data-del="${x.id}">×</span>`:''}</div>`}).join('')+'<button class="pz add" id="pAdd">＋<small>グッズ画像</small></button>';
-  if(!n)$('gHint').textContent='ガチャの中身がからっぽです。下の「＋」からグッズ画像を入れてね';else if(!gBusy)$('gHint').textContent=S.tickets>0?'ハンドルを指でぐるっと1回まわしてね ↻':'🍅を終えるとガチャけんがもらえるよ';
+  if(!n)$('gHint').textContent='ガチャの中身がからっぽです。下の「＋」からグッズ画像を入れてね';else if(!gBusy)$('gHint').textContent=S.tickets>0?'ハンドルを指でぐるっと1回まわしてね ↻':'🍅を終えるとコインがもらえるよ';
 }
 $('pEdit').onclick=()=>{pEditing=!pEditing;drawGacha()};
 $('pGrid').onclick=e=>{
@@ -992,7 +992,7 @@ function tick(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)(
 $('knob').addEventListener('pointerdown',e=>{
   if(gBusy||pending)return;
   if(!PRIZES.length){toast('ガチャの中身がからっぽだよ');return}
-  if(!(S.tickets>0)){const k=$('knob');toast('🎫がないよ。🍅を1つ終えるともらえる！');setKnob(-12);setTimeout(()=>setKnob(10),120);setTimeout(()=>setKnob(0),240);return}
+  if(!(S.tickets>0)){const k=$('knob');toast('🪙コインがないよ。25分勉強するか、あしたログインでもらえる！');setKnob(-12);setTimeout(()=>setKnob(10),120);setTimeout(()=>setKnob(0),240);return}
   unlockAudio();kOn=true;kLast=kAngle(e);kAcc=0;kTick=0;$('knob').setPointerCapture(e.pointerId);e.preventDefault();
 });
 $('knob').addEventListener('pointermove',e=>{
@@ -1029,7 +1029,7 @@ $('gClose').onclick=()=>{$('gOpen').classList.remove('on','done');
     if(!S.onboarded){S.chara=k;S.onboarded=true;setTimeout(()=>{modal('⭐','メインキャラが決まったよ！','このキャラといっしょに🍅をはじめよう！<br>25分ごとにガチャがまわせて、なかまがふえるよ');onboardGo='timer'},300)}
     else if(k!==S.chara&&!(S.party||[]).includes(k)){if((S.party||[]).length<4){(S.party=S.party||[]).push(k);toast('🏠 なかまが画面に追加されたよ！')}else toast('キャラに追加したよ（タイマー画面の「わたしのキャラ」で入れかえてね）')}
     save();refreshChars()}
-  pending=null;gBusy=false;drawGacha();drawReward();$('gHint').textContent=S.tickets>0?'もう1回まわせるよ ↻':'🍅を終えるとガチャけんがもらえるよ'};
+  pending=null;gBusy=false;drawGacha();drawReward();$('gHint').textContent=S.tickets>0?'もう1回まわせるよ ↻':'🍅を終えるとコインがもらえるよ'};
 
 // ===== ステージ（背景） =====
 const STAGES={auto:'🎲 おまかせ',live:'🎤 ライブ会場',mountain:'⛰️ 山',river:'🏞️ 川',camp:'🏕️ キャンプ',custom:'🖼️ じぶんの画像'};
