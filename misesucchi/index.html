@@ -1066,9 +1066,10 @@ let prizesReady=false,PRIZES=[],pEditing=false,gBusy=false,pending=null;
 const CAPC=['#e46a7f','#7cc36a','#f1c75a','#7aa7e0','#c79cef','#f39a7b','#3fa3a8'];
 const W={N:10,R:5,SR:2,SSR:1},RR=['N','R','SR','SSR'];
 const GOODS=Array.from({length:15},(_,i)=>'goods/g'+String(i+1).padStart(2,'0')+'.webp');
-idbGet('prizes').then(v=>{PRIZES=v||[];prizesReady=true;setTimeout(()=>{fixMain();refreshChars()},0);
-  if(!S.goodsSeeded){GOODS.forEach((d,i)=>{const id='g'+(i+1);if(!PRIZES.some(x=>x.id===id))PRIZES.push({id,d,r:'N'})});S.goodsSeeded=true;save();savePrizes()}
-  drawGacha();refreshChars()}).catch(()=>{prizesReady=true;PRIZES=GOODS.map((d,i)=>({id:'g'+(i+1),d,r:'N'}));drawGacha();refreshChars()}).catch(()=>{});
+idbGet('prizes').then(async v=>{PRIZES=v||[];prizesReady=true;setTimeout(()=>{fixMain();refreshChars()},0);
+  if(!S.goodsSeeded){const ok=await new Promise(r=>{const im=new Image();im.onload=()=>r(true);im.onerror=()=>r(false);im.src=GOODS[0]});
+    if(ok){GOODS.forEach((d,i)=>{const id='g'+(i+1);if(!PRIZES.some(x=>x.id===id))PRIZES.push({id,d,r:'N'})});S.goodsSeeded=true;save();savePrizes()}}
+  drawGacha();refreshChars()}).catch(()=>{prizesReady=true;PRIZES=[];drawGacha();refreshChars()}).catch(()=>{});
 const savePrizes=()=>idbPut('prizes',PRIZES).catch(()=>toast('保存できなかった。画像をへらしてね'));
 const CAPPOS=[[78,190],[118,198],[160,200],[202,194],[226,168],[96,160],[140,168],[184,166],[60,150],[120,134],[166,136],[210,130],[88,112],[142,100],[196,98],[110,72],[170,70]];
 function machineSVG(){
