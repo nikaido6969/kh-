@@ -535,11 +535,6 @@ details.fold[open]>summary{margin-bottom:10px}
       <div class="set col">データのバックアップ<div class="stsel"><button class="chip" id="bkOut">コピーする</button><button class="chip" id="bkIn">はりつけて復元</button></div><small class="muted" style="margin:0">きろく・設定をまとめて保存できます（画像はふくみません）</small></div>
     </div>
     <div class="card">
-      <div class="sec"><span class="sh"><i class="ic" data-ic="bear"></i>キャラ<em class="en">friends</em></span> <small>iPhoneの画像を使えるよ</small></div>
-      <div class="cgrid" id="charas"></div>
-      <p class="muted">背景は自動で消えるよ。キャラがたくさん写った画像は、1人ずつ切り抜いてから入れるときれい。画像はこのiPhoneの中だけに保存されます。</p>
-    </div>
-    <div class="card">
       <div class="sec"><span class="sh"><i class="ic" data-ic="sliders"></i>タイマー<em class="en">timer</em></span></div>
       <div class="set">しゅうちゅう<div class="seg" data-k="focus"></div></div>
       <div class="set">きゅうけい<div class="seg" data-k="short"></div></div>
@@ -754,7 +749,7 @@ function draw(){
   const fg=$('ringFg');fg.style.strokeDasharray=C;fg.style.strokeDashoffset=C*(l/tot);fg.style.stroke=m==='focus'?'var(--focus)':'var(--rest)';
   {const mi=S.run?'pause':'play';if($('bMain').dataset.i!==mi){$('bMain').dataset.i=mi;$('bMain').innerHTML=`<i class="ic">${IC[mi]}</i>`}}
   $('tomatoes').innerHTML=[0,1,2,3].map(i=>`<i class="${i<S.cycle%4?'on':''}">🍅</i>`).join('');
-  const mk=S.onboarded?S.chara:'_cap';if(lastChara!==mk){lastChara=mk;$('charaIn').innerHTML=mk==='_cap'?'<div class="capq"><div>？</div></div>':charaHTML(mk);lastParty=''}
+  const mk=S.onboarded&&isGot(S.chara)?S.chara:'_cap';if(lastChara!==mk){lastChara=mk;$('charaIn').innerHTML=mk==='_cap'?'<div class="capq"><div>？</div></div>':charaHTML(mk);lastParty=''}
   const ak=act?act[0]:'';
   S.party=(S.party||[]).filter(k=>k!==S.chara&&validKey(k)).slice(0,4);
   const pk=S.party.join('|')+'#'+(typeof PRIZES!=='undefined'?PRIZES.length:0);
@@ -798,13 +793,18 @@ function drawReward(){
   $('stCount').textContent=`${STICK.filter(s=>S.st[s[0]]).length} / ${STICK.length}`;
   $('stickers').innerHTML=STICK.map(([e,r])=>S.st[e]?`<div class="st ${r}">${e}${S.st[e]>1?`<b>×${S.st[e]}</b>`:''}</div>`:`<div class="st lock ${r}">？</div>`).join('');
 }
-function myCharas(){return ['apple',...IMGS.map((u,i)=>'img'+i),...(typeof PRIZES!=='undefined'?PRIZES:[]).filter(x=>S.got[x.id]).map(x=>'p'+x.id),...(S.ems||[])]}
+function myCharas(){return (typeof PRIZES!=='undefined'?PRIZES:[]).filter(x=>S.got[x.id]).map(x=>'p'+x.id)}
+function isGot(k){return !!k&&k[0]==='p'&&myCharas().includes(k)}
+// メインはガチャでゲットしたキャラだけ
+function fixMain(){const g=myCharas();if(isGot(S.chara))return;
+  if(g.length){S.chara=g[0];S.onboarded=true}else if(S.onboarded){S.onboarded=false;if(!(S.tickets>0))S.tickets=1;setTimeout(()=>{modal('🎰','まずはガチャ！','ガチャをまわして、メインのキャラを決めよう！');onboardGo='reward'},400)}
+  save()}
 function validKey(k){return myCharas().includes(k)}
-function pickerHTML(del){return myCharas().map(k=>`<button class="cb ${S.chara===k?'on':''}" data-c="${k}">${charaHTML(k)}${S.chara===k?'<span class="mn">⭐</span>':''}${(S.party||[]).includes(k)?'<span class="pt">🏠</span>':''}${del&&k.startsWith('img')?`<span data-del="${k.slice(3)}">×</span>`:''}</button>`).join('')+(IMGS.length<10?'<button class="cb add" data-add="1">＋<small>画像</small></button>':'')}
+function pickerHTML(del){return myCharas().map(k=>`<button class="cb ${S.chara===k?'on':''}" data-c="${k}">${charaHTML(k)}${S.chara===k?'<span class="mn">⭐</span>':''}${(S.party||[]).includes(k)?'<span class="pt">🏠</span>':''}${del&&k.startsWith('img')?`<span data-del="${k.slice(3)}">×</span>`:''}</button>`).join('')}
 function drawPick(){$('cpick').innerHTML=pickerHTML(false);if($('chCur'))$('chCur').textContent=S.onboarded?`なかま ${(S.party||[]).length}人`:''}
 function drawSet(){
   $('testIn').value=S.test||'';
-  $('charas').innerHTML=pickerHTML(true);
+  if($('charas'))$('charas').innerHTML=pickerHTML(true);
   document.querySelectorAll('.seg').forEach(el=>{const k=el.dataset.k;el.innerHTML=OPT[k].map(o=>{const [lab,v]=Array.isArray(o)?o:[o+(k==='goal'?'':'分'),o];return `<button class="${S.set[k]===v?'on':''}" data-v='${JSON.stringify(v)}'>${lab}</button>`}).join('')});
 }
 document.querySelectorAll('.seg').forEach(el=>el.onclick=e=>{const v=e.target.dataset.v;if(v===undefined)return;const k=el.dataset.k;S.set[k]=JSON.parse(v);
@@ -829,7 +829,7 @@ $('shParty').onclick=()=>{S.party=S.party||[];const i=S.party.indexOf(shKey);
   if(i>=0){S.party.splice(i,1);toast('↩️ もどしたよ')}else{if(S.party.length>=4){toast('画面に出せるのは4人までだよ');return}S.party.push(shKey);toast('🏠 画面に出したよ！')}
   save();$('sheet').classList.remove('on');refreshChars()};
 function refreshChars(){lastChara='';lastParty='';drawSet();drawPick();draw()}
-$('charas').onclick=onPick;$('cpick').onclick=onPick;
+$('cpick').onclick=onPick;
 $('upl').onchange=e=>{
   const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;toast('きりぬき中…');
   const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
@@ -1045,7 +1045,7 @@ let PRIZES=[],pEditing=false,gBusy=false,pending=null;
 const CAPC=['#e46a7f','#7cc36a','#f1c75a','#7aa7e0','#c79cef','#f39a7b','#3fa3a8'];
 const W={N:10,R:5,SR:2,SSR:1},RR=['N','R','SR','SSR'];
 const GOODS=Array.from({length:15},(_,i)=>'goods/g'+String(i+1).padStart(2,'0')+'.webp');
-idbGet('prizes').then(v=>{PRIZES=v||[];
+idbGet('prizes').then(v=>{PRIZES=v||[];setTimeout(()=>{fixMain();refreshChars()},0);
   if(!S.goodsSeeded){GOODS.forEach((d,i)=>{const id='g'+(i+1);if(!PRIZES.some(x=>x.id===id))PRIZES.push({id,d,r:'N'})});S.goodsSeeded=true;save();savePrizes()}
   drawGacha();refreshChars()}).catch(()=>{PRIZES=GOODS.map((d,i)=>({id:'g'+(i+1),d,r:'N'}));drawGacha();refreshChars()}).catch(()=>{});
 const savePrizes=()=>idbPut('prizes',PRIZES).catch(()=>toast('保存できなかった。画像をへらしてね'));
