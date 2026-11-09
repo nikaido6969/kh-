@@ -257,6 +257,45 @@ h1 span{color:var(--focus)}
 .cb .mn{position:absolute;right:-6px;bottom:-7px;font-size:15px}
 #sheet .mbox .btn{margin-top:8px}
 #sheet .btn.alt{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.scene{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.scene svg,.scene>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage>*:not(.scene){position:relative;z-index:1}
+.ring .disc{fill:rgba(255,255,255,.62)}
+.pt{position:absolute;top:-20px;pointer-events:none}
+.pt.rain{width:1.5px;height:16px;background:rgba(255,255,255,.75);animation:rain .7s linear infinite}
+@keyframes rain{to{transform:translate(-30px,460px)}}
+.pt.snow{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.9;animation:snow 7s linear infinite}
+@keyframes snow{0%{transform:translate(0,0)}50%{transform:translate(18px,230px)}100%{transform:translate(-6px,470px)}}
+.pt.petal{font-size:14px;animation:petal 9s linear infinite}
+@keyframes petal{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(-40px,230px) rotate(200deg)}100%{transform:translate(20px,470px) rotate(400deg)}}
+.pt.fly{width:5px;height:5px;border-radius:50%;background:#fff6a0;box-shadow:0 0 8px 3px #fff27a;animation:fly 4s ease-in-out infinite alternate}
+@keyframes fly{0%{transform:translate(0,260px);opacity:.2}100%{transform:translate(30px,200px);opacity:1}}
+.beam{transform-box:fill-box;animation:beam 3.5s ease-in-out infinite alternate}
+@keyframes beam{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+.plight{animation:pl .5s ease-in-out infinite alternate}
+@keyframes pl{to{transform:translateY(-6px)}}
+.flame{transform-box:fill-box;transform-origin:50% 100%;animation:flame .35s ease-in-out infinite alternate}
+@keyframes flame{to{transform:scale(.85,1.15)}}
+.wave{animation:wave 2.5s linear infinite}
+@keyframes wave{to{stroke-dashoffset:-40}}
+.stsel{display:flex;gap:6px;flex-wrap:wrap}
+.today{font-size:12px;font-weight:800;color:var(--sub);margin-top:8px}
+/* タイマー連動のキャラ演出 */
+.chara{scale:var(--sc,1);transition:scale 1s}
+.chara.dash{animation:dash .8s cubic-bezier(.2,1.4,.4,1)}
+@keyframes dash{0%{translate:-220px 0;rotate:-20deg}70%{translate:10px 0;rotate:6deg}100%{translate:0 0;rotate:0deg}}
+.chara.spin{animation:spinC 1s ease-in-out}
+@keyframes spinC{0%{rotate:0deg}50%{translate:0 -30px}100%{rotate:360deg}}
+.chara.spurt .in{animation-duration:.45s!important;filter:drop-shadow(0 0 8px #ffb347) drop-shadow(0 0 14px #ff8a5c)}
+.chara.panic{animation:panic .18s linear infinite}
+@keyframes panic{25%{translate:-3px 0}75%{translate:3px 0}}
+.chara.nap .in{rotate:-14deg;filter:grayscale(.35)}
+.chara.float{animation:floatC 3s ease-in-out infinite}
+@keyframes floatC{0%,100%{translate:0 0}50%{translate:0 -14px}}
+#cd{position:absolute;left:50%;top:-6px;translate:-50% 0;font-size:54px;font-weight:800;color:var(--focus);text-shadow:0 3px 0 #fff,0 0 12px #fff;z-index:3;pointer-events:none}
+#cd.pop{animation:cdpop .9s ease-out}
+@keyframes cdpop{0%{scale:1.8;opacity:0}20%{scale:1;opacity:1}100%{scale:.9;opacity:.2}}
+#aura{position:absolute;left:50%;top:130px;translate:-50% 0;font-size:22px;pointer-events:none;z-index:2;letter-spacing:46px;padding-left:46px}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -283,12 +322,12 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
 
   <!-- タイマー -->
   <section class="page on" id="p-timer">
-    <div class="stage focus" id="stage">
+    <div class="stage focus" id="stage"><div class="scene" id="scene"></div>
       <div class="mode"><b data-m="focus" class="on">しゅうちゅう</b><b data-m="short">きゅうけい</b><b data-m="long">ながいきゅうけい</b></div>
       <div class="ringbox">
-        <svg class="ring" viewBox="0 0 290 290"><circle class="bgc" cx="145" cy="145" r="130"/><circle class="fg" id="ringFg" cx="145" cy="145" r="130"/></svg>
+        <svg class="ring" viewBox="0 0 290 290"><circle class="disc" cx="145" cy="145" r="122"/><circle class="bgc" cx="145" cy="145" r="130"/><circle class="fg" id="ringFg" cx="145" cy="145" r="130"/></svg>
         <div class="bubble" id="bubble"></div>
-        <div id="mates"></div><div class="chara" id="chara"><div class="in breathe" id="charaIn"></div><div class="prop" id="prop"></div></div>
+        <div id="mates"></div><div id="cd"></div><div id="aura"></div><div class="chara" id="chara"><div class="in breathe" id="charaIn"></div><div class="prop" id="prop"></div></div>
         <div id="actPill" style="position:absolute;left:0;right:0;bottom:2px;text-align:center"></div><div class="time"><span id="time">25:00</span><small id="tLabel">スタートを押してね</small></div>
       </div>
       <div class="tomatoes" id="tomatoes"></div>
@@ -299,6 +338,12 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       </div>
     </div>
     <div class="card" style="margin-top:14px">
+      <div class="sec">🎪 ステージ <small>おまかせは毎日かわるよ</small></div>
+      <div class="stsel" id="stsel"></div>
+      <div class="today" id="today"></div>
+      <input type="file" accept="image/*" id="bgIn" hidden>
+    </div>
+    <div class="card">
       <div class="sec">🔎 AIでヒント検索 <small>中2の内容入り</small></div>
       <div class="srch"><input id="kbIn" placeholder="例：一次関数の傾き、不定詞、前線" enterkeyhint="search"><button id="kbAsk">AIに聞く</button></div>
       <div id="kbRes"></div>
@@ -354,7 +399,7 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       <div class="sec">🧸 グッズコレクション <small id="pCount"></small></div>
       <div class="pgrid" id="pGrid"></div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="chip" id="pEdit">✏️ ガチャの中身をへんしゅう</button></div>
-      <p class="muted" id="pNote">iPhoneに保存したグッズの写真を「＋」から入れると、ガチャの中身になるよ（何まいでもまとめて選べる）。へんしゅう中は、タップでレア度をかえられるよ。画像はこのiPhoneの中だけに保存されます。</p>
+      <p class="muted" id="pNote">「＋」からグッズの写真を追加できるよ。へんしゅう中は、タップでレア度をかえられるよ。</p>
       <input type="file" accept="image/*" id="pIn" multiple hidden>
     </div>
     <div class="card">
@@ -535,7 +580,7 @@ $('sndIn').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target
   catch(err){toast('とりこめなかった。別の曲でためしてね')}};
 function unlockAudio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
 function left(){return S.run?Math.max(0,Math.ceil((S.endAt-Date.now())/1000)):S.remain}
-function start(){unlockAudio();primeCustom();if(S.remain===dur(S.mode))S.actSeed=Math.floor(Math.random()*8);S.endAt=Date.now()+S.remain*1000;S.run=true;save();say(pick(S.mode==='focus'?TALK.focus:TALK.rest));draw()}
+function start(){unlockAudio();primeCustom();if(S.remain===dur(S.mode))fxMs=new Set();wasRun=false;if(S.remain===dur(S.mode))S.actSeed=Math.floor(Math.random()*8);S.endAt=Date.now()+S.remain*1000;S.run=true;save();say(pick(S.mode==='focus'?TALK.focus:TALK.rest));draw()}
 function pause(){S.remain=left();S.run=false;save();say(pick(TALK.pause));draw()}
 function setMode(m,autoRun){S.mode=m;S.remain=dur(m);S.run=false;if(autoRun)start();save();draw()}
 function finish(skipped){
@@ -594,7 +639,7 @@ const C=2*Math.PI*130;
 let lastMode='',lastChara='',lastAct=null,lastParty='';
 function draw(){
   const m=S.mode,l=left(),tot=dur(m);
-  $('stage').className='stage '+m;
+  $('stage').className='stage '+m;drawScene();charaFx();
   document.querySelectorAll('.mode b').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   $('time').textContent=String(Math.floor(l/60)).padStart(2,'0')+':'+String(l%60).padStart(2,'0');
   const act=curAct();
@@ -689,32 +734,32 @@ $('reset').onclick=()=>{if(confirm('きろくとシールをリセットする�
 
 // ===== 中学2年の学習内容（検索用） =====
 const KB=[
- {s:'数学',u:'式の計算',p:['同類項（文字の部分が同じ項）はまとめられる','単項式のかけ算は「係数どうし」「文字どうし」をかける','わり算は分数の形にするか、逆数をかける','等式の変形：「〜について解く」は、その文字を左辺に残して他を移項する'],m:'かっこをはずす時、うしろの項にかけ忘れる／移項で符号を変え忘れる',h:'まず同じ文字の項に印をつけてみよう'},
- {s:'数学',u:'連立方程式',p:['加減法：どちらかの文字の係数をそろえて、たすか引くかで消す','代入法：「y=〜」「x=〜」の形の式を、もう一方に代入する','求めた解は、2つの式の両方に代入して確かめる','文章題は「何をx・yにするか」を最初に決め、式を2つ作る'],m:'引き算のとき、右辺や2つめの項の符号を変え忘れる',h:'消しやすい文字はどっち？係数を何倍すればそろう？'},
- {s:'数学',u:'一次関数',p:['y=ax+b の a は傾き（変化の割合）、b は切片','変化の割合 ＝ yの増加量 ÷ xの増加量（一次関数では一定で a と同じ）','グラフは切片(0,b)から、右に1進むと上にa進む','2点を通る直線は、まず傾きを求めてからbを求める','2直線の交点は、2つの式の連立方程式の解'],m:'変化の割合を xの増加量÷yの増加量 と逆にしてしまう',h:'xが1増えると、yはいくつ増える？'},
- {s:'数学',u:'平行と合同',p:['対頂角は等しい','平行線では同位角・錯角が等しい（逆も成り立つ）','三角形の内角の和は180°、外角はとなり合わない2つの内角の和','n角形の内角の和は 180°×(n−2)、外角の和は360°','合同条件：3組の辺／2組の辺とその間の角／1組の辺とその両端の角','証明は「仮定 → 根拠（性質・条件）→ 結論」の順に書く'],m:'合同条件の「間の角」「両端の角」を確認せずに使う',h:'わかっている辺や角に印をつけて、どの合同条件が使えそうか見てみよう'},
- {s:'数学',u:'三角形と四角形',p:['二等辺三角形の2つの底角は等しい','二等辺三角形の頂角の二等分線は、底辺を垂直に2等分する','直角三角形の合同条件：斜辺と1つの鋭角／斜辺と他の1辺','平行四辺形：2組の対辺・対角がそれぞれ等しい、対角線はそれぞれの中点で交わる','平行四辺形になる条件には「1組の対辺が平行でその長さが等しい」もある','平行線を使うと、面積を変えずに形を変えられる（等積変形）'],m:'定義（決まりごと）と定理（証明されたこと）をまぜてしまう',h:'図の中に二等辺三角形や平行線がかくれていないか探そう'},
- {s:'数学',u:'確率',p:['どれも同じ程度に起こると考えられる時に使う（同様に確からしい）','確率 ＝ そのことが起こる場合の数 ÷ 起こりうるすべての場合の数','樹形図や表で、もれ・重なりなく数える','「〜でない」確率 ＝ 1 −「〜である」確率','確率は0以上1以下'],m:'2つのさいころなどで（1,2）と（2,1）を同じものとして数えてしまう',h:'まず、全部で何通りあるか樹形図か表にしてみよう'},
- {s:'数学',u:'データの活用',p:['データを小さい順に並べ、4つに分ける値が四分位数','四分位範囲 ＝ 第3四分位数 − 第1四分位数','箱ひげ図は 最小値・第1四分位数・中央値・第3四分位数・最大値 を表す','箱の長さが四分位範囲（データの真ん中の約半分のちらばり）'],m:'並べかえずに四分位数を求めてしまう',h:'まずデータを小さい順に並べよう'},
- {s:'英語',u:'過去進行形',p:['was / were ＋ 動詞のing形 で「〜していた」','否定文は was / were のあとに not','疑問文は Was / Were を主語の前に出す'],m:'主語が I や he なのに were を使う（I・3人称単数は was）',h:'主語は単数？複数？'},
- {s:'英語',u:'未来の表現',p:['will ＋ 動詞の原形「〜するだろう／〜します」','be going to ＋ 動詞の原形「〜するつもり・予定」','どちらも後ろの動詞は原形'],m:'will のあとの動詞に s や ed をつけてしまう',h:'will のうしろの動詞はどんな形だったかな？'},
- {s:'英語',u:'接続詞',p:['when「〜するとき」、if「もし〜なら」、because「〜なので」','I think (that) 〜 の that は省略できる','when・if の中は、未来のことでも現在形で表す'],m:'if の中で will を使ってしまう',h:'2つの文をつなぐ言葉は、どんな意味になるといいかな？'},
- {s:'英語',u:'不定詞',p:['to ＋ 動詞の原形','名詞的用法「〜すること」：I want to read.','副詞的用法「〜するために」「〜して」：I went to the park to play.','形容詞的用法「〜するための・〜すべき」：something to drink'],m:'to のあとに ing形や3単現の s をつけてしまう',h:'その to〜 は「こと」「ために」「ための」のどれで訳すと自然？'},
- {s:'英語',u:'動名詞',p:['動詞のing形で「〜すること」','enjoy / finish / stop のあとは動名詞','want / hope / decide のあとは不定詞（to〜）','like / start / begin はどちらもOK'],m:'enjoy to 〜 としてしまう',h:'その動詞のあとは ing と to のどっちが来るか、思い出してみよう'},
- {s:'英語',u:'比較',p:['比較級：-er than / more 〜 than「…より〜」','最上級：the -est / the most 〜「いちばん〜」','as 〜 as …「…と同じくらい〜」（〜は原級）','good / well → better → best'],m:'長い単語に -er をつける（more を使う）',h:'2つを比べてる？3つ以上の中でいちばん？'},
- {s:'英語',u:'受け身',p:['be動詞 ＋ 過去分詞「〜される・〜されている」','「〜によって」は by 〜','過去の受け身は was / were ＋ 過去分詞'],m:'過去分詞ではなく過去形や原形を使う',h:'主語は「する」側？「される」側？'},
- {s:'英語',u:'There is / have to・must',p:['There is ＋ 単数、There are ＋ 複数「〜がある・いる」','have to / must 〜「〜しなければならない」','don’t have to「〜しなくてよい」、must not「〜してはいけない」'],m:'don’t have to と must not の意味をまぜる',h:'「しなくていい」と「してはいけない」、どっちの意味かな？'},
- {s:'英語',u:'単語',p:['声に出す・書く・意味を言う、をセットで','まちがえた単語だけ集めてくり返す','品詞（名詞・動詞・形容詞）もいっしょに覚える'],m:'スペルを見るだけで覚えた気になる',h:'日本語を見て、英語を書けるか試してみよう'},
- {s:'国語',u:'文法(用言の活用)',p:['用言＝動詞・形容詞・形容動詞（活用する自立語）','活用形：未然・連用・終止・連体・仮定・命令','動詞の活用の種類：五段・上一段・下一段・カ行変格（来る）・サ行変格（する）','見分け方：「ない」をつけて、直前がア段→五段、イ段→上一段、エ段→下一段'],m:'「来る」「する（〜する）」を五段などとまちがえる',h:'その動詞に「ない」をつけてみよう。直前の音は何段？'},
- {s:'国語',u:'古典',p:['歴史的仮名遣い：語の頭以外の「は・ひ・ふ・へ・ほ」→「わ・い・う・え・お」','「ゐ・ゑ・を」→「い・え・お」','枕草子：清少納言の随筆（春はあけぼの）','平家物語：軍記物語、琵琶法師が語った（祇園精舎の鐘の声）','徒然草：兼好法師の随筆'],m:'語の頭の「は」まで「わ」に直してしまう',h:'まず、その古文を声に出して読んでみよう'},
- {s:'国語',u:'読解',p:['指示語（これ・それ）は、ふつう前の部分を指す','接続語（しかし・つまり）で文章の流れがわかる','筆者の考えは、最後の段落や「〜のだ」の文に出やすい','理由を聞かれたら、答えの文末は「〜から。」'],m:'本文ではなく自分の考えで答えてしまう',h:'答えの根拠になる文を、本文から探して線を引こう'},
- {s:'国語',u:'漢字',p:['部首・音読み・訓読みをセットで','熟語の組み立て（似た意味・反対の意味・上が下を修飾 など）','まちがえた字だけノートに集める'],m:'形の似た漢字（例：積・績）をまちがえる',h:'その字の部首は何？意味とつながってる？'},
- {s:'理科',u:'化学変化と原子・分子',p:['分解：炭酸水素ナトリウム → 炭酸ナトリウム＋水＋二酸化炭素','水の電気分解：陰極に水素、陽極に酸素（体積比 2：1）','酸化：酸素と結びつく、還元：酸化物から酸素をうばう','質量保存の法則：反応の前後で全体の質量は変わらない','結びつく質量の比は一定（銅：酸素＝4：1、マグネシウム：酸素＝3：2）','化学反応式は、左右で原子の数をそろえる'],m:'化学反応式で原子の数をそろえ忘れる',h:'左と右で、それぞれの原子は何個ずつあるか数えてみよう'},
- {s:'理科',u:'生物の体のつくり',p:['植物の細胞だけにある：細胞壁・葉緑体・（大きな）液胞','光合成：光を使い、二酸化炭素と水からデンプンなどをつくり酸素を出す','蒸散：おもに葉の気孔から水が水蒸気として出る','だ液（アミラーゼ）はデンプンを分解する：ヨウ素液・ベネジクト液で調べる','動脈は心臓から出る血液、静脈は心臓にもどる血液','反射：刺激に対して無意識に起こる反応'],m:'動脈血（酸素が多い）と動脈（血管）をまぜる',h:'その実験は「何と何を比べる」ための実験かな？'},
- {s:'理科',u:'電流とその利用',p:['直列：電流はどこも同じ、電圧は分かれる','並列：電圧はどこも同じ、電流は分かれる','オームの法則：電圧V ＝ 抵抗Ω × 電流A','電力W ＝ 電圧V × 電流A、電力量J ＝ 電力W × 時間s','電流のまわりには磁界ができる','電磁誘導：コイルの中の磁界が変わると電流が流れる'],m:'mA を A に直さずに計算する',h:'わかっている量（V・Ω・A）に印をつけて、どの式が使えるか見てみよう'},
- {s:'理科',u:'天気の変化',p:['湿度(%) ＝ 空気1m³中の水蒸気量 ÷ その気温の飽和水蒸気量 × 100','露点：水蒸気が水滴に変わりはじめる温度','雲：空気が上昇 → 膨張 → 温度が下がり露点に達してできる','寒冷前線：積乱雲、短い時間に強い雨、通過後は気温が下がる','温暖前線：乱層雲など、長い時間おだやかな雨、通過後は気温が上がる','冬は西高東低の気圧配置（シベリア気団）'],m:'寒冷前線と温暖前線の特徴を逆に覚える',h:'前線の記号の向きと、どっちの空気がもぐりこむか考えてみよう'},
- {s:'社会',u:'地理(日本の諸地域)',p:['九州・中国四国・近畿・中部・関東・東北・北海道の特色を「自然・産業・人口」で整理','地形図：縮尺、等高線（間かくがせまいほど急）、地図記号','グラフの読み取りは「いちばん多い・少ない」「変化」に注目'],m:'縮尺の計算で単位（cm・m・km）をそろえない',h:'その地方の気候と、さかんな産業はつながってるかな？'},
- {s:'社会',u:'歴史(鎌倉〜江戸)',p:['鎌倉：源頼朝、御恩と奉公、執権の北条氏、承久の乱、御成敗式目、元寇','室町：足利尊氏、日明貿易（勘合）、応仁の乱 → 戦国時代','安土桃山：織田信長（楽市・楽座）、豊臣秀吉（太閤検地・刀狩）','江戸：徳川家康、武家諸法度、参勤交代（家光）、鎖国','江戸の改革：享保（徳川吉宗）・寛政（松平定信）・天保（水野忠邦）'],m:'人物と政策・できごとの組み合わせをまちがえる',h:'「だれが・何のために・何をしたか」の3つで整理してみよう'},
+ {s:'数学',u:'式の計算',k:'かっこの前の数は、中の全部の項に「矢印2本」を書いてからかけると、かけ忘れがなくなる',p:['同類項（文字の部分が同じ項）はまとめられる','単項式のかけ算は「係数どうし」「文字どうし」をかける','わり算は分数の形にするか、逆数をかける','等式の変形：「〜について解く」は、その文字を左辺に残して他を移項する'],m:'かっこをはずす時、うしろの項にかけ忘れる／移項で符号を変え忘れる',h:'まず同じ文字の項に印をつけてみよう'},
+ {s:'数学',u:'連立方程式',k:'「そろえて消す」が加減法、「y＝〜 の形なら入れる」が代入法。最後は両方の式に代入してチェック',p:['加減法：どちらかの文字の係数をそろえて、たすか引くかで消す','代入法：「y=〜」「x=〜」の形の式を、もう一方に代入する','求めた解は、2つの式の両方に代入して確かめる','文章題は「何をx・yにするか」を最初に決め、式を2つ作る'],m:'引き算のとき、右辺や2つめの項の符号を変え忘れる',h:'消しやすい文字はどっち？係数を何倍すればそろう？'},
+ {s:'数学',u:'一次関数',k:'傾き＝「たて ÷ よこ」（yの増え方÷xの増え方）。切片は「スタート地点」とイメージ',p:['y=ax+b の a は傾き（変化の割合）、b は切片','変化の割合 ＝ yの増加量 ÷ xの増加量（一次関数では一定で a と同じ）','グラフは切片(0,b)から、右に1進むと上にa進む','2点を通る直線は、まず傾きを求めてからbを求める','2直線の交点は、2つの式の連立方程式の解'],m:'変化の割合を xの増加量÷yの増加量 と逆にしてしまう',h:'xが1増えると、yはいくつ増える？'},
+ {s:'数学',u:'平行と合同',k:'錯角は「Z（ゼット）の形」、同位角は「F（エフ）の形」で見つける。n角形の内角の和は 180×(n−2)',p:['対頂角は等しい','平行線では同位角・錯角が等しい（逆も成り立つ）','三角形の内角の和は180°、外角はとなり合わない2つの内角の和','n角形の内角の和は 180°×(n−2)、外角の和は360°','合同条件：3組の辺／2組の辺とその間の角／1組の辺とその両端の角','証明は「仮定 → 根拠（性質・条件）→ 結論」の順に書く'],m:'合同条件の「間の角」「両端の角」を確認せずに使う',h:'わかっている辺や角に印をつけて、どの合同条件が使えそうか見てみよう'},
+ {s:'数学',u:'三角形と四角形',k:'平行四辺形は「辺・角・対角線」の3つの性質をセットで覚える',p:['二等辺三角形の2つの底角は等しい','二等辺三角形の頂角の二等分線は、底辺を垂直に2等分する','直角三角形の合同条件：斜辺と1つの鋭角／斜辺と他の1辺','平行四辺形：2組の対辺・対角がそれぞれ等しい、対角線はそれぞれの中点で交わる','平行四辺形になる条件には「1組の対辺が平行でその長さが等しい」もある','平行線を使うと、面積を変えずに形を変えられる（等積変形）'],m:'定義（決まりごと）と定理（証明されたこと）をまぜてしまう',h:'図の中に二等辺三角形や平行線がかくれていないか探そう'},
+ {s:'数学',u:'確率',k:'「〜でない確率」は 1 から引く。数えるときは樹形図で、もれ・ダブりをなくす',p:['どれも同じ程度に起こると考えられる時に使う（同様に確からしい）','確率 ＝ そのことが起こる場合の数 ÷ 起こりうるすべての場合の数','樹形図や表で、もれ・重なりなく数える','「〜でない」確率 ＝ 1 −「〜である」確率','確率は0以上1以下'],m:'2つのさいころなどで（1,2）と（2,1）を同じものとして数えてしまう',h:'まず、全部で何通りあるか樹形図か表にしてみよう'},
+ {s:'数学',u:'データの活用',k:'箱ひげ図は「5つの数」：最小・第1四分位・中央値・第3四分位・最大',p:['データを小さい順に並べ、4つに分ける値が四分位数','四分位範囲 ＝ 第3四分位数 − 第1四分位数','箱ひげ図は 最小値・第1四分位数・中央値・第3四分位数・最大値 を表す','箱の長さが四分位範囲（データの真ん中の約半分のちらばり）'],m:'並べかえずに四分位数を求めてしまう',h:'まずデータを小さい順に並べよう'},
+ {s:'英語',u:'過去進行形',k:'was/were＋ing は「過去のある瞬間を動画で止めた1コマ」とイメージ',p:['was / were ＋ 動詞のing形 で「〜していた」','否定文は was / were のあとに not','疑問文は Was / Were を主語の前に出す'],m:'主語が I や he なのに were を使う（I・3人称単数は was）',h:'主語は単数？複数？'},
+ {s:'英語',u:'未来の表現',k:'will は「その場で決めた」、be going to は「前から決めていた予定」',p:['will ＋ 動詞の原形「〜するだろう／〜します」','be going to ＋ 動詞の原形「〜するつもり・予定」','どちらも後ろの動詞は原形'],m:'will のあとの動詞に s や ed をつけてしまう',h:'will のうしろの動詞はどんな形だったかな？'},
+ {s:'英語',u:'接続詞',k:'時（when）と条件（if）のカタマリの中は、未来のことでも現在形',p:['when「〜するとき」、if「もし〜なら」、because「〜なので」','I think (that) 〜 の that は省略できる','when・if の中は、未来のことでも現在形で表す'],m:'if の中で will を使ってしまう',h:'2つの文をつなぐ言葉は、どんな意味になるといいかな？'},
+ {s:'英語',u:'不定詞',k:'to＋原形 は3つの訳「こと・ために・ための」を順番にあてはめてみる',p:['to ＋ 動詞の原形','名詞的用法「〜すること」：I want to read.','副詞的用法「〜するために」「〜して」：I went to the park to play.','形容詞的用法「〜するための・〜すべき」：something to drink'],m:'to のあとに ing形や3単現の s をつけてしまう',h:'その to〜 は「こと」「ために」「ための」のどれで訳すと自然？'},
+ {s:'英語',u:'動名詞',k:'ing しかとらない動詞は語呂で「メガフェプス」（mind・enjoy・give up・avoid・finish・escape・put off・stop）',p:['動詞のing形で「〜すること」','enjoy / finish / stop のあとは動名詞','want / hope / decide のあとは不定詞（to〜）','like / start / begin はどちらもOK'],m:'enjoy to 〜 としてしまう',h:'その動詞のあとは ing と to のどっちが来るか、思い出してみよう'},
+ {s:'英語',u:'比較',k:'2つなら -er（比較級）、3つ以上で1番なら the -est（最上級）、同じくらいは as 原級 as',p:['比較級：-er than / more 〜 than「…より〜」','最上級：the -est / the most 〜「いちばん〜」','as 〜 as …「…と同じくらい〜」（〜は原級）','good / well → better → best'],m:'長い単語に -er をつける（more を使う）',h:'2つを比べてる？3つ以上の中でいちばん？'},
+ {s:'英語',u:'受け身',k:'「be動詞＋過去分詞」＝される。過去分詞は不規則動詞表をくり返し声に出して覚える',p:['be動詞 ＋ 過去分詞「〜される・〜されている」','「〜によって」は by 〜','過去の受け身は was / were ＋ 過去分詞'],m:'過去分詞ではなく過去形や原形を使う',h:'主語は「する」側？「される」側？'},
+ {s:'英語',u:'There is / have to・must',k:'must not＝「ダメ！」（禁止）、don’t have to＝「しなくてOK」（不要）',p:['There is ＋ 単数、There are ＋ 複数「〜がある・いる」','have to / must 〜「〜しなければならない」','don’t have to「〜しなくてよい」、must not「〜してはいけない」'],m:'don’t have to と must not の意味をまぜる',h:'「しなくていい」と「してはいけない」、どっちの意味かな？'},
+ {s:'英語',u:'単語',k:'「見る→言う→書く」を1セット。まちがえた単語だけ3回くり返す',p:['声に出す・書く・意味を言う、をセットで','まちがえた単語だけ集めてくり返す','品詞（名詞・動詞・形容詞）もいっしょに覚える'],m:'スペルを見るだけで覚えた気になる',h:'日本語を見て、英語を書けるか試してみよう'},
+ {s:'国語',u:'文法(用言の活用)',k:'活用形の順番は頭文字で「み・れ・し・れ・か・め」（未然・連用・終止・連体・仮定・命令）。「ない」をつけて ア段→五段、イ段→上一段、エ段→下一段',p:['用言＝動詞・形容詞・形容動詞（活用する自立語）','活用形：未然・連用・終止・連体・仮定・命令','動詞の活用の種類：五段・上一段・下一段・カ行変格（来る）・サ行変格（する）','見分け方：「ない」をつけて、直前がア段→五段、イ段→上一段、エ段→下一段'],m:'「来る」「する（〜する）」を五段などとまちがえる',h:'その動詞に「ない」をつけてみよう。直前の音は何段？'},
+ {s:'国語',u:'古典',k:'冒頭を音読で覚えよう：「春はあけぼの」（枕草子）「祇園精舎の鐘の声」（平家物語）「つれづれなるままに」（徒然草）',p:['歴史的仮名遣い：語の頭以外の「は・ひ・ふ・へ・ほ」→「わ・い・う・え・お」','「ゐ・ゑ・を」→「い・え・お」','枕草子：清少納言の随筆（春はあけぼの）','平家物語：軍記物語、琵琶法師が語った（祇園精舎の鐘の声）','徒然草：兼好法師の随筆'],m:'語の頭の「は」まで「わ」に直してしまう',h:'まず、その古文を声に出して読んでみよう'},
+ {s:'国語',u:'読解',k:'答えは必ず本文の中にある。根拠の文に線を引いてから答える',p:['指示語（これ・それ）は、ふつう前の部分を指す','接続語（しかし・つまり）で文章の流れがわかる','筆者の考えは、最後の段落や「〜のだ」の文に出やすい','理由を聞かれたら、答えの文末は「〜から。」'],m:'本文ではなく自分の考えで答えてしまう',h:'答えの根拠になる文を、本文から探して線を引こう'},
+ {s:'国語',u:'漢字',k:'部首から意味をイメージする（例：さんずい＝水に関係）',p:['部首・音読み・訓読みをセットで','熟語の組み立て（似た意味・反対の意味・上が下を修飾 など）','まちがえた字だけノートに集める'],m:'形の似た漢字（例：積・績）をまちがえる',h:'その字の部首は何？意味とつながってる？'},
+ {s:'理科',u:'化学変化と原子・分子',k:'結びつく質量の比は「銅：酸素＝4：1」「マグネシウム：酸素＝3：2」。水の電気分解は「水素が酸素の2倍」',p:['分解：炭酸水素ナトリウム → 炭酸ナトリウム＋水＋二酸化炭素','水の電気分解：陰極に水素、陽極に酸素（体積比 2：1）','酸化：酸素と結びつく、還元：酸化物から酸素をうばう','質量保存の法則：反応の前後で全体の質量は変わらない','結びつく質量の比は一定（銅：酸素＝4：1、マグネシウム：酸素＝3：2）','化学反応式は、左右で原子の数をそろえる'],m:'化学反応式で原子の数をそろえ忘れる',h:'左と右で、それぞれの原子は何個ずつあるか数えてみよう'},
+ {s:'理科',u:'生物の体のつくり',k:'光合成は「二酸化炭素＋水 →（光）→ デンプン＋酸素」。だ液のアミラーゼはデンプンを分解',p:['植物の細胞だけにある：細胞壁・葉緑体・（大きな）液胞','光合成：光を使い、二酸化炭素と水からデンプンなどをつくり酸素を出す','蒸散：おもに葉の気孔から水が水蒸気として出る','だ液（アミラーゼ）はデンプンを分解する：ヨウ素液・ベネジクト液で調べる','動脈は心臓から出る血液、静脈は心臓にもどる血液','反射：刺激に対して無意識に起こる反応'],m:'動脈血（酸素が多い）と動脈（血管）をまぜる',h:'その実験は「何と何を比べる」ための実験かな？'},
+ {s:'理科',u:'電流とその利用',k:'オームの法則は「V を上、R と I を下」に書いた三角形で、求めたいものを指でかくすと式がわかる。直列は電流が同じ、並列は電圧が同じ',p:['直列：電流はどこも同じ、電圧は分かれる','並列：電圧はどこも同じ、電流は分かれる','オームの法則：電圧V ＝ 抵抗Ω × 電流A','電力W ＝ 電圧V × 電流A、電力量J ＝ 電力W × 時間s','電流のまわりには磁界ができる','電磁誘導：コイルの中の磁界が変わると電流が流れる'],m:'mA を A に直さずに計算する',h:'わかっている量（V・Ω・A）に印をつけて、どの式が使えるか見てみよう'},
+ {s:'理科',u:'天気の変化',k:'寒冷前線は「ザーッと短く、通過後さむい」、温暖前線は「しとしと長く、通過後あたたかい」',p:['湿度(%) ＝ 空気1m³中の水蒸気量 ÷ その気温の飽和水蒸気量 × 100','露点：水蒸気が水滴に変わりはじめる温度','雲：空気が上昇 → 膨張 → 温度が下がり露点に達してできる','寒冷前線：積乱雲、短い時間に強い雨、通過後は気温が下がる','温暖前線：乱層雲など、長い時間おだやかな雨、通過後は気温が上がる','冬は西高東低の気圧配置（シベリア気団）'],m:'寒冷前線と温暖前線の特徴を逆に覚える',h:'前線の記号の向きと、どっちの空気がもぐりこむか考えてみよう'},
+ {s:'社会',u:'地理(日本の諸地域)',k:'地方ごとに「気候 → 産業 → 人口・くらし」の3点セットでまとめる',p:['九州・中国四国・近畿・中部・関東・東北・北海道の特色を「自然・産業・人口」で整理','地形図：縮尺、等高線（間かくがせまいほど急）、地図記号','グラフの読み取りは「いちばん多い・少ない」「変化」に注目'],m:'縮尺の計算で単位（cm・m・km）をそろえない',h:'その地方の気候と、さかんな産業はつながってるかな？'},
+ {s:'社会',u:'歴史(鎌倉〜江戸)',k:'年号の語呂：1185「いい箱つくろう鎌倉幕府」、1467「人の世むなしい応仁の乱」、1543「以後よさんざん鉄砲伝来」、1603「ひとむれおさまる江戸幕府」。江戸の三大改革は順に「享保・寛政・天保」',p:['鎌倉：源頼朝、御恩と奉公、執権の北条氏、承久の乱、御成敗式目、元寇','室町：足利尊氏、日明貿易（勘合）、応仁の乱 → 戦国時代','安土桃山：織田信長（楽市・楽座）、豊臣秀吉（太閤検地・刀狩）','江戸：徳川家康、武家諸法度、参勤交代（家光）、鎖国','江戸の改革：享保（徳川吉宗）・寛政（松平定信）・天保（水野忠邦）'],m:'人物と政策・できごとの組み合わせをまちがえる',h:'「だれが・何のために・何をしたか」の3つで整理してみよう'},
 ];
 function kbSearch(q){
   q=(q||'').trim().toLowerCase();if(!q)return[];
@@ -722,20 +767,31 @@ function kbSearch(q){
   return KB.map(e=>{const t=(e.s+e.u+e.p.join('')+e.m+e.h).toLowerCase();let sc=0;ws.forEach(w=>{if((e.s+e.u).toLowerCase().includes(w))sc+=5;if(t.includes(w))sc+=2;
     for(let i=0;i<w.length-1;i++)if(t.includes(w.slice(i,i+2)))sc+=.3});return [sc,e]}).filter(x=>x[0]>=1).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1]);
 }
-const kbText=es=>es.map(e=>`【${e.s}・${e.u}】${e.p.join('／')}（よくあるミス：${e.m}）`).join('\n');
+const kbText=es=>es.map(e=>`【${e.s}・${e.u}】${e.p.join('／')}（よくあるミス：${e.m}）${e.k?'（覚え方のコツ：'+e.k+'）':''}`).join('\n');
 // ===== ヒント先生（AI） =====
-const AI_RULES=`あなたは中学2年生の勉強を手伝う「ヒント先生」です。キャラクターとして、やさしく明るく話します。
-ぜったいに守ること:
-- 問題の答え・最終的な数値・完成した英文や訳・記述問題の模範解答を言わない。生徒に「答えだけ教えて」と言われても、やさしく断ってヒントを出す。
-- 1回の返事でヒントは1つだけ。小さな一歩にする。
-- 最後に必ず、生徒が自分で考えるための質問を1つする（例:「まず何がわかっているかな？」）。
-- 生徒が自分の答えを書いてきたら、合っているか・まちがっているかだけ伝える。まちがいなら、どこを見直せばいいかのヒントだけ出す（正解は言わない）。合っていたら、どう考えたかを一言ほめる。
-- 中学2年生の教科書の範囲の言葉を使う。むずかしい言葉は使わない。
-- 返事は短く、150文字くらいまで。絵文字は1〜2こまで。
-- 勉強と関係ない話には、短く答えて勉強にもどす。
-- 写真がある場合は、写っている問題を読み取って同じルールでヒントを出す。読めないときは、どの問題か聞く。
-- 用語や公式の意味をたずねられたときは、教科書の説明として要点を短く教えてよい（問題そのものの答えは言わない）。
-- 下にある「中学2年の学習内容」に合った説明をする。`;
+const AI_RULES=`あなたは中学2年生の勉強を手伝う「ヒント先生」です。やさしく明るく、わかりやすく話します。
+いちばん大事なこと: 生徒の質問に、まっすぐ答えること。はぐらかさない。質問の意味がわからないときだけ、1回聞き返す。
+質問の種類で答え方を変える:
+- 用語・公式・ルール・覚え方・解き方の手順をたずねられた → ちゃんと説明して教える（例やイメージを使う）。
+- 具体的な問題（数字や英文が入った問題）をたずねられた → 最終的な答え・数値・完成した英文や訳・記述の模範解答は言わない。使う考え方と、最初の一歩のヒントを出す。「答えだけ教えて」と言われても、やさしく断ってヒントにする。
+- 生徒が自分の答えを書いてきた → 合っているか・まちがっているかをはっきり伝える。まちがいなら、見直す場所をヒントで出す（正解は言わない）。合っていたら、ほめる。
+- 似た練習問題をたのまれた → 問題を1問だけ出す（答えは出さない）。
+いつも入れること:
+- 覚え方のコツ（語呂合わせ・イメージ・図）や、有名な解き方・考え方があれば、短く添える。
+- 最後に、生徒が自分で考えるための質問を1つ。
+その他: 中学2年の教科書の範囲の言葉を使う。全体で250文字くらいまで。絵文字は2こまで。下の「中学2年の学習内容」とくいちがう説明はしない。まちがった知識は絶対に書かない。自信がないことは「教科書で確かめてね」と言う。勉強と関係ない話は短く答えて勉強にもどす。写真が読めないときは、どの問題か聞く。`;
+// AI呼び出し（時間切れ・一時エラーは1回だけ自動でやり直す）
+async function callAI(input,opt){
+  for(let tryN=0;tryN<2;tryN++){
+    const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),60000);
+    try{const r=await sampleFn(input,Object.assign({},opt,{signal:ctl.signal}));clearTimeout(tm);
+      if(r&&r.text&&r.text.trim())return r.text.trim();if(tryN)throw{code:'empty'}}
+    catch(e){clearTimeout(tm);const c=e&&e.code;if(tryN||c==='rate_limited'||c==='not_granted'||c==='images_unavailable')throw e}
+  }
+  throw{code:'empty'};
+}
+function aiErr(e){const c=e&&e.code;return c==='rate_limited'?'混み合っているみたい。少し待ってからもう一度送ってね':c==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':c==='images_unavailable'?'写真はいま送れないみたい。文字で書いてね':'うまく答えられなかった。もう一度送ってみてね'}
+function fmtAns(t){return esc(t).replace(/【([^】]{1,12})】/g,'<b style="display:block;margin-top:6px;color:var(--focus)">【$1】</b>').replace(/^\s*<b style="display:block;margin-top:6px/,'<b style="display:block;margin-top:0')}
 const QUICK=['ヒントちょうだい','もっと小さいヒント','考え方の手順だけ教えて','答え合わせして','似た練習問題を出して'];
 let CHAT=[];try{CHAT=JSON.parse(localStorage.getItem('misesucchi_chat')||'[]')}catch(e){}
 const saveChat=()=>{try{localStorage.setItem('misesucchi_chat',JSON.stringify(CHAT.slice(-30)))}catch(e){}};
@@ -750,7 +806,7 @@ function drawAI(){
   $('quickq').innerHTML=QUICK.map(q=>`<button class="chip" data-q="${q}" style="font-size:12px">${q}</button>`).join('')+(CHAT.length?'<button class="chip" data-q="__solved" style="font-size:12px">🙌 じぶんで解けた！</button><button class="chip" data-q="__new" style="font-size:12px">🆕 あたらしい問題</button>':'');
   const c=$('chat');
   c.innerHTML=(CHAT.length?'':`<div class="msg ai">やっほー！いまは「${S.subj}${S.unit?'・'+S.unit:''}」だね📚\nわからない問題をそのまま書いてみて。いっしょに考えよう！</div>`)+
-    CHAT.map(m=>`<div class="msg ${m.role==='user'?'me':'ai'}">${m.img?`<img src="${m.img}" alt="">`:''}${esc(m.content)}</div>`).join('');
+    CHAT.map(m=>`<div class="msg ${m.role==='user'?'me':'ai'}">${m.img?`<img src="${m.img}" alt="">`:''}${m.role==='user'?esc(m.content):fmtAns(m.content)}</div>`).join('');
   c.scrollTop=c.scrollHeight;
 }
 const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -763,18 +819,18 @@ async function askAI(text){
   const box=document.createElement('div');box.className='msg ai';box.innerHTML='<span class="dots">考え中</span>';$('chat').appendChild(box);$('chat').scrollTop=1e9;
   const rel=kbSearch(CHAT.filter(m=>m.role==='user').map(m=>m.content).join(' ')+' '+S.unit);
   const ctx=`\n\n参考にする中学2年の学習内容:\n${kbText(rel.length?rel:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit)))}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）`;
-  const msgs=CHAT.slice(-12).map((m,i,a)=>({role:m.role,content:(i===0?AI_RULES+ctx+'\n\n--- ここから生徒 ---\n':'')+(m.content||'（写真）')}));
-  if(msgs[0].role!=='user')msgs.shift();
-  const opt={cache:false,onText:({text})=>{box.textContent=text;$('chat').scrollTop=1e9}};
+  let hist=CHAT.slice(-12).map(m=>({role:m.role,content:m.content||'（写真）'}));
+  while(hist.length&&hist[0].role!=='user')hist.shift();
+  const msgs=[];hist.forEach(m=>{const l=msgs[msgs.length-1];if(l&&l.role===m.role)l.content+='\n'+m.content;else msgs.push({...m})});
+  msgs[0].content=AI_RULES+ctx+'\n\n--- ここから生徒 ---\n'+msgs[0].content;
+  const opt={cache:false,onText:({text})=>{box.innerHTML=fmtAns(text);$('chat').scrollTop=1e9}};
   if(photoBlob&&canImg)opt.images=[photoBlob];
   try{
-    const r=await sampleFn(msgs,opt);
-    CHAT.push({role:'assistant',content:r.text});saveChat();
+    const t=await callAI(msgs,opt);
+    CHAT.push({role:'assistant',content:t});saveChat();
   }catch(e){
-    CHAT.pop();box.remove();
-    const code=e&&e.code;
-    toast(code==='rate_limited'?'ちょっと待ってから送ってね':code==='not_granted'?'AIの利用が許可されていないよ':'うまく送れなかった。もう一度ためしてね');
-    if(code==='not_granted'){$('aiSend').disabled=true;$('aiNote').textContent='AIの利用が許可されていません（右上のメニューから許可できます）'}
+    CHAT.pop();box.remove();toast(aiErr(e));
+    if(e&&e.code==='not_granted'){$('aiSend').disabled=true;$('aiNote').textContent='AIの利用が許可されていません（右上のメニューから許可できます）'}
   }
   aiBusy=false;drawAI();
 }
@@ -793,7 +849,7 @@ function clearPhoto(){photoBlob=null;photoURL='';$('photo').style.display='none'
 $('photoX').onclick=clearPhoto;
 
 function drawKB(es){
-  $('kbRes').innerHTML=es.map(e=>`<details class="kbr"><summary>${e.s}｜${e.u}</summary><ul>${e.p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="mi">⚠️ よくあるミス：${esc(e.m)}</div><div class="hi">💡 考え方：${esc(e.h)}</div></details>`).join('');
+  $('kbRes').innerHTML=es.map(e=>`<details class="kbr"><summary>${e.s}｜${e.u}</summary><ul>${e.p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="mi">⚠️ よくあるミス：${esc(e.m)}</div><div class="hi">💡 考え方：${esc(e.h)}</div>${e.k?`<div class="mi" style="background:#fff8de">🧠 覚え方のコツ：${esc(e.k)}</div>`:''}</details>`).join('');
 }
 let kbQ='',kbA='';
 $('kbIn').oninput=e=>{const q=e.target.value;drawKB(kbSearch(q))};
@@ -845,21 +901,34 @@ function graphSVG(a,b,note){
   <text x="10" y="20" font-size="15" fill="#e26b8f">${esc(lab)}</text>
   </svg>${note?`<p style="text-align:center;margin:6px 0 0;font-size:14px">♡ ${E(note)}</p>`:''}`;
 }
+let kbBusy=false;
 async function kbAsk(){
   const q=$('kbIn').value.trim();if(!q){toast('ききたいことを書いてね');return}
+  if(kbBusy)return;
   const hits=kbSearch(q);drawKB(hits);
   const box=$('kbAns');box.style.display='block';$('kbFig').innerHTML='';
   if(!sampleFn){box.textContent='AIはclaude.aiで開いたときに使えます。上の「中2の内容」を見てみてね。';return}
-  box.innerHTML='<span class="dots">考え中（図もかいてるよ）</span>';$('kbMore').style.display='none';
-  const prompt=AI_RULES+`\n\n参考にする中学2年の学習内容:\n${kbText(hits.length?hits:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit)))}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）\n${FIG_RULE}\n\n--- 生徒の質問 ---\n${q}`;
+  kbBusy=true;$('kbAsk').disabled=true;
+  box.innerHTML='<span class="dots">考え中</span>';$('kbMore').style.display='none';
+  const ref=hits.length?hits:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit));
+  const prompt=AI_RULES+`\n\n参考にする中学2年の学習内容:\n${kbText(ref)}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）
+書き方: 次の見出しを使って書く（ない項目は書かない）。
+【こたえ】質問へのまっすぐな答え（問題そのものの答えは言わない）
+【覚え方のコツ】語呂合わせやイメージ
+【有名な解き方】よく知られた解き方・考え方
+【考えてみよう】自分で考えるための質問1つ
+${FIG_RULE.replace('返事は次の形のJSONだけで出すこと（前後に文章を書かない）:','図があるとわかりやすい時だけ、文章のいちばん最後の行に「FIG:」に続けて次の形のJSONを1行で書く（いらない時は書かない）:').replace('{"hint":"ヒント文（150文字まで。答えは言わない。最後に考えるための質問を1つ）","figure":null か 下のどれか1つ}','図のJSON（下のどれか1つ）')}
+
+--- 生徒の質問 ---
+${q}`;
+  const split=t=>{const i=t.search(/\n?\s*FIG\s*[:：]/);return i<0?[t,'']:[t.slice(0,i),t.slice(i).replace(/^\s*FIG\s*[:：]\s*/,'')]};
   try{
-    let r;
-    try{r=await sampleFn.json(prompt,{cache:false})}
-    catch(e){if(e&&e.code==='invalid_json'&&e.text){r={hint:e.text.replace(/[{}"]/g,'').slice(0,300),figure:null}}else throw e}
-    const hint=(r&&r.hint)||'';box.textContent=hint;
-    const fh=figHTML(r&&r.figure);$('kbFig').innerHTML=fh;
-    kbQ=q;kbA=hint;$('kbMore').style.display='';
-  }catch(e){box.textContent=e&&e.code==='rate_limited'?'ちょっと待ってからもう一度ためしてね':e&&e.code==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':'うまく聞けなかった。もう一度ためしてね'}
+    const t=await callAI(prompt,{cache:false,onText:({text})=>{box.innerHTML=fmtAns(split(text)[0])}});
+    const [body,fig]=split(t);box.innerHTML=fmtAns(body);
+    if(fig){try{const j=JSON.parse(fig.slice(fig.indexOf('{'),fig.lastIndexOf('}')+1));$('kbFig').innerHTML=figHTML(j.figure||j)}catch(e){}}
+    kbQ=q;kbA=body.trim();$('kbMore').style.display='';
+  }catch(e){box.textContent=aiErr(e)}
+  kbBusy=false;$('kbAsk').disabled=false;
 }
 $('kbMore').onclick=()=>{CHAT.push({role:'user',content:kbQ},{role:'assistant',content:kbA});saveChat();go('ai')};
 
@@ -867,7 +936,10 @@ $('kbMore').onclick=()=>{CHAT.push({role:'user',content:kbQ},{role:'assistant',c
 let PRIZES=[],pEditing=false,gBusy=false,pending=null;
 const CAPC=['#e46a7f','#7cc36a','#f1c75a','#7aa7e0','#c79cef','#f39a7b','#3fa3a8'];
 const W={N:10,R:5,SR:2,SSR:1},RR=['N','R','SR','SSR'];
-idbGet('prizes').then(v=>{PRIZES=v||[];drawGacha();refreshChars()}).catch(()=>{});
+const GOODS=Array.from({length:15},(_,i)=>'goods/g'+String(i+1).padStart(2,'0')+'.webp');
+idbGet('prizes').then(v=>{PRIZES=v||[];
+  if(!S.goodsSeeded){GOODS.forEach((d,i)=>{const id='g'+(i+1);if(!PRIZES.some(x=>x.id===id))PRIZES.push({id,d,r:'N'})});S.goodsSeeded=true;save();savePrizes()}
+  drawGacha();refreshChars()}).catch(()=>{PRIZES=GOODS.map((d,i)=>({id:'g'+(i+1),d,r:'N'}));drawGacha();refreshChars()}).catch(()=>{});
 const savePrizes=()=>idbPut('prizes',PRIZES).catch(()=>toast('保存できなかった。画像をへらしてね'));
 const CAPPOS=[[78,190],[118,198],[160,200],[202,194],[226,168],[96,160],[140,168],[184,166],[60,150],[120,134],[166,136],[210,130],[88,112],[142,100],[196,98],[110,72],[170,70]];
 function machineSVG(){
@@ -896,7 +968,7 @@ function drawGacha(){
   const n=PRIZES.length;$('pCount').textContent=n?`${PRIZES.filter(x=>S.got[x.id]).length} / ${n}`:'';
   $('pEdit').textContent=pEditing?'✅ へんしゅうをおわる':'✏️ ガチャの中身をへんしゅう';
   $('pGrid').innerHTML=PRIZES.map(x=>{const c=S.got[x.id]||0,show=pEditing||c;return `<div class="pz ${show?'':'lock'}" data-id="${x.id}"><img src="${x.d}" alt=""><span class="rb ${x.r}">${x.r}</span>${c?`<span class="ct">×${c}</span>`:''}${pEditing?`<span class="dl" data-del="${x.id}">×</span>`:''}</div>`}).join('')+'<button class="pz add" id="pAdd">＋<small>グッズ画像</small></button>';
-  if(!n)$('gHint').textContent='グッズ画像がまだないので、シールが出るよ。下の「＋」から入れてね';else if(!gBusy)$('gHint').textContent=S.tickets>0?'ハンドルを指でぐるっと1回まわしてね ↻':'🍅を終えるとガチャけんがもらえるよ';
+  if(!n)$('gHint').textContent='ガチャの中身がからっぽです。下の「＋」からグッズ画像を入れてね';else if(!gBusy)$('gHint').textContent=S.tickets>0?'ハンドルを指でぐるっと1回まわしてね ↻':'🍅を終えるとガチャけんがもらえるよ';
 }
 $('pEdit').onclick=()=>{pEditing=!pEditing;drawGacha()};
 $('pGrid').onclick=e=>{
@@ -907,7 +979,7 @@ $('pGrid').onclick=e=>{
 $('pIn').onchange=async e=>{
   const fs=[...(e.target.files||[])];e.target.value='';if(!fs.length)return;toast(`${fs.length}まい とりこみ中…`);
   for(const f of fs){
-    const d=await new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=420,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cutout(c);let u=c.toDataURL('image/webp',.85);if(!u.startsWith('data:image/webp'))u=c.toDataURL('image/png');res(u)};im.onerror=()=>res(null);im.src=r.result};r.readAsDataURL(f)});
+    const d=await new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=420,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);let u=c.toDataURL('image/webp',.85);if(!u.startsWith('data:image/webp'))u=c.toDataURL('image/png');res(u)};im.onerror=()=>res(null);im.src=r.result};r.readAsDataURL(f)});
     if(d)PRIZES.push({id:Date.now()+Math.floor(Math.random()*1e4),d,r:'N'});
   }
   await savePrizes();drawGacha();toast('🧸 ガチャに入れたよ！');
@@ -919,6 +991,7 @@ function setKnob(a){const g=document.getElementById('knobG');if(g)g.setAttribute
 function tick(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=1400;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.05,n);g.gain.exponentialRampToValueAtTime(.001,n+.04);o.start(n);o.stop(n+.05)}catch(e){}}
 $('knob').addEventListener('pointerdown',e=>{
   if(gBusy||pending)return;
+  if(!PRIZES.length){toast('ガチャの中身がからっぽだよ');return}
   if(!(S.tickets>0)){const k=$('knob');toast('🎫がないよ。🍅を1つ終えるともらえる！');setKnob(-12);setTimeout(()=>setKnob(10),120);setTimeout(()=>setKnob(0),240);return}
   unlockAudio();kOn=true;kLast=kAngle(e);kAcc=0;kTick=0;$('knob').setPointerCapture(e.pointerId);e.preventDefault();
 });
@@ -931,8 +1004,7 @@ $('knob').addEventListener('pointermove',e=>{
 });
 ['pointerup','pointercancel'].forEach(t=>$('knob').addEventListener(t,()=>{if(kOn){kOn=false;if(kAcc<360){$('gHint').textContent='もっとぐるっと1回まわしてね ↻';let a=kAcc;const back=setInterval(()=>{a=Math.max(0,a-30);setKnob(a);if(!a)clearInterval(back)},16)}}}));
 function pickPrize(){
-  if(PRIZES.length){const tot=PRIZES.reduce((a,x)=>a+W[x.r],0);let r=Math.random()*tot;for(const x of PRIZES){r-=W[x.r];if(r<0)return {img:x.d,id:x.id,r:x.r}}return {img:PRIZES[0].d,id:PRIZES[0].id,r:PRIZES[0].r}}
-  const st=drawSticker(false);return {em:st[0],r:st[1]};
+  const tot=PRIZES.reduce((a,x)=>a+W[x.r],0);let r=Math.random()*tot;for(const x of PRIZES){r-=W[x.r];if(r<0)return {img:x.d,id:x.id,r:x.r}}return {img:PRIZES[0].d,id:PRIZES[0].id,r:PRIZES[0].r};
 }
 function dispense(){
   gBusy=true;S.tickets--;save();$('gTk').textContent=S.tickets;
@@ -958,6 +1030,121 @@ $('gClose').onclick=()=>{$('gOpen').classList.remove('on','done');
     else if(k!==S.chara&&!(S.party||[]).includes(k)){if((S.party||[]).length<4){(S.party=S.party||[]).push(k);toast('🏠 なかまが画面に追加されたよ！')}else toast('キャラに追加したよ（タイマー画面の「わたしのキャラ」で入れかえてね）')}
     save();refreshChars()}
   pending=null;gBusy=false;drawGacha();drawReward();$('gHint').textContent=S.tickets>0?'もう1回まわせるよ ↻':'🍅を終えるとガチャけんがもらえるよ'};
+
+// ===== ステージ（背景） =====
+const STAGES={auto:'🎲 おまかせ',live:'🎤 ライブ会場',mountain:'⛰️ 山',river:'🏞️ 川',camp:'🏕️ キャンプ',custom:'🖼️ じぶんの画像'};
+const WXN={sun:'☀️ はれ',cloud:'☁️ くもり',rain:'☔ あめ',snow:'⛄ ゆき'};
+const SEAN={spring:'🌸 春',summer:'🌻 夏',autumn:'🍁 秋',winter:'❄️ 冬'};
+let bgURL='',wxToday=null;
+const seedOf=d=>{let h=0;for(const c of d)h=(h*31+c.charCodeAt(0))>>>0;return h};
+function season(){const m=+jst().slice(5,7);return m>=3&&m<=5?'spring':m<=8&&m>=6?'summer':m>=9&&m<=11?'autumn':'winter'}
+function tod(){const h=+new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo',hour:'numeric',hour12:false})%24;return h>=19||h<5?'night':h>=16?'eve':'day'}
+function fakeWx(){const d=jst(),m=+d.slice(5,7),r=(seedOf(d)%100)/100,se=season();
+  if(se==='winter'&&r<.28)return'snow';if((m===6&&r<.5)||r<.18)return'rain';return r<.45?'cloud':'sun'}
+function wx(){return wxToday&&wxToday.d===jst()?wxToday.w:(S.wx&&S.wx.d===jst()?S.wx.w:fakeWx())}
+async function fetchWx(){
+  if(S.wx&&S.wx.d===jst())return;
+  try{const ctl=new AbortController();setTimeout(()=>ctl.abort(),4000);
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=35.68&longitude=139.76&daily=weather_code&timezone=Asia%2FTokyo&forecast_days=1',{signal:ctl.signal});
+    const j=await r.json();const c=j.daily.weather_code[0];
+    const w=c>=71&&c<=77||c===85||c===86?'snow':(c>=51&&c<=67)||(c>=80&&c<=82)||c>=95?'rain':c>=2?'cloud':'sun';
+    S.wx={d:jst(),w,real:1};save();sceneKey='';drawScene()}catch(e){}
+}
+function stageKind(){const k=S.stageSel||'auto';if(k==='custom'&&!bgURL)return'mountain';if(k!=='auto')return k;return['mountain','river','camp','live'][seedOf(jst()+'st')%4]}
+function sky(t,w){
+  if(t==='night')return w==='sun'?['#1f2b55','#46578e']:['#29304a','#525a74'];
+  if(t==='eve')return w==='sun'?['#ff9e7a','#ffe0bf']:['#b9939a','#e9d5cf'];
+  return{sun:['#9fd8ff','#e8f7ff'],cloud:['#b8c4d0','#e9eef3'],rain:['#8fa1b3','#d0d8e0'],snow:['#cfdbe8','#f4f7fb']}[w];
+}
+function sceneSVG(kind,se,w,t){
+  const tree={spring:'#ffc4d6',summer:'#6fbf5a',autumn:'#f0a04b',winter:'#e6edf5'}[se],grd={spring:'#a6d98a',summer:'#8fcf72',autumn:'#d8c27a',winter:'#f2f6fb'}[se];
+  const dk=t==='night'?.55:t==='eve'?.85:1;const [s1,s2]=sky(t,w);
+  const shade=`<rect width="360" height="420" fill="#0b1030" opacity="${1-dk}"/>`;
+  if(kind==='live'){
+    const crowd=Array.from({length:18},(_,i)=>{const x=10+i*20,y=372+(i%3)*8,c=['#ff6fa8','#7cf0ff','#fff36b','#a6ff7a','#c49bff'][i%5];
+      return `<circle cx="${x}" cy="${y}" r="11" fill="#1a1230"/><rect class="plight" style="animation-delay:${(i%4)*.12}s" x="${x+6}" y="${y-30}" width="4" height="18" rx="2" fill="${c}"/><circle cx="${x+8}" cy="${y-30}" r="6" fill="${c}" opacity=".35"/>`}).join('');
+    return `<svg viewBox="0 0 360 420" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="lv" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a1748"/><stop offset="1" stop-color="#5b2a6e"/></linearGradient><linearGradient id="bm" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff6c9" stop-opacity=".8"/><stop offset="1" stop-color="#fff6c9" stop-opacity="0"/></linearGradient></defs>
+    <rect width="360" height="420" fill="url(#lv)"/>
+    <rect x="0" y="18" width="360" height="10" fill="#3d2f58"/>${[40,110,180,250,320].map(x=>`<circle cx="${x}" cy="30" r="7" fill="#fff6c9"/>`).join('')}
+    ${[[40,'#ff9fd0'],[180,'#fff6c9'],[320,'#9fe6ff']].map(([x,c],i)=>`<g class="beam" style="transform-origin:${x}px 30px;animation-delay:${-i}s"><path d="M${x-6} 30L${x-70} 380H${x+70}L${x+6} 30z" fill="${c}" opacity=".22"/></g>`).join('')}
+    <rect x="0" y="300" width="360" height="22" fill="#3a2550"/><rect x="0" y="296" width="360" height="5" fill="#ff9fd0" opacity=".7"/>
+    <rect x="8" y="240" width="40" height="58" rx="4" fill="#20172f"/><circle cx="28" cy="258" r="9" fill="#3c3150"/><circle cx="28" cy="282" r="12" fill="#3c3150"/>
+    <rect x="312" y="240" width="40" height="58" rx="4" fill="#20172f"/><circle cx="332" cy="258" r="9" fill="#3c3150"/><circle cx="332" cy="282" r="12" fill="#3c3150"/>
+    ${crowd}</svg>`;
+  }
+  let land='';
+  if(kind==='mountain'){
+    land=`<path d="M-20 260L70 120 130 200 200 90 290 210 380 130V420H-20z" fill="${se==='winter'?'#b9c8da':'#8fb0d0'}"/>
+    <path d="M52 148L70 120 88 148 78 142 70 150 62 142zM182 118L200 90 218 118 208 112 200 120 192 112z" fill="#fff"/>
+    <path d="M-20 300Q90 220 190 280T380 250V420H-20z" fill="${grd}" opacity=".9"/>
+    ${[[30,285],[70,300],[300,275],[335,292]].map(([x,y])=>`<path d="M${x} ${y-36}l-16 36h32z" fill="${se==='winter'?'#7fa68a':'#3f8a5a'}"/><path d="M${x} ${y-50}l-12 26h24z" fill="${se==='winter'?'#fff':se==='autumn'?'#d9773a':'#4f9a66'}"/>`).join('')}`;
+  }else if(kind==='river'){
+    land=`<path d="M-20 250Q100 200 200 240T380 220V420H-20z" fill="${grd}"/>
+    <path d="M150 250Q120 300 170 340T140 430H260Q210 380 250 330T210 250z" fill="${w==='rain'?'#7aa5c8':'#7cc7ec'}"/>
+    <path class="wave" d="M170 290q10-6 20 0M160 330q10-6 20 0M190 370q10-6 20 0M175 400q10-6 20 0" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="8 12"/>
+    ${[[50,250],[95,262],[290,248],[330,258]].map(([x,y])=>`<rect x="${x-3}" y="${y-6}" width="6" height="22" fill="#9a6a40"/><circle cx="${x}" cy="${y-18}" r="20" fill="${tree}"/>`).join('')}
+    <ellipse cx="120" cy="360" rx="14" ry="7" fill="#b8b1a5"/><ellipse cx="280" cy="380" rx="18" ry="8" fill="#c7c0b4"/>`;
+  }else{
+    land=`<path d="M-20 270Q120 230 220 260T380 245V420H-20z" fill="${grd}"/>
+    ${[[30,240],[78,232],[320,236]].map(([x,y])=>`<rect x="${x-3}" y="${y}" width="6" height="26" fill="#9a6a40"/><circle cx="${x}" cy="${y-8}" r="22" fill="${tree}"/>`).join('')}
+    <path d="M240 330L285 262 330 330z" fill="#f39a7b"/><path d="M285 262L270 330H300z" fill="#d9775a"/><path d="M285 262v-8" stroke="#8a5a3a" stroke-width="3"/>
+    <g transform="translate(70 352)"><path d="M-16 6l32-8M-16-2l32 8" stroke="#8a5a3a" stroke-width="6" stroke-linecap="round"/><path class="flame" d="M0 0c-12-6-8-22 0-30 2 10 12 12 8 24-2 4-5 6-8 6z" fill="#ffb347"/><path class="flame" style="animation-delay:.1s" d="M0 -2c-6-4-4-12 0-16 1 6 6 7 4 12z" fill="#fff07a"/></g>
+    ${t==='night'?[60,110,160,210,260].map((x,i)=>`<circle cx="${x}" cy="${200+(i%2)*8}" r="3" fill="#fff3a6"/>`).join('')+'<path d="M40 196Q160 222 290 198" stroke="#7a6a5a" fill="none"/>':''}`;
+  }
+  const sunMoon=t==='night'?'<circle cx="300" cy="70" r="16" fill="#fff6c9"/><circle cx="292" cy="65" r="14" fill="'+s1+'"/>'+[[40,40],[120,30],[200,60],[250,30],[80,80]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#fff"/>`).join(''):w==='sun'?`<circle cx="300" cy="70" r="22" fill="${t==='eve'?'#ff8a5c':'#ffd96b'}"/>`:'';
+  const clouds=w!=='sun'?`<g fill="#fff" opacity="${w==='cloud'?.85:.6}"><ellipse cx="80" cy="80" rx="46" ry="18"/><ellipse cx="110" cy="70" rx="30" ry="18"/><ellipse cx="260" cy="100" rx="50" ry="18"/><ellipse cx="230" cy="90" rx="28" ry="16"/></g>`:'<g fill="#fff" opacity=".8"><ellipse cx="90" cy="90" rx="30" ry="10"/></g>';
+  return `<svg viewBox="0 0 360 420" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sk" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${s1}"/><stop offset="1" stop-color="${s2}"/></linearGradient></defs><rect width="360" height="420" fill="url(#sk)"/>${sunMoon}${clouds}${land}${shade}</svg>`;
+}
+function particles(kind,se,w,t){
+  let h='';const R=(n,f)=>{for(let i=0;i<n;i++)h+=f(i)};
+  if(kind==='live'){R(10,i=>`<div class="pt petal" style="left:${(i*37)%100}%;animation-delay:${-i*.9}s;font-size:12px">${['✨','🎵','💖'][i%3]}</div>`);return h}
+  if(w==='rain')R(34,i=>`<div class="pt rain" style="left:${(i*29)%104}%;animation-delay:${-(i*.11)%0.7}s"></div>`);
+  else if(w==='snow')R(28,i=>`<div class="pt snow" style="left:${(i*31)%100}%;animation-delay:${-i*.27}s"></div>`);
+  if(w!=='rain'&&se==='spring')R(10,i=>`<div class="pt petal" style="left:${(i*41)%100}%;animation-delay:${-i*.9}s">🌸</div>`);
+  if(w!=='rain'&&se==='autumn')R(8,i=>`<div class="pt petal" style="left:${(i*43)%100}%;animation-delay:${-i*1.1}s">${i%2?'🍁':'🍂'}</div>`);
+  if(se==='summer'&&t==='night')R(8,i=>`<div class="pt fly" style="left:${10+(i*23)%80}%;animation-delay:${-i*.5}s"></div>`);
+  return h;
+}
+let sceneKey='';
+function drawScene(){
+  const sel=S.stageSel||'auto',kind=stageKind(),se=season(),w=wx(),t=tod();
+  const key=[sel,kind,se,w,t,sel==='custom'?bgURL:''].join('|');
+  if(key!==sceneKey){sceneKey=key;
+    $('scene').innerHTML=sel==='custom'&&bgURL?`<img src="${bgURL}" alt="">`:sceneSVG(kind,se,w,t)+particles(kind,se,w,t)}
+  if($('stsel')){$('stsel').innerHTML=Object.entries(STAGES).map(([k,n])=>`<button class="chip ${sel===k?'on':''}" data-st="${k}">${n}</button>`).join('')+(bgURL?'<button class="chip" data-st="bgdel" style="color:#c94a64">画像をけす</button>':'');
+    $('today').textContent=`きょう（${+jst().slice(5,7)}/${+jst().slice(8)}）：${STAGES[kind]}・${SEAN[se]}・${WXN[w]}${S.wx&&S.wx.d===jst()&&S.wx.real?'（東京の天気）':''}`;}
+}
+$('stsel').onclick=async e=>{const k=e.target.dataset.st;if(!k)return;
+  if(k==='bgdel'){if(!confirm('背景の画像をけす？'))return;await idbPut('bg',null).catch(()=>{});bgURL='';if(S.stageSel==='custom')S.stageSel='auto';save();sceneKey='';drawScene();return}
+  if(k==='custom'&&!bgURL){$('bgIn').click();return}
+  S.stageSel=k;save();sceneKey='';drawScene();toast(STAGES[k]+' にしたよ')};
+$('bgIn').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  const d=await new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=1200,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);c.toBlob(res,'image/jpeg',.85)};im.onerror=()=>res(null);im.src=r.result};r.readAsDataURL(f)});
+  if(!d){toast('読みこめなかった');return}
+  try{await idbPut('bg',d);bgURL=URL.createObjectURL(d);S.stageSel='custom';save();sceneKey='';drawScene();toast('🖼️ 背景をかえたよ！')}catch(err){toast('保存できなかった')}};
+idbGet('bg').then(b=>{if(b){bgURL=URL.createObjectURL(b);sceneKey='';drawScene()}}).catch(()=>{});
+// ===== タイマー連動のキャラ演出 =====
+let fxMs=new Set(),lastCd=-1,wasRun=null,lastModeFx='';
+function charaFx(){
+  const c=$('chara'),l=left(),tot=dur(S.mode),pr=1-l/tot,run=S.run,f=S.mode==='focus';
+  c.style.setProperty('--sc',run&&f?(1+pr*.14).toFixed(3):'1');
+  const once=(k,fn)=>{if(!fxMs.has(k)){fxMs.add(k);fn()}};
+  if(run&&wasRun===false&&l===tot-0||run&&wasRun===false&&pr<.02){c.classList.remove('dash');void c.offsetWidth;c.classList.add('dash');say(f?'よーい、ドン！🏁':'きゅうけいだー！')}
+  if(wasRun!==run){wasRun=run}
+  if(lastModeFx!==S.mode){lastModeFx=S.mode;fxMs=new Set()}
+  if(run&&f){
+    if(pr>=.25)once('q1',()=>{say('ノってきた！🎶');confetti(12)});
+    if(pr>=.5)once('q2',()=>{c.classList.remove('spin');void c.offsetWidth;c.classList.add('spin');say('はんぶん きた！🎉');confetti(30)});
+    if(pr>=.75)once('q3',()=>say('ラストスパート！🔥'));
+  }
+  c.classList.toggle('spurt',run&&f&&pr>=.75);
+  $('aura').textContent=run&&f&&pr>=.75?'🔥🔥':'';
+  c.classList.toggle('panic',run&&l<=10&&l>0);
+  c.classList.toggle('nap',!run&&l<tot);
+  c.classList.toggle('float',run&&!f);
+  const cd=$('cd');
+  if(run&&l<=10&&l>0){if(l!==lastCd){lastCd=l;cd.textContent=l;cd.classList.remove('pop');void cd.offsetWidth;cd.classList.add('pop')}}else if(lastCd!==-1){lastCd=-1;cd.textContent=''}
+}
 // ===== 演出 =====
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
@@ -989,9 +1176,9 @@ setInterval(()=>{
   draw();
 },250);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){dayCheck();drawTest();draw()}});
-dayCheck();drawSubj();drawTest();drawPick();draw();
+dayCheck();drawSubj();drawTest();drawPick();draw();fetchWx();
 setTimeout(()=>say(S.run?'おかえり！つづいてるよ':pick(TALK.idle)),500);
-if(!S.onboarded){if(!(S.tickets>0))S.tickets=1;save();setTimeout(()=>{modal('🎰','ようこそ ミセスッちへ！','まずはガチャをまわして、いっしょにがんばる<b>キャラ</b>を決めよう！<br>（グッズの画像を入れておくと、それが出てくるよ）');onboardGo='reward'},700)}
+if(!S.onboarded){if(!(S.tickets>0))S.tickets=1;save();setTimeout(()=>{modal('🎰','ようこそ ミセスッちへ！','まずはガチャをまわして、いっしょにがんばる<b>キャラ</b>を決めよう！');onboardGo='reward'},700)}
 </script>
 </body>
 </html>
