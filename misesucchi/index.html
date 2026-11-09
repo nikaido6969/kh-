@@ -892,9 +892,14 @@ const KB=[
 ];
 function kbSearch(q){
   q=(q||'').trim().toLowerCase();if(!q)return[];
-  const ws=q.split(/[\s　、,]+/).filter(Boolean);
-  return KB.map(e=>{const t=(e.s+e.u+e.p.join('')+e.m+e.h).toLowerCase();let sc=0;ws.forEach(w=>{if((e.s+e.u).toLowerCase().includes(w))sc+=5;if(t.includes(w))sc+=2;
-    for(let i=0;i<w.length-1;i++)if(t.includes(w.slice(i,i+2)))sc+=.3});return [sc,e]}).filter(x=>x[0]>=1).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1]);
+  const ws=q.split(/[\s　、,。？?！!]+/).filter(Boolean);
+  const sc=KB.map(e=>{let v=0;const t=(e.s+e.u+e.p.join('')+e.m+e.h+(e.k||'')).toLowerCase();
+    e.u.split(/[()（）・〜\/\s]+/).filter(x=>x.length>=2).forEach(x=>{if(q.includes(x.toLowerCase()))v+=10});
+    if(q.includes(e.s))v+=2;
+    ws.forEach(w=>{if(t.includes(w))v+=2;for(let i=0;i<w.length-1;i++)if(t.includes(w.slice(i,i+2)))v+=.15});
+    return [v,e]});
+  const mx=Math.max(0,...sc.map(x=>x[0]));if(mx<1)return[];
+  return sc.filter(x=>x[0]>=Math.max(1,mx*.5)).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1]);
 }
 const kbText=es=>es.map(e=>`【${e.s}・${e.u}】${e.p.join('／')}（よくあるミス：${e.m}）${e.k?'（覚え方のコツ：'+e.k+'）':''}`).join('\n');
 // ===== ヒント先生（AI） =====
@@ -908,6 +913,7 @@ const AI_RULES=`あなたは中学2年生の勉強を手伝う「ヒント先生
 いつも入れること:
 - 覚え方のコツ（語呂合わせ・イメージ・図）や、有名な解き方・考え方があれば、短く添える。
 - 最後に、生徒が自分で考えるための質問を1つ。
+いちばん大事なルール2: 用語・分類・公式は、下の「参考にする中学2年の学習内容」に書いてある言い方と分け方をそのまま使う（自分で別の分け方を作らない）。
 その他: 中学2年の教科書の範囲の言葉を使う。全体で250文字くらいまで。絵文字は2こまで。下の「中学2年の学習内容」とくいちがう説明はしない。まちがった知識は絶対に書かない。自信がないことは「教科書で確かめてね」と言う。勉強と関係ない話は短く答えて勉強にもどす。写真が読めないときは、どの問題か聞く。`;
 // AI呼び出し（時間切れ・一時エラーは1回だけ自動でやり直す）
 async function callAI(input,opt){
@@ -920,16 +926,36 @@ async function callAI(input,opt){
   throw{code:'empty'};
 }
 function aiErr(e){const c=e&&e.code;return c==='rate_limited'?'混み合っているみたい。少し待ってからもう一度送ってね':c==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':c==='images_unavailable'?'写真はいま送れないみたい。文字で書いてね':'うまく答えられなかった。もう一度送ってみてね'}
-function fmtAns(t){return esc(t).replace(/【([^】]{1,12})】/g,'<b style="display:block;margin-top:6px;color:var(--focus)">【$1】</b>').replace(/^\s*<b style="display:block;margin-top:6px/,'<b style="display:block;margin-top:0')}
+function fmtAns(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#+\s*/gm,'').replace(/【([^】]{1,12})】/g,'<b style="display:block;margin-top:6px;color:var(--focus)">【$1】</b>').replace(/^\s*<b style="display:block;margin-top:6px/,'<b style="display:block;margin-top:0')}
 const QUICK=['ヒントちょうだい','もっと小さいヒント','考え方の手順だけ教えて','答え合わせして','似た練習問題を出して'];
 let CHAT=[];try{CHAT=JSON.parse(localStorage.getItem('misesucchi_chat')||'[]')}catch(e){}
 const saveChat=()=>{try{localStorage.setItem('misesucchi_chat',JSON.stringify(CHAT.slice(-30)))}catch(e){}};
 let sampleFn=null,canImg=false,photoBlob=null,photoURL='',aiBusy=false,aiCtl=null;
+// Claude以外で開いたときは、無料のAI（APIキー不要）を使う
+async function freeAI(input,opt={}){
+  let msgs=typeof input==='string'?[{role:'user',content:input}]:input.map(m=>({role:m.role,content:m.content}));
+  // ルールと中2の内容は system に分けて渡す（小さいモデルでも守りやすくする）
+  const SEP=/\n*---\s*(ここから生徒|生徒の質問)\s*---\n*/;
+  if(msgs[0]&&SEP.test(msgs[0].content)){const [sys,...rest]=msgs[0].content.split(SEP);msgs[0].content=rest[rest.length-1];msgs=[{role:'system',content:sys},...msgs]}
+  let r;
+  for(let i=0;i<4;i++){
+    r=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'openai',messages:msgs,private:true}),signal:opt.signal});
+    if(r.status!==429&&r.status!==402&&r.status<500)break;
+    if(opt.onText)opt.onText({text:'混み合っているので、少し待ってから答えるね…',delta:''});
+    await new Promise(res=>setTimeout(res,[6000,12000,20000,0][i]));
+  }
+  if(r.status===429||r.status===402)throw{code:"rate_limited"};if(!r.ok)throw{code:'http_'+r.status};
+  const j=await r.json();const t=((j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'').trim();
+  if(opt.onText&&t)opt.onText({text:t,delta:t});return {text:t,truncated:false};
+}
+freeAI.limits=async()=>({});
+function useFree(){sampleFn=freeAI;canImg=false;$('camBtn').style.display='none';$('aiNote').textContent='無料のAIで動いています（答えるまで少し時間がかかることがあります）'}
 (window.claude&&claude.use?claude.use('sample'):Promise.resolve(null)).then(async sm=>{
+  if(!sm){useFree();return}
   sampleFn=sm;
-  if(!sm){$('aiNote').textContent='このページではAIを使えません（claude.aiで開いてね）';$('aiSend').disabled=true;return}
   const lim=await sm.limits().catch(()=>null);canImg=!!(lim&&lim.images);$('camBtn').style.display=canImg?'':'none';
-}).catch(()=>{$('aiNote').textContent='このページではAIを使えません（claude.aiで開いてね）'});
+}).catch(useFree);
 function drawAI(){
   $('aiFace').innerHTML=charaHTML(S.chara);
   $('quickq').innerHTML=QUICK.map(q=>`<button class="chip" data-q="${q}" style="font-size:12px">${q}</button>`).join('')+(CHAT.length?'<button class="chip" data-q="__solved" style="font-size:12px">🙌 じぶんで解けた！</button><button class="chip" data-q="__new" style="font-size:12px">🆕 あたらしい問題</button>':'');
@@ -947,7 +973,7 @@ async function askAI(text){
   CHAT.push({role:'user',content:text.trim(),img:thumb||undefined});drawAI();
   const box=document.createElement('div');box.className='msg ai';box.innerHTML='<span class="dots">考え中</span>';$('chat').appendChild(box);$('chat').scrollTop=1e9;
   const rel=kbSearch(CHAT.filter(m=>m.role==='user').map(m=>m.content).join(' ')+' '+S.unit);
-  const ctx=`\n\n参考にする中学2年の学習内容:\n${kbText(rel.length?rel:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit)))}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）`;
+  const ctx=`\n\n参考にする中学2年の学習内容:\n${kbText(rel)||'（とくになし）'}\n\n（アプリで選んでいる教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}。質問がほかの教科なら、その教科として答える。どの教科の質問にも必ず答える）`;
   let hist=CHAT.slice(-12).map(m=>({role:m.role,content:m.content||'（写真）'}));
   while(hist.length&&hist[0].role!=='user')hist.shift();
   const msgs=[];hist.forEach(m=>{const l=msgs[msgs.length-1];if(l&&l.role===m.role)l.content+='\n'+m.content;else msgs.push({...m})});
@@ -1039,8 +1065,8 @@ async function kbAsk(){
   if(!sampleFn){box.textContent='AIはclaude.aiで開いたときに使えます。上の「中2の内容」を見てみてね。';return}
   kbBusy=true;$('kbAsk').disabled=true;
   box.innerHTML='<span class="dots">考え中</span>';$('kbMore').style.display='none';
-  const ref=hits.length?hits:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit));
-  const prompt=AI_RULES+`\n\n参考にする中学2年の学習内容:\n${kbText(ref)}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）
+  const ref=hits;
+  const prompt=AI_RULES+`\n\n参考にする中学2年の学習内容:\n${kbText(ref)||'（とくになし）'}\n\n（アプリで選んでいる教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}。質問がほかの教科なら、その教科として答える。どの教科の質問にも必ず答える）
 書き方: 次の見出しを使って書く（ない項目は書かない）。
 【こたえ】質問へのまっすぐな答え（問題そのものの答えは言わない）
 【覚え方のコツ】語呂合わせやイメージ
