@@ -368,7 +368,7 @@ html,body{font-family:var(--font);background:var(--bg) url("data:image/svg+xml,%
 .sub .ic{width:24px;height:24px}
 .chip{font-family:var(--font);font-weight:600;border:1.3px solid var(--inkA);border-radius:var(--hand);background:var(--card);color:var(--ink)}
 .chip.on{background:var(--focus2);color:var(--ink);border-color:var(--ink);box-shadow:2px 2px 0 var(--inkA)}
-.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 14px}
 .duo .card{margin:0}
 .mini #testLeft{font-family:var(--en);font-size:30px!important}
 .goal b{font-family:var(--en);font-size:22px}
@@ -428,6 +428,11 @@ details.fold[open]>summary{margin-bottom:10px}
       </div>
       <div class="edbar" id="edbar"><span id="edMsg">キャラを指でうごかしてね（2本指で大きさも変えられるよ）</span><button id="edMinus">－ 小さく</button><button id="edPlus">＋ 大きく</button><button id="edReset">↺ もとにもどす</button><button class="ok" id="edDone">✓ かんりょう</button></div>
     </div>
+    <details class="card fold" id="sbFold" style="margin-top:14px">
+      <summary class="sec"><span class="sh"><i class="ic" data-ic="book"></i>なにを勉強する？<em class="en">subject</em></span><small class="cur" id="sbCur"></small></summary>
+      <div class="subj" id="subj"></div>
+      <div class="subj" id="units" style="margin-top:8px"></div>
+    </details>
     <div class="duo">
     <div class="card mini" id="testCard" style="display:none">
       <div class="sec"><span class="sh"><i class="ic" data-ic="calendar"></i>テストまで<em class="en">test</em></span> <small id="testDate"></small></div>
@@ -438,11 +443,6 @@ details.fold[open]>summary{margin-bottom:10px}
       <div class="goal"><div class="bar"><i id="goalBar"></i></div><b id="goalNum">0 / 8</b></div>
     </div>
     </div>
-    <details class="card fold" id="sbFold">
-      <summary class="sec"><span class="sh"><i class="ic" data-ic="book"></i>なにを勉強する？<em class="en">subject</em></span><small class="cur" id="sbCur"></small></summary>
-      <div class="subj" id="subj"></div>
-      <div class="subj" id="units" style="margin-top:8px"></div>
-    </details>
     <details class="card fold" id="stFold">
       <summary class="sec"><span class="sh"><i class="ic" data-ic="flag"></i>ステージ<em class="en">stage</em></span><small class="cur" id="stCur"></small></summary>
       <div class="stsel" id="stsel"></div>
