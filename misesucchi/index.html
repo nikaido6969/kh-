@@ -1092,7 +1092,7 @@ let prizesReady=false,PRIZES=[],pEditing=false,gBusy=false,pending=null;
 const CAPC=['#e46a7f','#7cc36a','#f1c75a','#7aa7e0','#c79cef','#f39a7b','#3fa3a8'];
 const W={N:10,R:5,SR:2,SSR:1},RR=['N','R','SR','SSR'];
 const GOODS=Array.from({length:15},(_,i)=>'goods/g'+String(i+1).padStart(2,'0')+'.webp');
-const MINE=Array.from({length:5},(_,i)=>'mine/u'+String(i+1).padStart(2,'0')+'.webp');
+const MINE=Array.from({length:10},(_,i)=>'mine/u'+String(i+1).padStart(2,'0')+'.webp');
 idbGet('prizes').then(async v=>{PRIZES=v||[];prizesReady=true;setTimeout(()=>{fixMain();refreshChars()},0);
   // 入っているグッズ画像は毎回たしかめて、足りなければ自動で戻す（ガチャを空っぽにしない）
   {const can=src=>new Promise(r=>{const im=new Image();im.onload=()=>r(true);im.onerror=()=>r(false);im.src=src});
