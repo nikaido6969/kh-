@@ -22,6 +22,9 @@ h1 span{color:var(--green2)}
 .card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:14px;margin-bottom:14px}
 /* device */
 .device{position:relative;border-radius:28px;overflow:hidden;height:300px;box-shadow:var(--shadow);transition:background .6s}
+.scene{position:absolute;inset:0;width:100%;height:100%}
+.cloud{animation:drift 45s linear infinite}.cloud.c2{animation-duration:70s;animation-delay:-30s}
+@keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(420px)}}
 .device .ground{position:absolute;left:0;right:0;bottom:0;height:70px;background:rgba(255,255,255,.35)}
 #pet{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);width:210px;height:210px;cursor:pointer}
 #pet svg{width:100%;height:100%;overflow:visible}
@@ -124,7 +127,7 @@ nav .badge{position:absolute;margin-left:22px;background:#e46a7f;color:#fff;bord
   <!-- HOME -->
   <section class="page on" id="p-home">
     <div class="device" id="device">
-      <div class="ground"></div>
+      <div id="scene"></div><div class="ground" id="ground"></div>
       <div class="lv" id="lv">Lv.1</div>
       <div class="form" id="formName">たまご</div>
       <div class="bubble" id="bubble"></div>
@@ -332,7 +335,7 @@ function petSVG(){
   const sad=S.hunger<20||S.mood<20, happy=S.mood>70&&S.hunger>40;
   if(st==='egg'){
     return `<svg viewBox="0 0 200 200"><ellipse cx="100" cy="185" rx="50" ry="8" fill="rgba(0,0,0,.08)"/>
-    <path d="M100 30C60 30 45 100 45 125c0 35 25 58 55 58s55-23 55-58c0-25-15-95-55-95z" fill="#fffaf0" stroke="#e5dcc4" stroke-width="3"/>
+    <path d="M34 170q66 36 132 0q-6 24-66 26t-66-26z" fill="#c9a26b"/><path d="M40 176q30 10 60 4M100 182q34 2 60-8M50 186q40 8 90-2" stroke="#a8804a" stroke-width="2" fill="none"/><path d="M100 30C60 30 45 100 45 125c0 35 25 58 55 58s55-23 55-58c0-25-15-95-55-95z" fill="#fffaf0" stroke="#e5dcc4" stroke-width="3"/>
     <path d="M52 120l15-10 15 10 18-12 18 12 15-10 15 10" fill="none" stroke="#9fd38c" stroke-width="6" stroke-linecap="round"/>
     <circle cx="80" cy="80" r="7" fill="#c9e8bb"/><circle cx="120" cy="150" r="9" fill="#c9e8bb"/><circle cx="125" cy="75" r="5" fill="#f6c2cb"/>
     ${S.study+S.exer>=5?'<path d="M85 55l8 8-6 6 8 8" fill="none" stroke="#bfb397" stroke-width="2.5" stroke-linecap="round"/>':''}</svg>`;
@@ -453,6 +456,38 @@ function chibi(c,sc,sad,happy,acc,st){
    ${acc}${sad?'<text x="140" y="84" font-size="20">💧</text>':''}
   </g></svg>`;
 }
+
+// ===== 家と庭 =====
+function jstHour(){return +new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo',hour:'numeric',hour12:false})%24}
+function timeZoneKey(){const h=jstHour();return h>=19||h<5?'night':h>=16?'eve':'day'}
+const SKY={day:'linear-gradient(#cdeaf8,#eef7e4)',eve:'linear-gradient(#f7bf98,#f6dcc8)',night:'linear-gradient(#2c3560,#5a6494)'};
+function sceneSVG(t){
+  const n=t==='night';
+  const sky=n?'<circle cx="300" cy="44" r="16" fill="#fff6c9"/><circle cx="292" cy="40" r="14" fill="#2c3560"/>'+[[40,30],[120,20],[200,50],[250,24],[170,18],[80,60]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.6" fill="#fff"/>`).join(''):`<circle cx="300" cy="46" r="18" fill="${t==='eve'?'#f39a6b':'#ffd96b'}"/>`;
+  const fence=Array.from({length:12},(_,i)=>`<rect x="${112+i*16}" y="206" width="8" height="28" rx="3" fill="#fffaf0" stroke="#e2d6bb"/>`).join('');
+  const fl=[[120,262,'#f3a6b3'],[140,276,'#ffd96b'],[236,268,'#f3a6b3'],[256,282,'#c7a6e0'],[28,270,'#ffd96b'],[60,282,'#f3a6b3'],[300,276,'#ffd96b'],[336,262,'#f3a6b3']].map(([x,y,c])=>`<path d="M${x} ${y}v12" stroke="#5fae4e" stroke-width="2"/><circle cx="${x}" cy="${y}" r="5" fill="${c}"/><circle cx="${x}" cy="${y}" r="2" fill="#fff6c9"/>`).join('');
+  return `<svg class="scene" viewBox="0 0 360 300" preserveAspectRatio="xMidYMax slice">
+  ${sky}
+  <g class="cloud" opacity="${n?.25:.9}"><ellipse cx="0" cy="70" rx="28" ry="12" fill="#fff"/><ellipse cx="18" cy="62" rx="18" ry="12" fill="#fff"/></g>
+  <g class="cloud c2" opacity="${n?.2:.8}"><ellipse cx="0" cy="100" rx="22" ry="9" fill="#fff"/><ellipse cx="12" cy="94" rx="14" ry="9" fill="#fff"/></g>
+  <path d="M0 222q90-46 180-8t180-14v100H0z" fill="${n?'#4d6b58':'#bfe3a6'}"/>
+  <rect y="232" width="360" height="68" fill="${n?'#5d8a5f':'#9fd38c'}"/>
+  <path d="M150 300q18-40 26-68h8q8 28 26 68z" fill="${n?'#8f8a72':'#f1e6c8'}"/>
+  ${fence}<rect x="110" y="212" width="194" height="5" fill="#fffaf0"/><rect x="110" y="224" width="194" height="5" fill="#fffaf0"/>
+  <rect x="18" y="140" width="10" height="22" fill="#b58a6a"/>
+  <rect x="12" y="150" width="88" height="84" rx="4" fill="#fff6e6" stroke="#d9c7a2" stroke-width="2"/>
+  <path d="M4 154L56 106 108 154z" fill="#e46a7f" stroke="#c94a64" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="56" cy="136" r="7" fill="${n?'#ffe58a':'#cdeaf8'}" stroke="#d9c7a2" stroke-width="2"/>
+  <rect x="20" y="166" width="20" height="20" rx="3" fill="${n?'#ffe58a':'#cdeaf8'}" stroke="#d9c7a2" stroke-width="2"/><path d="M30 166v20M20 176h20" stroke="#d9c7a2" stroke-width="2"/>
+  <rect x="72" y="166" width="20" height="20" rx="3" fill="${n?'#ffe58a':'#cdeaf8'}" stroke="#d9c7a2" stroke-width="2"/><path d="M82 166v20M72 176h20" stroke="#d9c7a2" stroke-width="2"/>
+  <rect x="45" y="196" width="22" height="38" rx="10" fill="#a8774a"/><circle cx="62" cy="216" r="2" fill="#f1c75a"/>
+  <rect x="316" y="168" width="12" height="66" rx="3" fill="#a8774a"/>
+  <circle cx="322" cy="146" r="30" fill="#7cc36a"/><circle cx="300" cy="166" r="20" fill="#6db35c"/><circle cx="344" cy="166" r="20" fill="#6db35c"/>
+  <circle cx="310" cy="140" r="5" fill="#b6e07a" stroke="#5fae4e"/><circle cx="334" cy="152" r="5" fill="#b6e07a" stroke="#5fae4e"/><circle cx="318" cy="166" r="5" fill="#e2453c"/>
+  ${fl}
+  </svg>`;
+}
+let sceneKey='';
 // ===== UI =====
 function setBar(b,v,t,max=100){$(b+'b').style.width=Math.min(100,v/max*100)+'%';$(b+'v').textContent=t}
 function render(){
@@ -462,7 +497,10 @@ function render(){
   $('lv').textContent='Lv.'+(1+Math.floor(total()/30));
   $('formName').textContent=(st.key==='adult'||st.key==='legend')?FORMS[S.form]:st.name;
   $('petInner').innerHTML=petSVG();
-  $('device').style.background=S.eq.bg?ITEMS[S.eq.bg].bg:BG_DEFAULT;
+  const showScene=!S.eq.bg||S.eq.bg==='bg_park',tz=timeZoneKey(),key=showScene?tz:'';
+  if(key!==sceneKey){sceneKey=key;$('scene').innerHTML=showScene?sceneSVG(tz):''}
+  $('ground').style.display=showScene?'none':'';
+  $('device').style.background=showScene?SKY[tz]:ITEMS[S.eq.bg].bg;
   setBar('h',S.hunger,Math.round(S.hunger));
   setBar('m',S.mood,Math.round(S.mood));
   setBar('s',S.study%600,S.study+'分',600);
