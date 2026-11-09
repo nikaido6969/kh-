@@ -117,6 +117,14 @@ nav .badge{position:absolute;margin-left:22px;background:#e46a7f;color:#fff;bord
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-80px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:700;transition:.35s;z-index:12;white-space:nowrap}
 .toast.on{transform:translate(-50%,0)}
 .muted{color:var(--sub);font-size:12px;text-align:center;margin:8px 0 0}
+.ibtn{width:58px;height:58px;border-radius:14px;border:2px solid var(--line);background:#fff;padding:3px;position:relative}.ibtn.on{border-color:var(--green);box-shadow:0 0 0 2px var(--green)}.ibtn img{width:100%;height:100%;object-fit:contain;pointer-events:none}.ibtn span{position:absolute;top:-7px;right:-7px;background:#c94a64;color:#fff;border-radius:99px;width:20px;height:20px;font-size:13px;line-height:20px;text-align:center}
+#bobber,#petInner{height:100%}
+.pwrap{position:relative;height:100%;transform-origin:50% 100%}
+.pimg{width:100%;height:100%;object-fit:contain;object-position:50% 100%;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite;
+ filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 8px 10px rgba(60,40,20,.25))}
+.pimg.sad{filter:grayscale(.55) brightness(.95) drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 8px 10px rgba(60,40,20,.25))}
+.pshadow{position:absolute;left:50%;bottom:-4px;width:62%;height:14px;transform:translateX(-50%);background:radial-gradient(rgba(0,0,0,.22),transparent 70%);border-radius:50%}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.025,.975)}}
 .name{border:0;background:transparent;font:inherit;font-weight:800;font-size:12px;width:90px;text-align:right;color:var(--ink)}
 </style>
 </head>
@@ -204,7 +212,7 @@ nav .badge{position:absolute;margin-left:22px;background:#e46a7f;color:#fff;bord
       <div class="week" id="week"></div>
     </div>
     <div class="card">
-      <div class="sec">🎭 キャラえらび <small>うまれた後に反映</small></div>
+      <div class="sec">🎭 キャラえらび <small>iPhoneの画像をキャラにできるよ</small></div>
       <div class="quick" id="charas" style="justify-content:flex-start;margin:0"></div>
     </div>
     <div class="card">
@@ -341,6 +349,9 @@ function petSVG(){
     ${S.study+S.exer>=5?'<path d="M85 55l8 8-6 6 8 8" fill="none" stroke="#bfb397" stroke-width="2.5" stroke-linecap="round"/>':''}</svg>`;
   }
   const sc={baby:.62,kid:.78,teen:.9,adult:1,legend:1.05}[st];
+  if(S.chara&&S.chara.startsWith('img')){const im=IMGS[+S.chara.slice(3)];
+    if(im)return `<div class="pwrap" style="transform:scale(${sc})"><div class="pshadow"></div><img class="pimg ${sad?'sad':''}" src="${im}" alt="">${sad?'<div style="position:absolute;right:6px;top:10px;font-size:24px">💧</div>':''}${happy&&!sad?'<div style="position:absolute;left:4px;top:14px;font-size:20px">✨</div>':''}</div>`;}
+  if(S.chara&&!S.chara.startsWith('img')&&S.chara!=='apple')S.chara='apple';
   const body=st==='legend'?'#a8d86a':'#8fd06f', dark='#5fae4e';
   const eq=S.eq, f=S.form;
   // 目・口
@@ -393,7 +404,39 @@ const HATS={
  maple:'<text x="122" y="74" font-size="30">🍁</text>',
 };
 
-const CHARAS={apple:'🍏 りんご',a:'🩶 シルバーっち',b:'🩷 ピンクっち',c:'🌈 レインボーっち',d:'🎅 ブラウンっち',e:'🎄 ブラックっち',f:'⭐ ブロンドっち'};
+const CHARAS={apple:'🍏 りんご'};
+const IKEY='misesucchi_imgs';let IMGS=[];try{IMGS=JSON.parse(localStorage.getItem(IKEY)||'[]')}catch(e){}
+// 背景を自動で消して、キャラ部分だけ切り抜く
+function cutout(c){
+  const x=c.getContext('2d'),W=c.width,H=c.height,N=W*H,d=x.getImageData(0,0,W,H),p=d.data;
+  if([3,(W-1)*4+3].some(i=>p[i]<20))return; // すでに透過あり
+  const edge=[];for(let i=0;i<W;i++)edge.push(i,(H-1)*W+i);for(let j=0;j<H;j++)edge.push(j*W,j*W+W-1);
+  let r=0,g=0,b=0;edge.forEach(k=>{r+=p[k*4];g+=p[k*4+1];b+=p[k*4+2]});r/=edge.length;g/=edge.length;b/=edge.length;
+  const tol=40,C=new Uint8Array(N);
+  for(let k=0;k<N;k++){const o=k*4,dr=Math.abs(p[o]-r),dg=Math.abs(p[o+1]-g),db=Math.abs(p[o+2]-b);C[k]=(dr+dg+db<tol*3&&Math.max(dr,dg,db)<tol*1.4)?1:0}
+  const nb=(k,f)=>{const i=k%W,j=(k-i)/W;if(i>0)f(k-1);if(i<W-1)f(k+1);if(j>0)f(k-W);if(j<H-1)f(k+W)};
+  // すき間からの「もれ」を防ぐため、いったん細らせてから塗る
+  const R=2,E=new Uint8Array(N);
+  for(let j=0;j<H;j++)for(let i=0;i<W;i++){let ok=1;for(let dj=-R;dj<=R&&ok;dj++)for(let di=-R;di<=R;di++){const a=i+di,bb=j+dj;if(a<0||bb<0||a>=W||bb>=H)continue;if(!C[bb*W+a]){ok=0;break}}E[j*W+i]=ok}
+  const flood=(mask,seeds)=>{const v=new Uint8Array(N),st=[];seeds.forEach(k=>{if(mask[k]&&!v[k]){v[k]=1;st.push(k)}});while(st.length){const k=st.pop();nb(k,q=>{if(mask[q]&&!v[q]){v[q]=1;st.push(q)}})}return v};
+  let F=flood(E,edge);
+  // 元の太さに戻す
+  for(let t=0;t<R+1;t++){const F2=F.slice();for(let k=0;k<N;k++)if(F[k])nb(k,q=>{if(C[q])F2[q]=1});F=F2}
+  // 一番大きいかたまりだけ残す（文字やとなりの絵を消す）
+  const lab=new Int32Array(N);let best=0,bestN=0,id=0;
+  for(let k=0;k<N;k++){if(F[k]||lab[k])continue;id++;let n=0;const st=[k];lab[k]=id;while(st.length){const q=st.pop();n++;nb(q,z=>{if(!F[z]&&!lab[z]){lab[z]=id;st.push(z)}})}if(n>bestN){bestN=n;best=id}}
+  if(bestN<N*.04)return;
+  const notL=new Uint8Array(N);for(let k=0;k<N;k++)notL[k]=lab[k]===best?0:1;
+  const T=flood(notL,edge); // 外側だけ透明に（中の穴は残す）
+  let cnt=0;for(let k=0;k<N;k++)if(T[k]){p[k*4+3]=0;cnt++}
+  if(cnt<N*.03||cnt>N*.95)return;
+  for(let k=0;k<N;k++){if(T[k])continue;let e=0;nb(k,q=>{if(T[q])e=1});if(e)p[k*4+3]=160}
+  x.putImageData(d,0,0);
+  let x0=W,y0=H,x1=0,y1=0;for(let j=0;j<H;j++)for(let i=0;i<W;i++)if(p[(j*W+i)*4+3]>0){if(i<x0)x0=i;if(i>x1)x1=i;if(j<y0)y0=j;if(j>y1)y1=j}
+  const pad=6,w=x1-x0+1+pad*2,h=y1-y0+1+pad*2,t=document.createElement('canvas');t.width=w;t.height=h;t.getContext('2d').drawImage(c,x0-pad,y0-pad,w,h,0,0,w,h);
+  c.width=w;c.height=h;x.drawImage(t,0,0);
+}
+function saveImgs(){try{localStorage.setItem(IKEY,JSON.stringify(IMGS));return true}catch(e){return false}}
 function chibi(c,sc,sad,happy,acc,st){
   const skin='#ffe3d1',ink='#3a2a2a';
   const eyesN=`<g class="eye"><ellipse cx="78" cy="110" rx="8" ry="11" fill="${ink}"/><circle cx="81" cy="106" r="3.2" fill="#fff"/><circle cx="76" cy="114" r="1.5" fill="#fff"/></g><g class="eye"><ellipse cx="122" cy="110" rx="8" ry="11" fill="${ink}"/><circle cx="125" cy="106" r="3.2" fill="#fff"/><circle cx="120" cy="114" r="1.5" fill="#fff"/></g>`;
@@ -616,13 +659,24 @@ function renderRec(){
   $('k1').textContent=S.study;$('k2').textContent=S.exer;
   $('k3').textContent=Math.floor((Date.now()-S.born)/864e5)+1;
   $('petName').value=S.name;
-  $('charas').innerHTML=Object.entries(CHARAS).map(([k,v])=>`<button class="chip ${(S.chara||'apple')===k?'on':''}" data-c="${k}">${v}</button>`).join('');
+  $('charas').innerHTML=Object.entries(CHARAS).map(([k,v])=>`<button class="chip ${(S.chara||'apple')===k?'on':''}" data-c="${k}">${v}</button>`).join('')+IMGS.map((u,i)=>`<button class="ibtn ${S.chara==='img'+i?'on':''}" data-c="img${i}"><img src="${u}"><span data-del="${i}">×</span></button>`).join('')+(IMGS.length<8?'<label class="chip">📷 画像をついか<input type="file" accept="image/*" id="upl" hidden></label>':'');
   const days=[];for(let i=6;i>=0;i--)days.push(jstDate(Date.now()-i*864e5));
   const mx=Math.max(30,...days.map(d=>{const v=S.days[d]||{s:0,e:0};return v.s+v.e}));
   $('week').innerHTML=days.map(d=>{const v=S.days[d]||{s:0,e:0},hgt=110;return `<div class="day"><div style="font-size:10px">${v.s+v.e||''}</div><div class="stack" style="height:${Math.max(4,(v.s+v.e)/mx*hgt)}px"><i style="height:${v.s/(v.s+v.e||1)*100}%;background:#5b86c7"></i><i style="height:${v.e/(v.s+v.e||1)*100}%;background:#e07b4f"></i></div>${+d.slice(8)}日</div>`}).join('');
   $('logs').innerHTML=S.logs.slice(0,20).map(l=>`<div class="log"><span>${l.type==='study'?'📚 べんきょう':'🏃 うんどう'}</span><span>${l.min}分 ・ ${jstTime(l.t)}</span></div>`).join('')||'<p class="muted">まだきろくがないよ</p>';
 }
-$('charas').onclick=e=>{const c=e.target.dataset.c;if(!c)return;S.chara=c;save();renderRec();render();toast(CHARAS[c]+' にへんしん！')};
+$('charas').onclick=e=>{
+  const d=e.target.dataset.del;
+  if(d!==undefined){e.preventDefault();if(!confirm('この画像をけす？'))return;const i=+d;IMGS.splice(i,1);saveImgs();
+    if(S.chara==='img'+i)S.chara='apple';else if(S.chara&&S.chara.startsWith('img')&&+S.chara.slice(3)>i)S.chara='img'+(+S.chara.slice(3)-1);save();renderRec();render();return}
+  const b=e.target.closest('[data-c]');if(!b)return;S.chara=b.dataset.c;save();renderRec();render();toast(S.stage===0?'うまれたら この姿になるよ🥚':'へんしん！✨')};
+$('charas').onchange=e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
+    const m=480,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+    c.getContext('2d').drawImage(im,0,0,c.width,c.height);cutout(c);let u=c.toDataURL('image/webp',.85);if(!u.startsWith('data:image/webp'))u=c.toDataURL('image/png');
+    IMGS.push(u);if(!saveImgs()){IMGS.pop();toast('容量がいっぱい。画像をへらしてね');return}
+    S.chara='img'+(IMGS.length-1);save();renderRec();render();toast('📷 キャラにしたよ！');};im.src=r.result};r.readAsDataURL(f)};
 $('petName').onchange=e=>{S.name=e.target.value||'ミセスッち';save()};
 $('reset').onclick=()=>{if(confirm('ほんとうにリセットする？（もとにもどせません）')){localStorage.removeItem(KEY);location.reload()}};
 // ===== 演出 =====
