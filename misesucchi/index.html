@@ -543,7 +543,6 @@ details.fold[open]>summary{margin-bottom:10px}
       <div class="set col">もじのスタイル<div class="stsel" id="fnt"></div></div>
       <div class="set col">じぶんの教科<div class="stsel" id="mySubj"></div><div class="srch"><input id="msIn" maxlength="8" placeholder="例：塾の宿題、英検"><button id="msAdd">ついか</button></div></div>
       <div class="set col">キャラのおうえんセリフ<div class="stsel" id="myCheer"></div><div class="srch"><input id="mcIn" maxlength="20" placeholder="例：いけるいける！"><button id="mcAdd">ついか</button></div></div>
-      <div class="set col">データのバックアップ<div class="stsel"><button class="chip" id="bkOut">コピーする</button><button class="chip" id="bkIn">はりつけて復元</button></div><small class="muted" style="margin:0">きろく・設定をまとめて保存できます（画像はふくみません）</small></div>
     </div>
     <div class="card">
       <div class="sec"><span class="sh"><i class="ic" data-ic="sliders"></i>タイマー<em class="en">timer</em></span></div>
@@ -1388,8 +1387,6 @@ $('msAdd').onclick=()=>{const v=$('msIn').value.trim();if(!v)return;if(subjList(
 $('mySubj').onclick=async e=>{const i=e.target.dataset.ms;if(i===undefined)return;if(!(await ask('この教科をけす？（きろくは残ります）')))return;S.mySubj.splice(+i,1);save();drawLook();drawSubj()};
 $('mcAdd').onclick=()=>{const v=$('mcIn').value.trim();if(!v)return;(S.cheers=S.cheers||[]).push(v);$('mcIn').value='';save();applyLook();drawLook();say(v)};
 $('myCheer').onclick=e=>{const i=e.target.dataset.mc;if(i===undefined)return;S.cheers.splice(+i,1);save();applyLook();drawLook()};
-$('bkOut').onclick=async()=>{const t=JSON.stringify(S);try{await navigator.clipboard.writeText(t);toast('📋 コピーしたよ。メモなどに貼って保存してね')}catch(e){await ask('下の文字を全部コピーして保存してね',true).catch(()=>{});}};
-$('bkIn').onclick=async()=>{const t=await ask('バックアップの文字を貼りつけてね',true);if(!t)return;try{const o=JSON.parse(t);if(!o||typeof o!=='object'||!o.set)throw 0;S=Object.assign(fresh(),o);save();applyLook();drawLook();drawSubj();refreshChars();toast('✅ 復元したよ')}catch(e){toast('読みこめなかった。全部貼れているか確認してね')}};
 // ===== 演出 =====
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
@@ -1420,7 +1417,8 @@ setInterval(()=>{
   if(S.run&&++talkT%240===0)say(pick(S.mode==='focus'?TALK.focus:TALK.rest));
   draw();
 },250);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){dayCheck();drawTest();draw()}});
+addEventListener('pagehide',()=>save());
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();if(!document.hidden){dayCheck();drawTest();draw()}});
 paintIcons();applyLook();dayCheck();drawSubj();drawTest();drawPick();draw();applyLayout();fetchWx();
 setTimeout(()=>say(S.run?'おかえり！つづいてるよ':pick(TALK.idle)),500);
 if(!S.onboarded){if(!(S.tickets>0))S.tickets=1;save();setTimeout(()=>{modal('🎰','ようこそ ミセスッちへ！','まずはガチャをまわして、いっしょにがんばる<b>キャラ</b>を決めよう！');onboardGo='reward'},700)}
