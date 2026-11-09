@@ -201,6 +201,10 @@ nav .badge{position:absolute;margin-left:22px;background:#e46a7f;color:#fff;bord
       <div class="week" id="week"></div>
     </div>
     <div class="card">
+      <div class="sec">🎭 キャラえらび <small>うまれた後に反映</small></div>
+      <div class="quick" id="charas" style="justify-content:flex-start;margin:0"></div>
+    </div>
+    <div class="card">
       <div class="sec">🗓 りれき</div>
       <div id="logs"></div>
       <button class="chip" id="reset" style="margin-top:14px;width:100%;color:#c94a64">データをリセット</button>
@@ -352,6 +356,7 @@ function petSVG(){
   const HD={mic:'<g transform="translate(160 120) rotate(20)"><rect x="-4" y="0" width="8" height="34" rx="4" fill="#555"/><circle r="11" fill="#bbb"/></g>',
    guitar:'<g transform="translate(150 150) rotate(-35)"><rect x="-3" y="-60" width="6" height="50" fill="#8a5a2b"/><ellipse cx="0" cy="0" rx="16" ry="20" fill="#e07b4f"/><circle cx="0" cy="-2" r="5" fill="#3b3a33"/></g>',
    wand:'<g transform="translate(160 130) rotate(25)"><rect x="-2" y="-10" width="4" height="40" fill="#c79cef"/><text x="-12" y="-6" font-size="22">⭐</text></g>'};
+  if(S.chara&&S.chara!=='apple')return chibi(S.chara,sc,sad,happy,(eq.head?H[eq.head]:'')+(eq.face?F[eq.face]:'')+(eq.hand?HD[eq.hand]:''),st);
   return `<svg viewBox="0 0 200 200"><defs><radialGradient id="shine" cx=".35" cy=".3" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></radialGradient><pattern id="mesh" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0l4 4" stroke="#888"/></pattern></defs>
   <ellipse cx="100" cy="190" rx="${55*sc}" ry="8" fill="rgba(0,0,0,.08)"/>
   <g transform="translate(100 190) scale(${sc}) translate(-100 -190)">
@@ -364,6 +369,49 @@ function petSVG(){
    <path d="M42 140q-14 4-10 18" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M158 140q14 4 10 18" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
    ${extra}${eq.head?H[eq.head]:''}${eq.face?F[eq.face]:''}${eq.hand?HD[eq.hand]:''}
    ${sad?'<text x="140" y="80" font-size="20">💧</text>':''}
+  </g></svg>`;
+}
+
+// ===== ミニキャラ =====
+const CHARAS={apple:'🍏 りんご',a:'🩶 シルバーっち',b:'🩷 ピンクっち',c:'🌈 レインボーっち'};
+function chibi(c,sc,sad,happy,acc,st){
+  const skin='#ffe3d1',ink='#3a2a2a';
+  const eyesN=`<g class="eye"><ellipse cx="78" cy="110" rx="8" ry="11" fill="${ink}"/><circle cx="81" cy="106" r="3.2" fill="#fff"/><circle cx="76" cy="114" r="1.5" fill="#fff"/></g><g class="eye"><ellipse cx="122" cy="110" rx="8" ry="11" fill="${ink}"/><circle cx="125" cy="106" r="3.2" fill="#fff"/><circle cx="120" cy="114" r="1.5" fill="#fff"/></g>`;
+  const eyesH=`<path d="M68 112q10-12 20 0M112 112q10-12 20 0" fill="none" stroke="${ink}" stroke-width="5" stroke-linecap="round"/>`;
+  const mSmile='<path d="M88 128q12 16 24 0z" fill="#e8667c" stroke="#3a2a2a" stroke-width="3" stroke-linejoin="round"/>';
+  const mShout='<path d="M84 126q16 30 32 0q-16 4-32 0z" fill="#c0394f" stroke="#3a2a2a" stroke-width="3" stroke-linejoin="round"/><path d="M88 128h24" stroke="#fff" stroke-width="3"/>';
+  const mLaugh='<path d="M82 124q18 30 36 0z" fill="#e8667c" stroke="#3a2a2a" stroke-width="3" stroke-linejoin="round"/><path d="M90 136q10 6 20 0" fill="#ff9fb0"/>';
+  const mSad='<path d="M90 136q10-8 20 0" fill="none" stroke="#3a2a2a" stroke-width="4" stroke-linecap="round"/>';
+  const C={
+   a:{defs:'<linearGradient id="hA" x1="0" x2="1"><stop offset=".5" stop-color="#e4e1ea"/><stop offset=".5" stop-color="#26262b"/></linearGradient>',
+      back:'<path d="M40 104q-6-66 60-68q66 2 60 68v44q-10 8-20 0v-40H60v40q-10 8-20 0z" fill="url(#hA)"/>',
+      front:'<path d="M44 100q2-58 56-60q54 2 56 60q-14-6-22-24q-14 14-34 10q-20 6-36-8q-8 16-20 22z" fill="url(#hA)"/>',
+      cloth:'#ffffff',cs:'#d9d2c3',extra:'<path d="M86 150l14 12 14-12" fill="#fff" stroke="#d9d2c3" stroke-width="3" stroke-linejoin="round"/>',
+      eyes:eyesN,mouth:mSmile},
+   b:{defs:'',
+      back:'<path d="M42 110q-6-60 58-64q64 4 58 64l-6 20H48z" fill="#1d1d22"/>',
+      front:'<path d="M40 96L46 44 64 64 70 24 90 52 104 14 116 50 136 24 138 60 160 44 160 98Q132 70 100 74 68 70 40 96z" fill="#ff4fa3" stroke="#d93a86" stroke-width="2" stroke-linejoin="round"/><path d="M42 98l4-30 12 14zM158 98l-4-30-12 14z" fill="#1d1d22"/>',
+      cloth:'#1f2a4a',cs:'#141c33',extra:'<path d="M70 168h60M68 176h64" stroke="#f5d33a" stroke-width="4"/><path d="M90 150l10 14 10-14" fill="#fff"/>',
+      eyes:eyesN+'<path d="M64 94l24 8M136 94l-24 8" stroke="#1d1d22" stroke-width="5" stroke-linecap="round"/>',mouth:mShout},
+   c:{defs:'<linearGradient id="hC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc2dc"/><stop offset=".35" stop-color="#fff2a8"/><stop offset=".65" stop-color="#b8f0d8"/><stop offset="1" stop-color="#cdb8ff"/></linearGradient>',
+      back:'<path d="M34 112q-12-74 66-78q78 4 66 78q8 30-8 52q-12-20-8-44H50q4 24-8 44q-16-22-8-52z" fill="url(#hC)"/>',
+      front:'<path d="M42 100q4-58 58-60q54 2 58 60q-10-16-20-8q-8-18-20-8q-10-16-18-4q-10-14-20 0q-10-12-20 4q-10-8-18 16z" fill="url(#hC)"/>',
+      cloth:'#5fb07a',cs:'#3f8a5a',extra:'<g transform="translate(120 162)"><circle r="7" fill="#f7a9c4"/><circle cx="-7" cy="-3" r="5" fill="#f7a9c4"/><circle cx="6" cy="-6" r="5" fill="#f7a9c4"/><circle r="3" fill="#e46a9a"/></g>',
+      eyes:eyesH,mouth:mLaugh},
+  }[c];
+  const eyes=sad?eyesN:C.eyes, mouth=sad?mSad:C.mouth;
+  return `<svg viewBox="0 0 200 200"><defs>${C.defs}</defs>
+  <ellipse cx="100" cy="190" rx="${55*sc}" ry="8" fill="rgba(0,0,0,.08)"/>
+  <g transform="translate(100 190) scale(${sc}) translate(-100 -190)">
+   ${C.back}
+   <path d="M62 188q-2-40 38-40t38 40z" fill="${C.cloth}" stroke="${C.cs}" stroke-width="3"/>
+   <path d="M66 162q-14 6-12 20M134 162q14 6 12 20" stroke="${C.cloth}" stroke-width="10" fill="none" stroke-linecap="round"/>
+   ${C.extra}
+   <circle cx="100" cy="104" r="54" fill="${skin}"/>
+   ${eyes}<ellipse cx="66" cy="126" rx="9" ry="5" fill="#f3a6b3" opacity=".8"/><ellipse cx="134" cy="126" rx="9" ry="5" fill="#f3a6b3" opacity=".8"/>
+   ${mouth}${C.front}
+   ${st==='legend'?'<text x="150" y="60" font-size="18">✨</text>':''}
+   ${acc}${sad?'<text x="140" y="84" font-size="20">💧</text>':''}
   </g></svg>`;
 }
 // ===== UI =====
@@ -491,11 +539,13 @@ function renderRec(){
   $('k1').textContent=S.study;$('k2').textContent=S.exer;
   $('k3').textContent=Math.floor((Date.now()-S.born)/864e5)+1;
   $('petName').value=S.name;
+  $('charas').innerHTML=Object.entries(CHARAS).map(([k,v])=>`<button class="chip ${(S.chara||'apple')===k?'on':''}" data-c="${k}">${v}</button>`).join('');
   const days=[];for(let i=6;i>=0;i--)days.push(jstDate(Date.now()-i*864e5));
   const mx=Math.max(30,...days.map(d=>{const v=S.days[d]||{s:0,e:0};return v.s+v.e}));
   $('week').innerHTML=days.map(d=>{const v=S.days[d]||{s:0,e:0},hgt=110;return `<div class="day"><div style="font-size:10px">${v.s+v.e||''}</div><div class="stack" style="height:${Math.max(4,(v.s+v.e)/mx*hgt)}px"><i style="height:${v.s/(v.s+v.e||1)*100}%;background:#5b86c7"></i><i style="height:${v.e/(v.s+v.e||1)*100}%;background:#e07b4f"></i></div>${+d.slice(8)}日</div>`}).join('');
   $('logs').innerHTML=S.logs.slice(0,20).map(l=>`<div class="log"><span>${l.type==='study'?'📚 べんきょう':'🏃 うんどう'}</span><span>${l.min}分 ・ ${jstTime(l.t)}</span></div>`).join('')||'<p class="muted">まだきろくがないよ</p>';
 }
+$('charas').onclick=e=>{const c=e.target.dataset.c;if(!c)return;S.chara=c;save();renderRec();render();toast(CHARAS[c]+' にへんしん！')};
 $('petName').onchange=e=>{S.name=e.target.value||'ミセスッち';save()};
 $('reset').onclick=()=>{if(confirm('ほんとうにリセットする？（もとにもどせません）')){localStorage.removeItem(KEY);location.reload()}};
 // ===== 演出 =====
