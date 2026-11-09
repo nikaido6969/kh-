@@ -33,7 +33,7 @@ h1 span{color:var(--focus)}
 .ring circle{fill:none;stroke-width:14}
 .ring .bgc{stroke:rgba(255,255,255,.75)}
 .ring .fg{stroke-linecap:round;transition:stroke-dashoffset .3s linear,stroke .6s}
-.chara{position:absolute;left:50%;top:44px;width:150px;height:150px;transform:translateX(-50%);cursor:pointer}
+.chara{position:absolute;left:50%;top:36px;width:136px;height:136px;transform:translateX(-50%);cursor:pointer}
 .chara .in{width:100%;height:100%;transform-origin:50% 100%}
 .chara svg,.chara img{width:100%;height:100%;object-fit:contain;object-position:50% 100%}
 .chara img{filter:drop-shadow(2.5px 0 0 #fff) drop-shadow(-2.5px 0 0 #fff) drop-shadow(0 2.5px 0 #fff) drop-shadow(0 -2.5px 0 #fff) drop-shadow(0 8px 10px rgba(60,40,20,.22))}
@@ -44,7 +44,7 @@ h1 span{color:var(--focus)}
 .jump{animation:jump .7s ease}
 @keyframes jump{30%{transform:translateY(-40px) scale(.95,1.06)}60%{transform:translateY(0) scale(1.08,.92)}}
 .prop{position:absolute;font-size:30px;right:-6px;bottom:6px;animation:breathe 2s infinite}
-.time{position:absolute;left:0;right:0;bottom:46px;text-align:center;font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.time{position:absolute;left:0;right:0;bottom:36px;text-align:center;font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.02em}
 .time small{display:block;font-size:12px;color:var(--sub);font-weight:700;letter-spacing:0}
 .bubble{position:absolute;left:50%;top:12px;transform:translateX(-50%) scale(.85);background:#fff;padding:7px 14px;border-radius:16px;font-size:13px;font-weight:800;opacity:0;transition:.3s;white-space:nowrap;box-shadow:var(--shadow);z-index:2}
 .bubble.show{opacity:1;transform:translateX(-50%) scale(1)}
@@ -126,6 +126,53 @@ h1 span{color:var(--focus)}
 .photo img{height:48px;border-radius:8px}
 .dots::after{content:'…';animation:dots 1s steps(3) infinite}
 @keyframes dots{0%{content:'.'}50%{content:'..'}100%{content:'...'}}
+.fx{position:absolute;font-size:26px;pointer-events:none;z-index:1}
+.f-pan{right:-22px;bottom:18px;animation:flip 1.2s ease-in-out infinite}
+@keyframes flip{0%,100%{transform:rotate(0)}30%{transform:translateY(-8px) rotate(-22deg)}60%{transform:rotate(8deg)}}
+.f-rise{animation:rise 2s ease-out infinite}.f-rise.d2{animation-delay:1s}
+@keyframes rise{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(-55px);opacity:0}}
+.f-bite{left:-18px;top:62px;animation:bite 1.4s ease-in-out infinite}
+@keyframes bite{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-8px) scale(.8)}}
+.f-sweep{left:-24px;bottom:-6px;transform-origin:50% 10%;animation:sweep .8s ease-in-out infinite alternate}
+@keyframes sweep{from{transform:rotate(-28deg)}to{transform:rotate(22deg)}}
+.f-fall{animation:fall2 1s linear infinite}.f-fall.d2{animation-delay:.5s}
+@keyframes fall2{0%{transform:translateY(-12px);opacity:0}30%{opacity:1}100%{transform:translateY(30px);opacity:0}}
+.f-strum{right:-20px;bottom:22px;animation:strum .35s ease-in-out infinite alternate}
+@keyframes strum{to{transform:rotate(-14deg) translateY(2px)}}
+.f-pop{animation:pop2 1.4s ease-in-out infinite}
+@keyframes pop2{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+.a-cook,.a-clean{animation:sway 1s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+.a-snack,.a-juice{animation:chew .7s ease-in-out infinite}
+@keyframes chew{0%,100%{transform:scale(1,1)}50%{transform:scale(1.04,.96)}}
+.a-pushup{animation:pushup 1.3s ease-in-out infinite}
+@keyframes pushup{0%,100%{transform:translate(-4px,-6px) rotate(-76deg) scale(.78)}50%{transform:translate(-4px,-20px) rotate(-68deg) scale(.78)}}
+.a-gym{animation:bend 1.6s ease-in-out infinite}
+@keyframes bend{0%,100%{transform:rotate(-15deg)}25%{transform:translateY(-10px) rotate(0)}50%{transform:rotate(15deg)}75%{transform:translateY(-10px) rotate(0)}}
+.a-jump{animation:hop .55s ease-in-out infinite}
+.a-water{animation:tilt 2s ease-in-out infinite}
+@keyframes tilt{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}
+.a-read{animation:breathe 3s ease-in-out infinite}
+.a-guitar{animation:groove .7s ease-in-out infinite}
+@keyframes groove{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+.a-sleep{animation:snooze 4s ease-in-out infinite;opacity:.92}
+@keyframes snooze{0%,100%{transform:rotate(-9deg) scale(1,1)}50%{transform:rotate(-9deg) scale(1.03,.97)}}
+.a-stretch{animation:stretch 2.2s ease-in-out infinite}
+@keyframes stretch{0%,100%{transform:scale(1,1)}50%{transform:scale(.94,1.1)}}
+.act{display:inline-block;margin-top:4px;background:rgba(255,255,255,.85);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:800;color:var(--ink)}
+.cpick{display:flex;gap:8px;overflow-x:auto;padding:4px 2px;scrollbar-width:none}.cpick::-webkit-scrollbar{display:none}
+.cpick .cb{width:60px;height:60px;flex:none}
+.kbr{border:1px solid var(--line);border-radius:16px;background:#fff;margin-top:8px;overflow:hidden}
+.kbr summary{list-style:none;padding:10px 12px;font-size:14px;font-weight:800;display:flex;justify-content:space-between;cursor:pointer}
+.kbr summary::-webkit-details-marker{display:none}
+.kbr summary::after{content:'＋';color:var(--sub)}.kbr[open] summary::after{content:'－'}
+.kbr ul{margin:0;padding:0 14px 6px 30px;font-size:13px;line-height:1.7}
+.kbr .mi{margin:0 12px 10px;font-size:12px;background:#fff4ef;border-radius:10px;padding:7px 10px;line-height:1.6}
+.kbr .hi{margin:0 12px 10px;font-size:12px;background:#eef8ec;border-radius:10px;padding:7px 10px;line-height:1.6}
+.aians{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;font-size:14px;line-height:1.7;white-space:pre-wrap;display:none;user-select:text}
+.srch{display:flex;gap:8px}
+.srch input{flex:1;min-width:0;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:16px;background:#fff;color:var(--ink);user-select:text}
+.srch button{flex:none;white-space:nowrap;border:0;border-radius:14px;padding:0 14px;font:inherit;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--focus2),var(--focus))}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -158,7 +205,7 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
         <svg class="ring" viewBox="0 0 290 290"><circle class="bgc" cx="145" cy="145" r="130"/><circle class="fg" id="ringFg" cx="145" cy="145" r="130"/></svg>
         <div class="bubble" id="bubble"></div>
         <div class="chara" id="chara"><div class="in breathe" id="charaIn"></div><div class="prop" id="prop"></div></div>
-        <div class="time"><span id="time">25:00</span><small id="tLabel">スタートを押してね</small></div>
+        <div id="actPill" style="position:absolute;left:0;right:0;bottom:2px;text-align:center"></div><div class="time"><span id="time">25:00</span><small id="tLabel">スタートを押してね</small></div>
       </div>
       <div class="tomatoes" id="tomatoes"></div>
       <div class="ctrl">
@@ -168,6 +215,17 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       </div>
     </div>
     <div class="card" style="margin-top:14px">
+      <div class="sec">🔎 AIでヒント検索 <small>中2の内容入り</small></div>
+      <div class="srch"><input id="kbIn" placeholder="例：一次関数の傾き、不定詞、前線" enterkeyhint="search"><button id="kbAsk">AIに聞く</button></div>
+      <div id="kbRes"></div>
+      <div class="aians" id="kbAns"></div>
+      <button class="chip" id="kbMore" style="display:none;margin-top:8px">💡 ヒント先生でつづける</button>
+    </div>
+    <div class="card">
+      <div class="sec">🧸 キャラをえらぶ <small>タイマー中にいろいろ動くよ</small></div>
+      <div class="cpick" id="cpick"></div>
+    </div>
+    <div class="card">
       <div class="sec">📚 なにを勉強する？</div>
       <div class="subj" id="subj"></div>
       <div class="subj" id="units" style="margin-top:8px"></div>
@@ -243,7 +301,16 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       <div class="set">定期テストの日<input type="date" id="testIn" style="font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:5px 8px;background:#fff"></div>
       <div class="set">1日の目標🍅<div class="seg" data-k="goal"></div></div>
       <div class="set">つぎを自動スタート<div class="seg" data-k="auto"></div></div>
-      <div class="set">おわりの音<div class="seg" data-k="sound"></div></div>
+    </div>
+    <div class="card">
+      <div class="sec">🔔 タイマーがおわった時の音 <small>タップで試し聞き</small></div>
+      <div class="cpick" id="sndList" style="flex-wrap:wrap"></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+        <button class="chip" id="sndImport">🎵 iPhoneの音楽をとりこむ</button>
+        <span class="muted" id="sndName" style="margin:0"></span>
+      </div>
+      <input type="file" accept="audio/*" id="sndIn" hidden>
+      <p class="muted">とりこんだ曲は最初の20秒が流れます（このiPhoneの中だけに保存）。マナーモード中は音が出ないことがあります。</p>
     </div>
     <div class="card">
       <button class="chip" id="reset" style="width:100%;color:#c94a64">きろくをリセット</button>
@@ -272,7 +339,7 @@ const UNITS={
  理科:['化学変化と原子・分子','生物の体のつくり','電流とその利用','天気の変化'],
  社会:['地理(日本の諸地域)','歴史(鎌倉〜江戸)'],
 };
-const OPT={focus:[15,25,30,50],short:[3,5,10],long:[15,20,30],goal:[4,6,8,12],auto:[['オフ',false],['オン',true]],sound:[['オフ',false],['オン',true]]};
+const OPT={focus:[15,25,30,50],short:[3,5,10],long:[15,20,30],goal:[4,6,8,12],auto:[['オフ',false],['オン',true]]};
 const STICK=[
  ['🍎','N'],['🍏','N'],['🍅','N'],['✏️','N'],['📒','N'],['📏','N'],['🧃','N'],['🍙','N'],['☕','N'],['🌱','N'],
  ['📚','R'],['🎧','R'],['🎵','R'],['🌷','R'],['🍰','R'],['🧸','R'],['🎒','R'],['🌙','R'],
@@ -289,7 +356,7 @@ const TALK={
 const jst=(t=Date.now())=>new Date(t).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 // ===== セーブ =====
 const KEY='misesucchi_pomo_v1',IKEY='misesucchi_pomo_imgs';
-const fresh=()=>({set:{focus:25,short:5,long:15,goal:8,auto:false,sound:true},mode:'focus',run:false,endAt:0,remain:25*60,cycle:0,subj:'数学',unit:'',test:'',logs:[],st:{},chara:'apple',lastDay:null,streak:0});
+const fresh=()=>({set:{focus:25,short:5,long:15,goal:8,auto:false,sound:'chime'},mode:'focus',run:false,endAt:0,remain:25*60,cycle:0,subj:'数学',unit:'',test:'',logs:[],st:{},chara:'apple',lastDay:null,streak:0});
 let S;try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=fresh()}
 let IMGS=[];try{IMGS=JSON.parse(localStorage.getItem(IKEY)||'[]')}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -332,14 +399,41 @@ function cutout(c){
 
 // ===== タイマー =====
 let ac;
-function chime(){
-  if(!S.set.sound)return;
-  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime;
-    [[784,0],[988,.18],[1175,.36],[1568,.6]].forEach(([f,t])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(0,n+t);g.gain.linearRampToValueAtTime(.25,n+t+.02);g.gain.exponentialRampToValueAtTime(.001,n+t+.5);o.start(n+t);o.stop(n+t+.55)})}catch(e){}
+const SOUNDS=[['off','🔕 なし'],['chime','🔔 チャイム'],['bell','🛎️ ベル'],['fanfare','🎺 ファンファーレ'],['orgel','🎶 オルゴール'],['pico','👾 ピコピコ'],['custom','🎵 じぶんの曲']];
+const SYN={
+ chime:[[784,0,.5],[988,.18,.5],[1175,.36,.5],[1568,.6,.8]].map(x=>[...x,'sine']),
+ bell:[[1047,0,1.6,'triangle'],[1319,0,1.6,'triangle'],[1047,.7,1.6,'triangle'],[1319,.7,1.6,'triangle']],
+ fanfare:[[392,0,.16],[523,.16,.16],[659,.32,.16],[784,.48,.45],[659,.86,.16],[784,1.02,1]].map(x=>[...x,'square']),
+ orgel:[[1047,0],[1319,.25],[1568,.5],[2093,.75],[1568,1],[1319,1.25],[1047,1.5]].map(x=>[x[0],x[1],1.2,'sine']),
+ pico:[[880,0,.09],[1175,.11,.09],[1568,.22,.09],[1175,.33,.09],[1568,.44,.09],[2093,.55,.3]].map(x=>[...x,'square']),
+};
+let customURL='',au=null,auT=0;
+const sndKey=()=>S.set.sound===true?'chime':(S.set.sound||'off');
+function chime(force){
+  const k=force||sndKey();if(k==='off')return;
+  if(k==='custom'){if(!customURL)return chime('chime');try{au=au||new Audio();if(au.src!==customURL)au.src=customURL;au.currentTime=0;au.volume=1;au.play().catch(()=>{});clearTimeout(auT);auT=setTimeout(stopSound,20000)}catch(e){}return}
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();const n=ac.currentTime+.05;
+    SYN[k].forEach(([f,t,d,type])=>{const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(ac.destination);const v=type==='square'?.08:.22;g.gain.setValueAtTime(0,n+t);g.gain.linearRampToValueAtTime(v,n+t+.02);g.gain.exponentialRampToValueAtTime(.001,n+t+d);o.start(n+t);o.stop(n+t+d+.05)})}catch(e){}
 }
+function stopSound(){try{if(au){au.pause();au.currentTime=0}}catch(e){}}
+function primeCustom(){if(sndKey()!=='custom'||!customURL)return;try{au=au||new Audio();au.src=customURL;au.muted=true;au.play().then(()=>{au.pause();au.currentTime=0;au.muted=false}).catch(()=>{au.muted=false})}catch(e){}}
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('misesucchi',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function idbPut(k,v){const db=await idb();return new Promise((res,rej)=>{const t=db.transaction('f','readwrite');t.objectStore('f').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})}
+async function idbGet(k){const db=await idb();return new Promise((res,rej)=>{const r=db.transaction('f').objectStore('f').get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+idbGet('sound').then(b=>{if(b){customURL=URL.createObjectURL(b)}if($('sndName'))drawSnd()}).catch(()=>{});
+function drawSnd(){
+  $('sndList').innerHTML=SOUNDS.map(([k,n])=>`<button class="chip ${sndKey()===k?'on':''}" data-snd="${k}" ${k==='custom'&&!customURL?'disabled style="opacity:.4"':''}>${n}</button>`).join('');
+  $('sndName').textContent=customURL?('とりこみ済み：'+(S.set.soundName||'曲')):'';
+}
+$('sndList').onclick=e=>{const k=e.target.dataset.snd;if(!k)return;stopSound();S.set.sound=k;save();drawSnd();unlockAudio();chime(k);if(k==='custom')setTimeout(stopSound,5000)};
+$('sndImport').onclick=()=>$('sndIn').click();
+$('sndIn').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  if(f.size>15*1024*1024){toast('15MBまでの曲にしてね');return}
+  try{await idbPut('sound',f);if(customURL)URL.revokeObjectURL(customURL);customURL=URL.createObjectURL(f);S.set.sound='custom';S.set.soundName=f.name.replace(/\.[^.]+$/,'').slice(0,24);save();drawSnd();toast('🎵 曲をとりこんだよ！');chime('custom');setTimeout(stopSound,5000)}
+  catch(err){toast('とりこめなかった。別の曲でためしてね')}};
 function unlockAudio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
 function left(){return S.run?Math.max(0,Math.ceil((S.endAt-Date.now())/1000)):S.remain}
-function start(){unlockAudio();S.endAt=Date.now()+S.remain*1000;S.run=true;save();say(pick(S.mode==='focus'?TALK.focus:TALK.rest));draw()}
+function start(){unlockAudio();primeCustom();if(S.remain===dur(S.mode))S.actSeed=Math.floor(Math.random()*8);S.endAt=Date.now()+S.remain*1000;S.run=true;save();say(pick(S.mode==='focus'?TALK.focus:TALK.rest));draw()}
 function pause(){S.remain=left();S.run=false;save();say(pick(TALK.pause));draw()}
 function setMode(m,autoRun){S.mode=m;S.remain=dur(m);S.run=false;if(autoRun)start();save();draw()}
 function finish(skipped){
@@ -368,21 +462,47 @@ function dayCheck(){
   const d=jst();if(S.lastDay===d)return;
   const y=jst(Date.now()-864e5);S.streak=S.lastDay===y?S.streak+1:(S.lastDay?1:1);S.lastDay=d;save();
 }
+
+// ===== キャラの日常アクション =====
+const ACTS={
+ focus:[['cook','りょうり中','🍳'],['pushup','うでたてふせ中','💪'],['gym','たいそう中','🤸'],['clean','おそうじ中','🧹'],['water','水やり中','🪴'],['guitar','ギター練習中','🎸'],['read','読書中','📖'],['jump','なわとび中','🪢']],
+ rest:[['snack','おやつタイム','🍪'],['sleep','おひるね中','💤'],['stretch','ストレッチ中','🙆'],['juice','ジュースタイム','🧃'],['bake','おかしづくり中','🧁']]};
+const FX={
+ cook:'<div class="fx f-pan">🍳</div><div class="fx f-rise" style="right:-10px;bottom:52px;font-size:18px">💨</div><div class="fx f-rise d2" style="right:4px;bottom:50px;font-size:16px">🔥</div>',
+ pushup:'<div class="fx f-fall" style="left:40px;top:40px;font-size:18px">💦</div><div class="fx f-pop" style="right:-6px;top:20px;font-size:20px">💪</div>',
+ gym:'<div class="fx f-rise" style="left:-14px;top:40px;font-size:20px">🎵</div><div class="fx f-rise d2" style="right:-14px;top:30px;font-size:18px">🎶</div>',
+ clean:'<div class="fx f-sweep">🧹</div><div class="fx f-pop" style="right:-8px;bottom:10px;font-size:18px">✨</div>',
+ water:'<div class="fx" style="right:-26px;bottom:0;font-size:30px">🪴</div><div class="fx f-fall" style="right:-14px;bottom:36px;font-size:14px">💧</div><div class="fx f-fall d2" style="right:-22px;bottom:34px;font-size:14px">💧</div>',
+ guitar:'<div class="fx f-strum">🎸</div><div class="fx f-rise" style="left:-12px;top:30px;font-size:18px">🎵</div>',
+ read:'<div class="fx f-pop" style="right:-18px;bottom:24px">📖</div>',
+ jump:'<div class="fx f-pop" style="left:-20px;bottom:0">🪢</div><div class="fx f-rise" style="right:-10px;top:40px;font-size:16px">✨</div>',
+ snack:'<div class="fx f-bite" data-snack>🍪</div><div class="fx f-fall" style="left:30px;bottom:30px;font-size:10px">🟤</div>',
+ sleep:'<div class="fx f-rise" style="right:-6px;top:20px;font-size:20px">💤</div><div class="fx" style="left:-20px;bottom:0;font-size:24px">🛏️</div>',
+ stretch:'<div class="fx f-pop" style="right:-12px;top:10px;font-size:20px">✨</div>',
+ juice:'<div class="fx f-bite">🧃</div>',
+ bake:'<div class="fx f-pop" style="right:-22px;bottom:18px">🧁</div><div class="fx f-rise" style="right:-6px;bottom:50px;font-size:16px">💗</div>'};
+function curAct(){
+  if(!S.run)return null;
+  const list=S.mode==='focus'?ACTS.focus:ACTS.rest,el=dur(S.mode)-left();
+  return list[(Math.floor(el/90)+(S.actSeed||0))%list.length];
+}
 // ===== 描画 =====
 const C=2*Math.PI*130;
-let lastMode='',lastChara='';
+let lastMode='',lastChara='',lastAct=null;
 function draw(){
   const m=S.mode,l=left(),tot=dur(m);
   $('stage').className='stage '+m;
   document.querySelectorAll('.mode b').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   $('time').textContent=String(Math.floor(l/60)).padStart(2,'0')+':'+String(l%60).padStart(2,'0');
-  $('tLabel').textContent=S.run?(m==='focus'?`${S.subj}${S.unit?'・'+S.unit:''} しゅうちゅう中`:'きゅうけい中'):(l===tot?'スタートを押してね':'いちじていし中');
+  const act=curAct();
+  $('tLabel').innerHTML=(S.run?(m==='focus'?`${S.subj}${S.unit?'・'+S.unit:''} しゅうちゅう中`:'きゅうけい中'):(l===tot?'スタートを押してね':'いちじていし中'));
+  $('actPill').innerHTML=act?`<span class="act">${act[2]} キャラは${act[1]}</span>`:'';
   const fg=$('ringFg');fg.style.strokeDasharray=C;fg.style.strokeDashoffset=C*(l/tot);fg.style.stroke=m==='focus'?'var(--focus)':'var(--rest)';
   $('bMain').textContent=S.run?'❚❚':'▶';
   $('tomatoes').innerHTML=[0,1,2,3].map(i=>`<i class="${i<S.cycle%4?'on':''}">🍅</i>`).join('');
   if(lastChara!==S.chara){lastChara=S.chara;$('charaIn').innerHTML=charaHTML(S.chara)}
-  $('charaIn').className='in '+(S.run&&m!=='focus'?'hop':'breathe');
-  $('prop').textContent=S.run?(m==='focus'?'✏️':'☕'):'';
+  const ak=act?act[0]:'';
+  if(ak!==lastAct){lastAct=ak;$('charaIn').className='in '+(ak?'a-'+ak:'breathe');$('prop').innerHTML=ak?FX[ak]:''}
   document.title=S.run?`${$('time').textContent} ${m==='focus'?'🍅':'☕'} ミセスッち`:'ミセスッち 勉強タイマー';
   $('hTotal').textContent=total();$('hStreak').textContent=S.streak;
   const tc=todayCount(),g=S.set.goal;
@@ -418,29 +538,68 @@ function drawReward(){
   $('stCount').textContent=`${STICK.filter(s=>S.st[s[0]]).length} / ${STICK.length}`;
   $('stickers').innerHTML=STICK.map(([e,r])=>S.st[e]?`<div class="st ${r}">${e}${S.st[e]>1?`<b>×${S.st[e]}</b>`:''}</div>`:`<div class="st lock ${r}">？</div>`).join('');
 }
+function pickerHTML(del){return `<button class="cb ${S.chara==='apple'?'on':''}" data-c="apple">${APPLE}</button>`+IMGS.map((u,i)=>`<button class="cb ${S.chara==='img'+i?'on':''}" data-c="img${i}"><img src="${u}" alt="">${del?`<span data-del="${i}">×</span>`:''}</button>`).join('')+(IMGS.length<10?'<button class="cb add" data-add="1">＋<small>画像</small></button>':'')}
+function drawPick(){$('cpick').innerHTML=pickerHTML(false)}
 function drawSet(){
   $('testIn').value=S.test||'';
-  $('charas').innerHTML=`<button class="cb ${S.chara==='apple'?'on':''}" data-c="apple">${APPLE}</button>`+IMGS.map((u,i)=>`<button class="cb ${S.chara==='img'+i?'on':''}" data-c="img${i}"><img src="${u}" alt=""><span data-del="${i}">×</span></button>`).join('')+(IMGS.length<10?'<button class="cb add" id="addImg">＋<small>画像</small></button>':'');
+  $('charas').innerHTML=pickerHTML(true);
   document.querySelectorAll('.seg').forEach(el=>{const k=el.dataset.k;el.innerHTML=OPT[k].map(o=>{const [lab,v]=Array.isArray(o)?o:[o+(k==='goal'?'':'分'),o];return `<button class="${S.set[k]===v?'on':''}" data-v='${JSON.stringify(v)}'>${lab}</button>`}).join('')});
 }
 document.querySelectorAll('.seg').forEach(el=>el.onclick=e=>{const v=e.target.dataset.v;if(v===undefined)return;const k=el.dataset.k;S.set[k]=JSON.parse(v);
   if(['focus','short','long'].includes(k)&&!S.run&&S.mode===k)S.remain=dur(k);save();drawSet();draw()});
-$('charas').onclick=e=>{
+function onPick(e){
   const d=e.target.dataset.del;
   if(d!==undefined){if(!confirm('この画像をけす？'))return;const i=+d;IMGS.splice(i,1);saveImgs();
-    if(S.chara==='img'+i)S.chara='apple';else if(S.chara.startsWith('img')&&+S.chara.slice(3)>i)S.chara='img'+(+S.chara.slice(3)-1);lastChara='';save();drawSet();draw();return}
-  if(e.target.closest('#addImg')){$('upl').click();return}
-  const b=e.target.closest('[data-c]');if(!b)return;S.chara=b.dataset.c;save();drawSet();draw();toast('キャラをかえたよ！')};
+    if(S.chara==='img'+i)S.chara='apple';else if(S.chara.startsWith('img')&&+S.chara.slice(3)>i)S.chara='img'+(+S.chara.slice(3)-1);lastChara='';save();drawSet();drawPick();draw();return}
+  if(e.target.closest('[data-add]')){$('upl').click();return}
+  const b=e.target.closest('[data-c]');if(!b)return;S.chara=b.dataset.c;save();drawSet();drawPick();draw();bounce();toast('キャラをかえたよ！')}
+$('charas').onclick=onPick;$('cpick').onclick=onPick;
 $('upl').onchange=e=>{
   const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;toast('きりぬき中…');
   const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{
     const m=480,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
     c.getContext('2d').drawImage(im,0,0,c.width,c.height);cutout(c);let u=c.toDataURL('image/webp',.85);if(!u.startsWith('data:image/webp'))u=c.toDataURL('image/png');
     IMGS.push(u);if(!saveImgs()){IMGS.pop();toast('容量がいっぱい。画像をへらしてね');return}
-    S.chara='img'+(IMGS.length-1);save();drawSet();draw();toast('📷 キャラにしたよ！')};im.src=r.result};r.readAsDataURL(f)};
+    S.chara='img'+(IMGS.length-1);save();drawSet();drawPick();draw();toast('📷 キャラにしたよ！')};im.src=r.result};r.readAsDataURL(f)};
 $('testIn').onchange=e=>{S.test=e.target.value;save();drawTest();toast(S.test?'📝 テストの日を設定したよ':'テストの日をけしたよ')};
 $('reset').onclick=()=>{if(confirm('きろくとシールをリセットする？（キャラ画像は残ります）')){const c=S.chara,st=S.set;S=fresh();S.chara=c;S.set=st;S.remain=dur('focus');save();dayCheck();draw();drawSet();toast('リセットしたよ')}};
 
+// ===== 中学2年の学習内容（検索用） =====
+const KB=[
+ {s:'数学',u:'式の計算',p:['同類項（文字の部分が同じ項）はまとめられる','単項式のかけ算は「係数どうし」「文字どうし」をかける','わり算は分数の形にするか、逆数をかける','等式の変形：「〜について解く」は、その文字を左辺に残して他を移項する'],m:'かっこをはずす時、うしろの項にかけ忘れる／移項で符号を変え忘れる',h:'まず同じ文字の項に印をつけてみよう'},
+ {s:'数学',u:'連立方程式',p:['加減法：どちらかの文字の係数をそろえて、たすか引くかで消す','代入法：「y=〜」「x=〜」の形の式を、もう一方に代入する','求めた解は、2つの式の両方に代入して確かめる','文章題は「何をx・yにするか」を最初に決め、式を2つ作る'],m:'引き算のとき、右辺や2つめの項の符号を変え忘れる',h:'消しやすい文字はどっち？係数を何倍すればそろう？'},
+ {s:'数学',u:'一次関数',p:['y=ax+b の a は傾き（変化の割合）、b は切片','変化の割合 ＝ yの増加量 ÷ xの増加量（一次関数では一定で a と同じ）','グラフは切片(0,b)から、右に1進むと上にa進む','2点を通る直線は、まず傾きを求めてからbを求める','2直線の交点は、2つの式の連立方程式の解'],m:'変化の割合を xの増加量÷yの増加量 と逆にしてしまう',h:'xが1増えると、yはいくつ増える？'},
+ {s:'数学',u:'平行と合同',p:['対頂角は等しい','平行線では同位角・錯角が等しい（逆も成り立つ）','三角形の内角の和は180°、外角はとなり合わない2つの内角の和','n角形の内角の和は 180°×(n−2)、外角の和は360°','合同条件：3組の辺／2組の辺とその間の角／1組の辺とその両端の角','証明は「仮定 → 根拠（性質・条件）→ 結論」の順に書く'],m:'合同条件の「間の角」「両端の角」を確認せずに使う',h:'わかっている辺や角に印をつけて、どの合同条件が使えそうか見てみよう'},
+ {s:'数学',u:'三角形と四角形',p:['二等辺三角形の2つの底角は等しい','二等辺三角形の頂角の二等分線は、底辺を垂直に2等分する','直角三角形の合同条件：斜辺と1つの鋭角／斜辺と他の1辺','平行四辺形：2組の対辺・対角がそれぞれ等しい、対角線はそれぞれの中点で交わる','平行四辺形になる条件には「1組の対辺が平行でその長さが等しい」もある','平行線を使うと、面積を変えずに形を変えられる（等積変形）'],m:'定義（決まりごと）と定理（証明されたこと）をまぜてしまう',h:'図の中に二等辺三角形や平行線がかくれていないか探そう'},
+ {s:'数学',u:'確率',p:['どれも同じ程度に起こると考えられる時に使う（同様に確からしい）','確率 ＝ そのことが起こる場合の数 ÷ 起こりうるすべての場合の数','樹形図や表で、もれ・重なりなく数える','「〜でない」確率 ＝ 1 −「〜である」確率','確率は0以上1以下'],m:'2つのさいころなどで（1,2）と（2,1）を同じものとして数えてしまう',h:'まず、全部で何通りあるか樹形図か表にしてみよう'},
+ {s:'数学',u:'データの活用',p:['データを小さい順に並べ、4つに分ける値が四分位数','四分位範囲 ＝ 第3四分位数 − 第1四分位数','箱ひげ図は 最小値・第1四分位数・中央値・第3四分位数・最大値 を表す','箱の長さが四分位範囲（データの真ん中の約半分のちらばり）'],m:'並べかえずに四分位数を求めてしまう',h:'まずデータを小さい順に並べよう'},
+ {s:'英語',u:'過去進行形',p:['was / were ＋ 動詞のing形 で「〜していた」','否定文は was / were のあとに not','疑問文は Was / Were を主語の前に出す'],m:'主語が I や he なのに were を使う（I・3人称単数は was）',h:'主語は単数？複数？'},
+ {s:'英語',u:'未来の表現',p:['will ＋ 動詞の原形「〜するだろう／〜します」','be going to ＋ 動詞の原形「〜するつもり・予定」','どちらも後ろの動詞は原形'],m:'will のあとの動詞に s や ed をつけてしまう',h:'will のうしろの動詞はどんな形だったかな？'},
+ {s:'英語',u:'接続詞',p:['when「〜するとき」、if「もし〜なら」、because「〜なので」','I think (that) 〜 の that は省略できる','when・if の中は、未来のことでも現在形で表す'],m:'if の中で will を使ってしまう',h:'2つの文をつなぐ言葉は、どんな意味になるといいかな？'},
+ {s:'英語',u:'不定詞',p:['to ＋ 動詞の原形','名詞的用法「〜すること」：I want to read.','副詞的用法「〜するために」「〜して」：I went to the park to play.','形容詞的用法「〜するための・〜すべき」：something to drink'],m:'to のあとに ing形や3単現の s をつけてしまう',h:'その to〜 は「こと」「ために」「ための」のどれで訳すと自然？'},
+ {s:'英語',u:'動名詞',p:['動詞のing形で「〜すること」','enjoy / finish / stop のあとは動名詞','want / hope / decide のあとは不定詞（to〜）','like / start / begin はどちらもOK'],m:'enjoy to 〜 としてしまう',h:'その動詞のあとは ing と to のどっちが来るか、思い出してみよう'},
+ {s:'英語',u:'比較',p:['比較級：-er than / more 〜 than「…より〜」','最上級：the -est / the most 〜「いちばん〜」','as 〜 as …「…と同じくらい〜」（〜は原級）','good / well → better → best'],m:'長い単語に -er をつける（more を使う）',h:'2つを比べてる？3つ以上の中でいちばん？'},
+ {s:'英語',u:'受け身',p:['be動詞 ＋ 過去分詞「〜される・〜されている」','「〜によって」は by 〜','過去の受け身は was / were ＋ 過去分詞'],m:'過去分詞ではなく過去形や原形を使う',h:'主語は「する」側？「される」側？'},
+ {s:'英語',u:'There is / have to・must',p:['There is ＋ 単数、There are ＋ 複数「〜がある・いる」','have to / must 〜「〜しなければならない」','don’t have to「〜しなくてよい」、must not「〜してはいけない」'],m:'don’t have to と must not の意味をまぜる',h:'「しなくていい」と「してはいけない」、どっちの意味かな？'},
+ {s:'英語',u:'単語',p:['声に出す・書く・意味を言う、をセットで','まちがえた単語だけ集めてくり返す','品詞（名詞・動詞・形容詞）もいっしょに覚える'],m:'スペルを見るだけで覚えた気になる',h:'日本語を見て、英語を書けるか試してみよう'},
+ {s:'国語',u:'文法(用言の活用)',p:['用言＝動詞・形容詞・形容動詞（活用する自立語）','活用形：未然・連用・終止・連体・仮定・命令','動詞の活用の種類：五段・上一段・下一段・カ行変格（来る）・サ行変格（する）','見分け方：「ない」をつけて、直前がア段→五段、イ段→上一段、エ段→下一段'],m:'「来る」「する（〜する）」を五段などとまちがえる',h:'その動詞に「ない」をつけてみよう。直前の音は何段？'},
+ {s:'国語',u:'古典',p:['歴史的仮名遣い：語の頭以外の「は・ひ・ふ・へ・ほ」→「わ・い・う・え・お」','「ゐ・ゑ・を」→「い・え・お」','枕草子：清少納言の随筆（春はあけぼの）','平家物語：軍記物語、琵琶法師が語った（祇園精舎の鐘の声）','徒然草：兼好法師の随筆'],m:'語の頭の「は」まで「わ」に直してしまう',h:'まず、その古文を声に出して読んでみよう'},
+ {s:'国語',u:'読解',p:['指示語（これ・それ）は、ふつう前の部分を指す','接続語（しかし・つまり）で文章の流れがわかる','筆者の考えは、最後の段落や「〜のだ」の文に出やすい','理由を聞かれたら、答えの文末は「〜から。」'],m:'本文ではなく自分の考えで答えてしまう',h:'答えの根拠になる文を、本文から探して線を引こう'},
+ {s:'国語',u:'漢字',p:['部首・音読み・訓読みをセットで','熟語の組み立て（似た意味・反対の意味・上が下を修飾 など）','まちがえた字だけノートに集める'],m:'形の似た漢字（例：積・績）をまちがえる',h:'その字の部首は何？意味とつながってる？'},
+ {s:'理科',u:'化学変化と原子・分子',p:['分解：炭酸水素ナトリウム → 炭酸ナトリウム＋水＋二酸化炭素','水の電気分解：陰極に水素、陽極に酸素（体積比 2：1）','酸化：酸素と結びつく、還元：酸化物から酸素をうばう','質量保存の法則：反応の前後で全体の質量は変わらない','結びつく質量の比は一定（銅：酸素＝4：1、マグネシウム：酸素＝3：2）','化学反応式は、左右で原子の数をそろえる'],m:'化学反応式で原子の数をそろえ忘れる',h:'左と右で、それぞれの原子は何個ずつあるか数えてみよう'},
+ {s:'理科',u:'生物の体のつくり',p:['植物の細胞だけにある：細胞壁・葉緑体・（大きな）液胞','光合成：光を使い、二酸化炭素と水からデンプンなどをつくり酸素を出す','蒸散：おもに葉の気孔から水が水蒸気として出る','だ液（アミラーゼ）はデンプンを分解する：ヨウ素液・ベネジクト液で調べる','動脈は心臓から出る血液、静脈は心臓にもどる血液','反射：刺激に対して無意識に起こる反応'],m:'動脈血（酸素が多い）と動脈（血管）をまぜる',h:'その実験は「何と何を比べる」ための実験かな？'},
+ {s:'理科',u:'電流とその利用',p:['直列：電流はどこも同じ、電圧は分かれる','並列：電圧はどこも同じ、電流は分かれる','オームの法則：電圧V ＝ 抵抗Ω × 電流A','電力W ＝ 電圧V × 電流A、電力量J ＝ 電力W × 時間s','電流のまわりには磁界ができる','電磁誘導：コイルの中の磁界が変わると電流が流れる'],m:'mA を A に直さずに計算する',h:'わかっている量（V・Ω・A）に印をつけて、どの式が使えるか見てみよう'},
+ {s:'理科',u:'天気の変化',p:['湿度(%) ＝ 空気1m³中の水蒸気量 ÷ その気温の飽和水蒸気量 × 100','露点：水蒸気が水滴に変わりはじめる温度','雲：空気が上昇 → 膨張 → 温度が下がり露点に達してできる','寒冷前線：積乱雲、短い時間に強い雨、通過後は気温が下がる','温暖前線：乱層雲など、長い時間おだやかな雨、通過後は気温が上がる','冬は西高東低の気圧配置（シベリア気団）'],m:'寒冷前線と温暖前線の特徴を逆に覚える',h:'前線の記号の向きと、どっちの空気がもぐりこむか考えてみよう'},
+ {s:'社会',u:'地理(日本の諸地域)',p:['九州・中国四国・近畿・中部・関東・東北・北海道の特色を「自然・産業・人口」で整理','地形図：縮尺、等高線（間かくがせまいほど急）、地図記号','グラフの読み取りは「いちばん多い・少ない」「変化」に注目'],m:'縮尺の計算で単位（cm・m・km）をそろえない',h:'その地方の気候と、さかんな産業はつながってるかな？'},
+ {s:'社会',u:'歴史(鎌倉〜江戸)',p:['鎌倉：源頼朝、御恩と奉公、執権の北条氏、承久の乱、御成敗式目、元寇','室町：足利尊氏、日明貿易（勘合）、応仁の乱 → 戦国時代','安土桃山：織田信長（楽市・楽座）、豊臣秀吉（太閤検地・刀狩）','江戸：徳川家康、武家諸法度、参勤交代（家光）、鎖国','江戸の改革：享保（徳川吉宗）・寛政（松平定信）・天保（水野忠邦）'],m:'人物と政策・できごとの組み合わせをまちがえる',h:'「だれが・何のために・何をしたか」の3つで整理してみよう'},
+];
+function kbSearch(q){
+  q=(q||'').trim().toLowerCase();if(!q)return[];
+  const ws=q.split(/[\s　、,]+/).filter(Boolean);
+  return KB.map(e=>{const t=(e.s+e.u+e.p.join('')+e.m+e.h).toLowerCase();let sc=0;ws.forEach(w=>{if((e.s+e.u).toLowerCase().includes(w))sc+=5;if(t.includes(w))sc+=2;
+    for(let i=0;i<w.length-1;i++)if(t.includes(w.slice(i,i+2)))sc+=.3});return [sc,e]}).filter(x=>x[0]>=1).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>x[1]);
+}
+const kbText=es=>es.map(e=>`【${e.s}・${e.u}】${e.p.join('／')}（よくあるミス：${e.m}）`).join('\n');
 // ===== ヒント先生（AI） =====
 const AI_RULES=`あなたは中学2年生の勉強を手伝う「ヒント先生」です。キャラクターとして、やさしく明るく話します。
 ぜったいに守ること:
@@ -451,7 +610,9 @@ const AI_RULES=`あなたは中学2年生の勉強を手伝う「ヒント先生
 - 中学2年生の教科書の範囲の言葉を使う。むずかしい言葉は使わない。
 - 返事は短く、150文字くらいまで。絵文字は1〜2こまで。
 - 勉強と関係ない話には、短く答えて勉強にもどす。
-- 写真がある場合は、写っている問題を読み取って同じルールでヒントを出す。読めないときは、どの問題か聞く。`;
+- 写真がある場合は、写っている問題を読み取って同じルールでヒントを出す。読めないときは、どの問題か聞く。
+- 用語や公式の意味をたずねられたときは、教科書の説明として要点を短く教えてよい（問題そのものの答えは言わない）。
+- 下にある「中学2年の学習内容」に合った説明をする。`;
 const QUICK=['ヒントちょうだい','もっと小さいヒント','考え方の手順だけ教えて','答え合わせして','似た練習問題を出して'];
 let CHAT=[];try{CHAT=JSON.parse(localStorage.getItem('misesucchi_chat')||'[]')}catch(e){}
 const saveChat=()=>{try{localStorage.setItem('misesucchi_chat',JSON.stringify(CHAT.slice(-30)))}catch(e){}};
@@ -477,7 +638,8 @@ async function askAI(text){
   const thumb=photoURL&&!CHAT.some(m=>m.img===photoURL)?photoURL:'';
   CHAT.push({role:'user',content:text.trim(),img:thumb||undefined});drawAI();
   const box=document.createElement('div');box.className='msg ai';box.innerHTML='<span class="dots">考え中</span>';$('chat').appendChild(box);$('chat').scrollTop=1e9;
-  const ctx=`\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）`;
+  const rel=kbSearch(CHAT.filter(m=>m.role==='user').map(m=>m.content).join(' ')+' '+S.unit);
+  const ctx=`\n\n参考にする中学2年の学習内容:\n${kbText(rel.length?rel:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit)))}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）`;
   const msgs=CHAT.slice(-12).map((m,i,a)=>({role:m.role,content:(i===0?AI_RULES+ctx+'\n\n--- ここから生徒 ---\n':'')+(m.content||'（写真）')}));
   if(msgs[0].role!=='user')msgs.shift();
   const opt={cache:false,onText:({text})=>{box.textContent=text;$('chat').scrollTop=1e9}};
@@ -506,6 +668,25 @@ $('camIn').onchange=e=>{const f=e.target.files&&e.target.files[0];e.target.value
     c.toBlob(b=>{photoBlob=b;const t=document.createElement('canvas'),tk=200/Math.max(c.width,c.height);t.width=c.width*tk;t.height=c.height*tk;t.getContext('2d').drawImage(c,0,0,t.width,t.height);photoURL=t.toDataURL('image/jpeg',.7);$('photoImg').src=photoURL;$('photo').style.display='flex';},'image/jpeg',.85)};im.src=r.result};r.readAsDataURL(f)};
 function clearPhoto(){photoBlob=null;photoURL='';$('photo').style.display='none'}
 $('photoX').onclick=clearPhoto;
+
+function drawKB(es){
+  $('kbRes').innerHTML=es.map(e=>`<details class="kbr"><summary>${e.s}｜${e.u}</summary><ul>${e.p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="mi">⚠️ よくあるミス：${esc(e.m)}</div><div class="hi">💡 考え方：${esc(e.h)}</div></details>`).join('');
+}
+let kbQ='',kbA='';
+$('kbIn').oninput=e=>{const q=e.target.value;drawKB(kbSearch(q))};
+$('kbIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();kbAsk()}};
+$('kbAsk').onclick=()=>kbAsk();
+async function kbAsk(){
+  const q=$('kbIn').value.trim();if(!q){toast('ききたいことを書いてね');return}
+  const hits=kbSearch(q);drawKB(hits);
+  const box=$('kbAns');box.style.display='block';
+  if(!sampleFn){box.textContent='AIはclaude.aiで開いたときに使えます。上の「中2の内容」を見てみてね。';return}
+  box.innerHTML='<span class="dots">考え中</span>';$('kbMore').style.display='none';
+  const prompt=AI_RULES+`\n\n参考にする中学2年の学習内容:\n${kbText(hits.length?hits:KB.filter(e=>e.s===S.subj&&(!S.unit||e.u===S.unit)))}\n\n（いまの教科: ${S.subj}${S.unit?' / 単元: '+S.unit:''}）\n\n--- 生徒の質問 ---\n${q}`;
+  try{const r=await sampleFn(prompt,{cache:false,onText:({text})=>{box.textContent=text}});kbQ=q;kbA=r.text;$('kbMore').style.display='';}
+  catch(e){box.textContent=e&&e.code==='rate_limited'?'ちょっと待ってからもう一度ためしてね':e&&e.code==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':'うまく聞けなかった。もう一度ためしてね'}
+}
+$('kbMore').onclick=()=>{CHAT.push({role:'user',content:kbQ},{role:'assistant',content:kbA});saveChat();go('ai')};
 // ===== 演出 =====
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
@@ -513,7 +694,7 @@ function bounce(){const c=$('chara');c.classList.remove('jump');void c.offsetWid
 function confetti(n=50){const cs=['#e46a5a','#f3a6b3','#e8b84a','#5fae7a','#7aa7e0'];for(let i=0;i<n;i++){const p=document.createElement('div');p.className='confetti';p.style.left=Math.random()*100+'vw';p.style.background=pick(cs);p.style.animationDuration=(1.6+Math.random()*1.6)+'s';p.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),3800)}}
 let tt;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2200)}
 function modal(ic,t,p){$('mIc').textContent=ic;$('mT').textContent=t;$('mP').innerHTML=p;$('modal').classList.add('on')}
-$('mOk').onclick=()=>$('modal').classList.remove('on');
+$('mOk').onclick=()=>{$('modal').classList.remove('on');stopSound()};
 $('chara').onclick=()=>{bounce();say(pick(S.run?(S.mode==='focus'?TALK.focus:TALK.rest):TALK.idle))};
 // ===== 操作 =====
 $('bMain').onclick=()=>S.run?pause():start();
@@ -523,7 +704,7 @@ document.querySelectorAll('.mode b').forEach(b=>b.onclick=()=>{if(S.run&&!confir
 function go(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
-  if(p==='stats')drawStats();if(p==='reward')drawReward();if(p==='set')drawSet();if(p==='ai')drawAI();if(p==='timer'){draw();drawTest()}
+  if(p==='stats')drawStats();if(p==='reward')drawReward();if(p==='set'){drawSet();drawSnd()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
   window.scrollTo({top:0});
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
@@ -535,7 +716,7 @@ setInterval(()=>{
   draw();
 },250);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){dayCheck();drawTest();draw()}});
-dayCheck();drawSubj();drawTest();draw();
+dayCheck();drawSubj();drawTest();drawPick();draw();
 setTimeout(()=>say(S.run?'おかえり！つづいてるよ':pick(TALK.idle)),500);
 </script>
 </body>
