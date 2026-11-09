@@ -173,6 +173,57 @@ h1 span{color:var(--focus)}
 .srch{display:flex;gap:8px}
 .srch input{flex:1;min-width:0;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:16px;background:#fff;color:var(--ink);user-select:text}
 .srch button{flex:none;white-space:nowrap;border:0;border-radius:14px;padding:0 14px;font:inherit;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--focus2),var(--focus))}
+.gm{position:relative;width:280px;height:401px;margin:0 auto}
+.gm svg{width:100%;height:100%;display:block}
+.knobHit{position:absolute;left:50%;top:74.4%;width:110px;height:110px;margin:-55px 0 0 -55px;border-radius:50%;touch-action:none;cursor:grab}
+#caps.shake{animation:cshake .12s linear 6;transform-origin:150px 130px}
+@keyframes cshake{25%{transform:rotate(-2deg) translateX(-2px)}75%{transform:rotate(2deg) translateX(2px)}}
+.outCap{position:absolute;left:50%;top:86%;width:54px;height:54px;margin-left:-27px;display:none;cursor:pointer;z-index:2}
+.outCap.on{display:block;animation:capDrop .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes capDrop{from{transform:translateY(-90px) scale(.6);opacity:0}}
+.outCap .wob{width:100%;height:100%;animation:wob 1.2s ease-in-out infinite .7s}
+@keyframes wob{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.cap{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;box-shadow:inset -4px -6px 10px rgba(0,0,0,.15),0 4px 10px rgba(0,0,0,.2)}
+.cap .t{position:absolute;left:0;right:0;top:0;height:50%}
+.cap .b{position:absolute;left:0;right:0;bottom:0;height:50%;background:rgba(255,255,255,.85)}
+.cap .ln{position:absolute;left:0;right:0;top:calc(50% - 2px);height:4px;background:rgba(0,0,0,.12)}
+.ghint{text-align:center;font-size:13px;font-weight:800;color:var(--sub);margin:4px 0 0;min-height:20px}
+.tk{display:flex;justify-content:center;align-items:center;gap:6px;font-weight:800;font-size:15px;margin-bottom:6px}
+.tk b{font-size:24px;color:var(--focus)}
+#gOpen{position:fixed;inset:0;background:rgba(40,35,25,.6);display:none;align-items:center;justify-content:center;flex-direction:column;z-index:20;padding:20px}
+#gOpen.on{display:flex}
+.rays{position:absolute;width:520px;height:520px;background:repeating-conic-gradient(rgba(255,240,180,.35) 0 10deg,transparent 10deg 20deg);border-radius:50%;animation:spin 8s linear infinite;opacity:0;transition:opacity .5s}
+#gOpen.done .rays{opacity:1}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bigcap{position:relative;width:200px;height:200px}
+.bigcap .ht,.bigcap .hb{position:absolute;left:0;right:0;height:50%;transition:transform .7s cubic-bezier(.5,-.4,.5,1.4),opacity .7s}
+.bigcap .ht{top:0;border-radius:100px 100px 0 0;box-shadow:inset -6px 6px 14px rgba(255,255,255,.4)}
+.bigcap .hb{bottom:0;border-radius:0 0 100px 100px;background:rgba(255,255,255,.9);box-shadow:inset -6px -8px 14px rgba(0,0,0,.12)}
+.bigcap.shk{animation:bshake .5s ease-in-out 2}
+@keyframes bshake{25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+#gOpen.done .ht{transform:translate(-60px,-170px) rotate(-50deg);opacity:0}
+#gOpen.done .hb{transform:translate(50px,170px) rotate(40deg);opacity:0}
+.prize{position:absolute;inset:10px;display:flex;align-items:center;justify-content:center;transform:scale(.2);opacity:0;transition:transform .6s cubic-bezier(.2,1.6,.4,1) .35s,opacity .3s .35s}
+#gOpen.done .prize{transform:scale(1.35);opacity:1}
+.prize img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+.prize .em{font-size:110px}
+.ginfo{position:relative;margin-top:70px;text-align:center;color:#fff;opacity:0;transition:opacity .4s .8s}
+#gOpen.done .ginfo{opacity:1}
+.ginfo .rr{display:inline-block;font-size:22px;font-weight:800;padding:4px 18px;border-radius:99px;background:#fff;color:var(--ink)}
+.ginfo .rr.SSR{background:linear-gradient(90deg,#f1c75a,#ff9fb0,#9cc4ef);color:#fff}
+.ginfo .rr.SR{background:#c79cef;color:#fff}.ginfo .rr.R{background:#7aa7e0;color:#fff}
+.ginfo p{margin:10px 0 14px;font-weight:800}
+.ginfo .btn{padding:12px 28px;font-size:15px;background:linear-gradient(135deg,var(--focus2),var(--focus))}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pz{aspect-ratio:1;background:#fff;border:2px solid var(--line);border-radius:14px;position:relative;display:flex;align-items:center;justify-content:center;padding:4px}
+.pz img{max-width:100%;max-height:100%;object-fit:contain}
+.pz.lock img{filter:brightness(0) opacity(.18)}
+.pz .rb{position:absolute;left:3px;top:3px;font-size:9px;font-weight:800;background:var(--ink);color:#fff;border-radius:6px;padding:1px 5px}
+.pz .rb.SSR{background:var(--gold)}.pz .rb.SR{background:#9a6acf}.pz .rb.R{background:#5b86c7}
+.pz .ct{position:absolute;right:4px;bottom:2px;font-size:10px;font-weight:800;color:var(--sub)}
+.pz .dl{position:absolute;top:-7px;right:-7px;background:#c94a64;color:#fff;border-radius:99px;width:20px;height:20px;font-size:13px;line-height:20px;text-align:center}
+.pz.add{border-style:dashed;flex-direction:column;color:var(--sub);font-size:22px}
+.pz.add small{font-size:10px;font-weight:700}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -261,6 +312,19 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
   <!-- ごほうび -->
   <section class="page" id="p-reward">
     <div class="card">
+      <div class="sec">🎰 ミセスッちガチャ <small>🍅1こで1回</small></div>
+      <div class="tk">🎫 ガチャけん <b id="gTk">0</b> まい</div>
+      <div class="gm" id="gm"><div id="gmSvg"></div><div class="knobHit" id="knob"></div><div class="outCap" id="outCap"><div class="wob"><div class="cap"><div class="t" id="outT"></div><div class="b"></div><div class="ln"></div></div></div></div></div>
+      <p class="ghint" id="gHint">ハンドルを指でぐるっと1回まわしてね ↻</p>
+    </div>
+    <div class="card">
+      <div class="sec">🧸 グッズコレクション <small id="pCount"></small></div>
+      <div class="pgrid" id="pGrid"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="chip" id="pEdit">✏️ ガチャの中身をへんしゅう</button></div>
+      <p class="muted" id="pNote">iPhoneに保存したグッズの写真を「＋」から入れると、ガチャの中身になるよ（何まいでもまとめて選べる）。へんしゅう中は、タップでレア度をかえられるよ。画像はこのiPhoneの中だけに保存されます。</p>
+      <input type="file" accept="image/*" id="pIn" multiple hidden>
+    </div>
+    <div class="card">
       <div class="lvbox"><div class="big" id="lvIc">🌱</div><div style="flex:1"><h3 id="lvName">Lv.1</h3><p id="lvNext"></p><div class="xbar"><i id="lvBar"></i></div></div></div>
     </div>
     <div class="card">
@@ -322,11 +386,12 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
   <button class="on" data-p="timer"><i>🍅</i>タイマー</button>
   <button data-p="stats"><i>📊</i>きろく</button>
   <button data-p="ai"><i>💡</i>ヒント</button>
-  <button data-p="reward"><i>🎁</i>ごほうび</button>
+  <button data-p="reward"><i>🎰</i>ガチャ</button>
   <button data-p="set"><i>⚙️</i>せってい</button>
 </nav>
 <div class="modal" id="modal"><div class="mbox"><div class="ic" id="mIc"></div><h2 id="mT"></h2><p id="mP"></p><button class="btn" id="mOk">OK</button></div></div>
 <div class="toast" id="toast"></div>
+<div id="gOpen"><div class="rays"></div><div class="bigcap" id="bigcap"><div class="prize" id="prize"></div><div class="ht" id="bigT"></div><div class="hb"></div></div><div class="ginfo"><span class="rr" id="gR">N</span><p id="gTxt"></p><button class="btn" id="gClose">コレクションに入れる</button></div></div>
 <input type="file" accept="image/*" id="upl" hidden><input type="file" accept="image/*" id="camIn" hidden>
 
 <script>
@@ -356,7 +421,7 @@ const TALK={
 const jst=(t=Date.now())=>new Date(t).toLocaleDateString('sv-SE',{timeZone:'Asia/Tokyo'});
 // ===== セーブ =====
 const KEY='misesucchi_pomo_v1',IKEY='misesucchi_pomo_imgs';
-const fresh=()=>({set:{focus:25,short:5,long:15,goal:8,auto:false,sound:'chime'},mode:'focus',run:false,endAt:0,remain:25*60,cycle:0,subj:'数学',unit:'',test:'',logs:[],st:{},chara:'apple',lastDay:null,streak:0});
+const fresh=()=>({tickets:1,got:{},set:{focus:25,short:5,long:15,goal:8,auto:false,sound:'chime'},mode:'focus',run:false,endAt:0,remain:25*60,cycle:0,subj:'数学',unit:'',test:'',logs:[],st:{},chara:'apple',lastDay:null,streak:0});
 let S;try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){S=fresh()}
 let IMGS=[];try{IMGS=JSON.parse(localStorage.getItem(IKEY)||'[]')}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
@@ -444,7 +509,8 @@ function finish(skipped){
     const lvUp=levelOf(total()-1)!==levelOf(total());
     chime();confetti(st[1]==='SSR'?90:45);bounce();
     const today=todayCount();
-    modal('🍅',`🍅 ${total()}こ目 達成！`,`${S.subj}${S.unit?'（'+S.unit+'）':''}を${min}分がんばったね！<br>ごほうびシール <span style="font-size:28px">${st[0]}</span> <b>${st[1]}</b>${isNew?' 🆕':''}`+(lvUp?`<br>🎉 レベルアップ！「${LV[levelOf(total())][2]}」になった`:'')+(today===S.set.goal?'<br>🎯 きょうの目標たっせい！':''));
+    S.tickets=(S.tickets||0)+1;
+    modal('🍅',`🍅 ${total()}こ目 達成！`,`🎰 ガチャけん +1まい<br>`+`${S.subj}${S.unit?'（'+S.unit+'）':''}を${min}分がんばったね！<br>ごほうびシール <span style="font-size:28px">${st[0]}</span> <b>${st[1]}</b>${isNew?' 🆕':''}`+(lvUp?`<br>🎉 レベルアップ！「${LV[levelOf(total())][2]}」になった`:'')+(today===S.set.goal?'<br>🎯 きょうの目標たっせい！':''));
     setMode(S.cycle%4===0?'long':'short',S.set.auto);
   }else if(was!=='focus'&&!skipped){
     chime();bounce();modal('⏰','きゅうけい おわり！','つぎの🍅をはじめよう！');setMode('focus',S.set.auto);
@@ -687,6 +753,97 @@ async function kbAsk(){
   catch(e){box.textContent=e&&e.code==='rate_limited'?'ちょっと待ってからもう一度ためしてね':e&&e.code==='not_granted'?'AIの利用が許可されていないよ（右上のメニューから許可できます）':'うまく聞けなかった。もう一度ためしてね'}
 }
 $('kbMore').onclick=()=>{CHAT.push({role:'user',content:kbQ},{role:'assistant',content:kbA});saveChat();go('ai')};
+
+// ===== ガチャ =====
+let PRIZES=[],pEditing=false,gBusy=false,pending=null;
+const CAPC=['#e46a7f','#7cc36a','#f1c75a','#7aa7e0','#c79cef','#f39a7b','#3fa3a8'];
+const W={N:10,R:5,SR:2,SSR:1},RR=['N','R','SR','SSR'];
+idbGet('prizes').then(v=>{PRIZES=v||[];drawGacha()}).catch(()=>{});
+const savePrizes=()=>idbPut('prizes',PRIZES).catch(()=>toast('保存できなかった。画像をへらしてね'));
+const CAPPOS=[[78,190],[118,198],[160,200],[202,194],[226,168],[96,160],[140,168],[184,166],[60,150],[120,134],[166,136],[210,130],[88,112],[142,100],[196,98],[110,72],[170,70]];
+function machineSVG(){
+  const pool=PRIZES.length?PRIZES.map(x=>x.d):[];
+  const caps=CAPPOS.map(([x,y],i)=>{const c=CAPC[i%CAPC.length],r=(i*47)%360,img=pool.length?pool[i%pool.length]:'';
+    return `<g transform="translate(${x} ${y}) rotate(${r})"><clipPath id="cc${i}"><circle r="21"/></clipPath><circle r="22" fill="rgba(255,255,255,.75)" stroke="rgba(0,0,0,.12)" stroke-width="1.5"/>${img?`<image href="${img}" x="-17" y="-17" width="34" height="34" clip-path="url(#cc${i})" preserveAspectRatio="xMidYMid meet" transform="rotate(${-r})"/>`:''}<path d="M-22 0a22 22 0 0 1 44 0z" fill="${c}" opacity="${img?.72:.95}"/><path d="M-22 0h44" stroke="rgba(0,0,0,.15)" stroke-width="2"/><ellipse cx="-8" cy="-12" rx="6" ry="3" fill="#fff" opacity=".6" transform="rotate(-30)"/></g>`}).join('');
+  return `<svg viewBox="0 0 300 430"><defs><radialGradient id="glass" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffffff" stop-opacity=".55"/><stop offset=".6" stop-color="#d9f0fb" stop-opacity=".35"/><stop offset="1" stop-color="#a9d6ee" stop-opacity=".5"/></radialGradient><clipPath id="domeC"><circle cx="150" cy="130" r="108"/></clipPath><linearGradient id="bodyG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8fd06f"/><stop offset="1" stop-color="#5fae4e"/></linearGradient></defs>
+  <ellipse cx="150" cy="420" rx="120" ry="9" fill="rgba(0,0,0,.12)"/>
+  <circle cx="150" cy="130" r="112" fill="#eef8fd" stroke="#bfe0ef" stroke-width="4"/>
+  <g clip-path="url(#domeC)"><g id="caps">${caps}</g></g>
+  <circle cx="150" cy="130" r="110" fill="url(#glass)"/>
+  <path d="M70 80q30-50 90-52" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" opacity=".7"/><circle cx="66" cy="100" r="5" fill="#fff" opacity=".7"/>
+  <rect x="36" y="216" width="228" height="26" rx="12" fill="#4e9e45"/>
+  <rect x="34" y="236" width="232" height="178" rx="26" fill="url(#bodyG)" stroke="#4e9e45" stroke-width="4"/>
+  <rect x="62" y="250" width="176" height="30" rx="15" fill="#fff"/><text x="150" y="271" text-anchor="middle" font-size="15" font-weight="800" fill="#4e9e45" font-family="M PLUS Rounded 1c,sans-serif">ミセスッち ガチャ</text>
+  <circle cx="240" cy="306" r="19" fill="#f1c75a" stroke="#d49a2a" stroke-width="2"/><text x="240" y="312" text-anchor="middle" font-size="15">🎫</text>
+  <circle cx="150" cy="320" r="48" fill="#4e9e45" opacity=".35"/>
+  <g id="knobG" transform="rotate(0 150 320)"><circle cx="150" cy="320" r="44" fill="#fff" stroke="#e5e0d2" stroke-width="4"/><rect x="112" y="311" width="76" height="18" rx="9" fill="#e46a7f"/><circle cx="150" cy="320" r="8" fill="#fff" stroke="#e5e0d2" stroke-width="2"/><circle cx="182" cy="320" r="4" fill="#fff"/></g>
+  <rect x="96" y="372" width="108" height="34" rx="14" fill="#2f3a2c"/><rect x="100" y="376" width="100" height="10" rx="5" fill="#46523f"/>
+  </svg>`;
+}
+function drawGacha(){
+  if(!$('gmSvg'))return;
+  $('gTk').textContent=S.tickets||0;
+  if(!gBusy){$('gmSvg').innerHTML=machineSVG()}
+  const n=PRIZES.length;$('pCount').textContent=n?`${PRIZES.filter(x=>S.got[x.id]).length} / ${n}`:'';
+  $('pEdit').textContent=pEditing?'✅ へんしゅうをおわる':'✏️ ガチャの中身をへんしゅう';
+  $('pGrid').innerHTML=PRIZES.map(x=>{const c=S.got[x.id]||0,show=pEditing||c;return `<div class="pz ${show?'':'lock'}" data-id="${x.id}"><img src="${x.d}" alt=""><span class="rb ${x.r}">${x.r}</span>${c?`<span class="ct">×${c}</span>`:''}${pEditing?`<span class="dl" data-del="${x.id}">×</span>`:''}</div>`}).join('')+'<button class="pz add" id="pAdd">＋<small>グッズ画像</small></button>';
+  if(!n)$('gHint').textContent='グッズ画像がまだないので、シールが出るよ。下の「＋」から入れてね';else if(!gBusy)$('gHint').textContent=S.tickets>0?'ハンドルを指でぐるっと1回まわしてね ↻':'🍅を終えるとガチャけんがもらえるよ';
+}
+$('pEdit').onclick=()=>{pEditing=!pEditing;drawGacha()};
+$('pGrid').onclick=e=>{
+  if(e.target.closest('#pAdd')){$('pIn').click();return}
+  const d=e.target.dataset.del;if(d){if(!confirm('このグッズをガチャからけす？'))return;PRIZES=PRIZES.filter(x=>String(x.id)!==d);savePrizes();drawGacha();return}
+  const z=e.target.closest('.pz');if(!z||!pEditing)return;const x=PRIZES.find(x=>String(x.id)===z.dataset.id);x.r=RR[(RR.indexOf(x.r)+1)%4];savePrizes();drawGacha();
+};
+$('pIn').onchange=async e=>{
+  const fs=[...(e.target.files||[])];e.target.value='';if(!fs.length)return;toast(`${fs.length}まい とりこみ中…`);
+  for(const f of fs){
+    const d=await new Promise(res=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=420,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);cutout(c);let u=c.toDataURL('image/webp',.85);if(!u.startsWith('data:image/webp'))u=c.toDataURL('image/png');res(u)};im.onerror=()=>res(null);im.src=r.result};r.readAsDataURL(f)});
+    if(d)PRIZES.push({id:Date.now()+Math.floor(Math.random()*1e4),d,r:'N'});
+  }
+  await savePrizes();drawGacha();toast('🧸 ガチャに入れたよ！');
+};
+// ハンドルを指でまわす
+let kOn=false,kLast=0,kAcc=0,kTick=0;
+function kAngle(e){const r=$('knob').getBoundingClientRect();return Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*180/Math.PI}
+function setKnob(a){const g=document.getElementById('knobG');if(g)g.setAttribute('transform',`rotate(${a} 150 320)`)}
+function tick(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=1400;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.05,n);g.gain.exponentialRampToValueAtTime(.001,n+.04);o.start(n);o.stop(n+.05)}catch(e){}}
+$('knob').addEventListener('pointerdown',e=>{
+  if(gBusy||pending)return;
+  if(!(S.tickets>0)){const k=$('knob');toast('🎫がないよ。🍅を1つ終えるともらえる！');setKnob(-12);setTimeout(()=>setKnob(10),120);setTimeout(()=>setKnob(0),240);return}
+  unlockAudio();kOn=true;kLast=kAngle(e);kAcc=0;kTick=0;$('knob').setPointerCapture(e.pointerId);e.preventDefault();
+});
+$('knob').addEventListener('pointermove',e=>{
+  if(!kOn)return;const a=kAngle(e);let d=a-kLast;if(d>180)d-=360;if(d<-180)d+=360;kLast=a;
+  if(d>0)kAcc+=d;else kAcc=Math.max(0,kAcc+d*.3);setKnob(kAcc);
+  if(Math.floor(kAcc/40)>kTick){kTick=Math.floor(kAcc/40);tick()}
+  $('gHint').textContent=kAcc<360?`あと少し…（${Math.round(kAcc/3.6)}%）`:'';
+  if(kAcc>=360){kOn=false;dispense()}
+});
+['pointerup','pointercancel'].forEach(t=>$('knob').addEventListener(t,()=>{if(kOn){kOn=false;if(kAcc<360){$('gHint').textContent='もっとぐるっと1回まわしてね ↻';let a=kAcc;const back=setInterval(()=>{a=Math.max(0,a-30);setKnob(a);if(!a)clearInterval(back)},16)}}}));
+function pickPrize(){
+  if(PRIZES.length){const tot=PRIZES.reduce((a,x)=>a+W[x.r],0);let r=Math.random()*tot;for(const x of PRIZES){r-=W[x.r];if(r<0)return {img:x.d,id:x.id,r:x.r}}return {img:PRIZES[0].d,id:PRIZES[0].id,r:PRIZES[0].r}}
+  const st=drawSticker(false);return {em:st[0],r:st[1]};
+}
+function dispense(){
+  gBusy=true;S.tickets--;save();$('gTk').textContent=S.tickets;
+  pending=pickPrize();pending.c=pick(CAPC);
+  const caps=document.getElementById('caps');caps.classList.add('shake');
+  setTimeout(()=>{caps.classList.remove('shake');$('outT').style.background=pending.c;const o=$('outCap');o.classList.remove('on');void o.offsetWidth;o.classList.add('on');$('gHint').textContent='カプセルが出たよ！タップしてあけよう 👆';tick();setTimeout(tick,120)},760);
+}
+$('outCap').onclick=()=>{
+  if(!pending)return;const p=pending;
+  $('bigT').style.background=`linear-gradient(160deg,${p.c},${p.c}cc)`;
+  $('prize').innerHTML=p.img?`<img src="${p.img}" alt="">`:`<span class="em">${p.em}</span>`;
+  $('gR').textContent=p.r;$('gR').className='rr '+p.r;
+  const isNew=p.id?!S.got[p.id]:!S.st[p.em];
+  $('gTxt').innerHTML=(isNew?'🆕 はじめてゲット！':'ゲット！')+(p.r==='SSR'?'<br>✨ 超レア！ ✨':'');
+  const g=$('gOpen');g.classList.remove('done');g.classList.add('on');$('outCap').classList.remove('on');
+  const bc=$('bigcap');bc.classList.remove('shk');void bc.offsetWidth;bc.classList.add('shk');
+  setTimeout(()=>{g.classList.add('done');if(sndKey()!=='off')chime(p.r==='SSR'||p.r==='SR'?'fanfare':'pico');confetti(p.r==='SSR'?120:p.r==='SR'?60:25)},1050);
+  if(p.id)S.got[p.id]=(S.got[p.id]||0)+1;else S.st[p.em]=(S.st[p.em]||0)+1;save();
+};
+$('gClose').onclick=()=>{$('gOpen').classList.remove('on','done');pending=null;gBusy=false;drawGacha();drawReward();$('gHint').textContent=S.tickets>0?'もう1回まわせるよ ↻':'🍅を終えるとガチャけんがもらえるよ'};
 // ===== 演出 =====
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
@@ -704,7 +861,7 @@ document.querySelectorAll('.mode b').forEach(b=>b.onclick=()=>{if(S.run&&!confir
 function go(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
-  if(p==='stats')drawStats();if(p==='reward')drawReward();if(p==='set'){drawSet();drawSnd()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
+  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha()}if(p==='set'){drawSet();drawSnd()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
   window.scrollTo({top:0});
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
