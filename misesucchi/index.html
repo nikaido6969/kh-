@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="ミセスッち">
 <meta name="theme-color" content="#f6f1e7">
 <title>ミセスッち 勉強タイマー</title>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Hachi+Maru+Pop&family=Yomogi&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Hachi+Maru+Pop&family=Yomogi&family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@500;700&family=Yusei+Magic&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f6f1e7;--card:#fffdf8;--ink:#3b3a33;--sub:#8a8574;--line:#e9e1cf;--focus:#e46a5a;--focus2:#f39a7b;--rest:#5fae7a;--rest2:#9fd3a8;--gold:#e8b84a;--shadow:0 6px 20px rgba(120,100,60,.12)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -324,11 +324,91 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
 @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-90px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:14px;font-weight:700;transition:.35s;z-index:12;white-space:nowrap}
 .toast.on{transform:translate(-50%,0)}
+
+/* ===== デザイン（手書き風） ===== */
+:root,[data-theme="sakura"]{--bg:#fbf6f1;--card:#fffdfa;--ink:#4b3f3c;--inkA:rgba(75,63,60,.55);--sub:#9a8b86;--line:#ecdfd5;--focus:#e48f8a;--focus2:#f3bdb4;--rest:#8fb79a;--rest2:#c3dcc8;--gold:#e8c46a;--hl:#ffe3a3}
+[data-theme="mint"]{--bg:#f3f8f4;--card:#fcfffd;--ink:#3d4a45;--inkA:rgba(61,74,69,.55);--sub:#86978f;--line:#d9e8df;--focus:#6fb3a0;--focus2:#acd8ca;--rest:#e4a0a0;--rest2:#f2c8c8;--gold:#e8c46a;--hl:#d5f0e6}
+[data-theme="lavender"]{--bg:#f7f4fb;--card:#fffdff;--ink:#47405a;--inkA:rgba(71,64,90,.55);--sub:#968fa8;--line:#e6dff1;--focus:#9b87c9;--focus2:#cdc0ea;--rest:#86b9a5;--rest2:#c2dfd3;--gold:#e8c46a;--hl:#eadfff}
+[data-theme="lemon"]{--bg:#fbf8ee;--card:#fffef9;--ink:#4d4536;--inkA:rgba(77,69,54,.55);--sub:#9c927c;--line:#efe6cc;--focus:#e0a83e;--focus2:#f3d891;--rest:#7fb0c9;--rest2:#bcd8e6;--gold:#e0a83e;--hl:#fff0b8}
+[data-theme="night"]{--bg:#25232c;--card:#302e39;--ink:#f1ebe3;--inkA:rgba(241,235,227,.45);--sub:#aaa3b6;--line:#43404f;--focus:#f0a7a0;--focus2:#8a5d63;--rest:#9fcfb3;--rest2:#45604f;--gold:#f0cf7a;--hl:#5a4a6a}
+:root{--font:"Klee One","Zen Maru Gothic",sans-serif;--head:"Yusei Magic","Klee One",sans-serif;--en:"Caveat",cursive;--hand:255px 18px 225px 18px/18px 225px 18px 255px}
+[data-font="maru"]{--font:"Zen Maru Gothic",sans-serif}
+[data-font="marker"]{--font:"Yusei Magic","Zen Maru Gothic",sans-serif}
+html,body{font-family:var(--font);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .35 0 0 0 0 .3 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");color:var(--ink);font-weight:600}
+.ic{display:inline-flex;width:1.25em;height:1.25em;vertical-align:-.25em;font-style:normal}
+.ic svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.hd{align-items:flex-end;margin:6px 2px 14px}
+.hello{font-size:12px;color:var(--sub)}
+.logo{font-family:var(--en);font-size:34px;font-weight:700;line-height:.95;color:var(--ink);letter-spacing:.01em;position:relative;display:inline-block}
+.logo::after{content:'';position:absolute;left:-4px;right:-6px;bottom:4px;height:10px;background:var(--hl);z-index:-1;border-radius:6px;transform:rotate(-1.5deg)}
+.logo small{display:block;font-size:14px;color:var(--sub);font-weight:600;margin-top:2px}
+.hstat{display:flex;gap:10px}
+.hstat div{text-align:center;line-height:1}
+.hstat b{display:block;font-family:var(--en);font-size:26px;color:var(--focus)}
+.hstat small{font-family:var(--en);font-size:13px;color:var(--sub)}
+.card{border:1.5px solid var(--inkA);border-radius:var(--hand);box-shadow:3px 4px 0 var(--line);background:var(--card)}
+.sec{font-family:var(--head);font-weight:400;font-size:16px;align-items:flex-end}
+.sec .sh{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sec .ic{color:var(--focus);width:1.3em;height:1.3em}
+.sec .en{font-family:var(--en);font-style:normal;font-size:15px;color:var(--sub);margin-left:2px}
+.sec small{font-family:var(--font)}
+.stage{border:1.6px solid var(--inkA);border-radius:30px 22px 34px 24px/24px 34px 22px 30px;box-shadow:4px 5px 0 var(--line)}
+.stage::before,.stage::after{content:'';position:absolute;top:8px;width:70px;height:20px;z-index:2;opacity:.85;background:repeating-linear-gradient(45deg,var(--focus2) 0 7px,#fff8 7px 14px)}
+.stage::before{left:-14px;transform:rotate(-32deg)}.stage::after{right:-14px;transform:rotate(32deg)}
+.mode b{font-family:var(--font);background:rgba(255,255,255,.7);border:1.2px solid transparent}
+.mode b.on{background:var(--card);color:var(--ink);border-color:var(--inkA);border-radius:var(--hand);box-shadow:2px 2px 0 rgba(0,0,0,.06)}
+.time{font-family:var(--en);font-weight:700}
+#time{font-size:62px;letter-spacing:.02em;line-height:1}
+.time small{font-family:var(--font)}
+.btn{border-radius:48% 52% 50% 50%/52% 48% 52% 48%}
+.main{border:2px solid var(--ink);background:var(--focus);color:#fff;box-shadow:3px 4px 0 var(--ink)}
+.stage.short .main,.stage.long .main{background:var(--rest)}
+.main .ic{width:34px;height:34px}.main .ic svg{stroke-width:2.2}
+.sub{border:1.6px solid var(--inkA);background:var(--card);color:var(--ink);box-shadow:2px 3px 0 var(--line)}
+.sub .ic{width:24px;height:24px}
+.chip{font-family:var(--font);font-weight:600;border:1.3px solid var(--inkA);border-radius:var(--hand);background:var(--card);color:var(--ink)}
+.chip.on{background:var(--focus2);color:var(--ink);border-color:var(--ink);box-shadow:2px 2px 0 var(--inkA)}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}
+.duo .card{margin:0}
+.mini #testLeft{font-family:var(--en);font-size:30px!important}
+.goal b{font-family:var(--en);font-size:22px}
+.goal .bar,.xbar,.srow .bar{border:1.2px solid var(--inkA);background:var(--card)}
+.goal .bar i{background:repeating-linear-gradient(-45deg,var(--focus) 0 6px,var(--focus2) 6px 12px)}
+nav{background:var(--card);border-top:1.5px solid var(--inkA)}
+nav button{font-family:var(--font);color:var(--sub)}
+nav button i.ic{width:26px;height:26px;filter:none;opacity:.7;position:relative}
+nav button.on{color:var(--ink)}
+nav button.on i.ic{opacity:1;color:var(--focus)}
+nav button.on i.ic::after{content:'';position:absolute;left:-4px;right:-4px;bottom:0;height:9px;background:var(--hl);z-index:-1;border-radius:5px;transform:rotate(-3deg)}
+.kpi div,.st,.pz,.cb{border-radius:var(--hand)}
+.kpi b{font-family:var(--en);font-size:28px}
+.tin{font:inherit;font-size:16px;border:1.3px solid var(--inkA);border-radius:12px;padding:7px 10px;background:var(--card);color:var(--ink);user-select:text}
+.set.col{flex-direction:column;align-items:stretch;gap:8px}
+.set>.tin{width:58%;min-width:0}
+.mini .sec{flex-wrap:wrap;gap:2px}
+.mini .sec small{width:100%}
+details.fold>summary{list-style:none;cursor:pointer;margin:0}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:"＋";font-family:var(--font);color:var(--sub);font-size:18px}
+details.fold[open]>summary::after{content:"－"}
+details.fold[open]>summary{margin-bottom:10px}
+.fold .cur{font-family:var(--font);font-size:12px;color:var(--sub);margin-left:auto;margin-right:8px}
+.thm{display:flex;gap:10px}
+.thm button{width:40px;height:40px;border-radius:50% 46% 52% 48%;border:1.6px solid var(--inkA);cursor:pointer}
+.thm button.on{outline:3px solid var(--ink);outline-offset:2px}
+.btn.alt{background:var(--card);color:var(--ink);border:1.5px solid var(--inkA)}
+.mbox{border:1.6px solid var(--inkA);border-radius:var(--hand);background:var(--card);color:var(--ink)}
+.mbox h2{font-family:var(--head);font-weight:400}
+.msg.ai{border-radius:18px 18px 18px 6px;border:1.3px solid var(--inkA);background:var(--card)}
+.msg.me{background:var(--focus2);color:var(--ink)}
+.toast{font-family:var(--font)}
+[data-theme="night"] .stage .scene{opacity:.9}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header><h1>ミセスッち <span>🍅</span></h1><div class="pill">🍅 <span id="hTotal">0</span> ・ 🔥<span id="hStreak">0</span>日</div></header>
+  <header class="hd"><div><div class="hello" id="hello">きょうもおつかれさま</div><h1 class="logo">misesucchi<small>study diary</small></h1></div>
+  <div class="hstat"><div><b id="hTotal">0</b><small>tomato</small></div><div><b id="hStreak">0</b><small>days</small></div><div><b id="hCoin">0</b><small>coin</small></div></div></header>
 
   <!-- タイマー -->
   <section class="page on" id="p-timer">
@@ -342,59 +422,62 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       </div>
       <div class="tomatoes" id="tomatoes"></div>
       <div class="ctrl">
-        <button class="btn sub" id="bReset" aria-label="リセット">↺</button>
-        <button class="btn main" id="bMain" aria-label="スタート">▶</button>
-        <button class="btn sub" id="bSkip" aria-label="スキップ">⏭</button>
+        <button class="btn sub" id="bReset" aria-label="リセット"><i class="ic" data-ic="reset"></i></button>
+        <button class="btn main" id="bMain" aria-label="スタート"></button>
+        <button class="btn sub" id="bSkip" aria-label="スキップ"><i class="ic" data-ic="skip"></i></button>
       </div>
       <div class="edbar" id="edbar"><span id="edMsg">キャラを指でうごかしてね（2本指で大きさも変えられるよ）</span><button id="edMinus">－ 小さく</button><button id="edPlus">＋ 大きく</button><button id="edReset">↺ もとにもどす</button><button class="ok" id="edDone">✓ かんりょう</button></div>
     </div>
-    <div class="card" style="margin-top:14px">
-      <div class="sec">🎪 ステージ <small>おまかせは毎日かわるよ</small></div>
+    <div class="duo">
+    <div class="card mini" id="testCard" style="display:none">
+      <div class="sec"><span class="sh"><i class="ic" data-ic="calendar"></i>テストまで<em class="en">test</em></span> <small id="testDate"></small></div>
+      <div style="font-size:30px;font-weight:800;text-align:center" id="testLeft"></div>
+    </div>
+    <div class="card mini">
+      <div class="sec"><span class="sh"><i class="ic" data-ic="goal"></i>きょうの目標<em class="en">today</em></span> <small id="goalTxt"></small></div>
+      <div class="goal"><div class="bar"><i id="goalBar"></i></div><b id="goalNum">0 / 8</b></div>
+    </div>
+    </div>
+    <details class="card fold" id="sbFold">
+      <summary class="sec"><span class="sh"><i class="ic" data-ic="book"></i>なにを勉強する？<em class="en">subject</em></span><small class="cur" id="sbCur"></small></summary>
+      <div class="subj" id="subj"></div>
+      <div class="subj" id="units" style="margin-top:8px"></div>
+    </details>
+    <details class="card fold" id="stFold">
+      <summary class="sec"><span class="sh"><i class="ic" data-ic="flag"></i>ステージ<em class="en">stage</em></span><small class="cur" id="stCur"></small></summary>
       <div class="stsel" id="stsel"></div>
       <div class="today" id="today"></div>
       <input type="file" accept="image/*" id="bgIn" hidden>
-    </div>
+    </details>
     <div class="card">
-      <div class="sec">🔎 AIでヒント検索 <small>中2の内容入り</small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="search"></i>AIでヒント検索<em class="en">hint search</em></span> <small>中2の内容入り</small></div>
       <div class="srch"><input id="kbIn" placeholder="例：一次関数の傾き、不定詞、前線" enterkeyhint="search"><button id="kbAsk">AIに聞く</button></div>
       <div id="kbRes"></div>
       <div class="aians" id="kbAns"></div><div id="kbFig"></div>
       <button class="chip" id="kbMore" style="display:none;margin-top:8px">💡 ヒント先生でつづける</button>
     </div>
-    <div class="card">
-      <div class="sec">🧸 わたしのキャラ <small>タップでメイン・画面に出す</small></div>
+    <details class="card fold" id="chFold">
+      <summary class="sec"><span class="sh"><i class="ic" data-ic="bear"></i>わたしのキャラ<em class="en">my friends</em></span><small class="cur" id="chCur"></small></summary>
+      <p class="muted" style="margin:0 0 8px">キャラをタップすると「メインにする・画面に出す」をえらべるよ</p>
       <button class="chip" id="edStart" style="margin-bottom:8px">✋ キャラの位置・大きさを調整する</button>
       <div class="cpick" id="cpick"></div>
-    </div>
-    <div class="card">
-      <div class="sec">📚 なにを勉強する？</div>
-      <div class="subj" id="subj"></div>
-      <div class="subj" id="units" style="margin-top:8px"></div>
-    </div>
-    <div class="card" id="testCard" style="display:none">
-      <div class="sec">📝 定期テストまで <small id="testDate"></small></div>
-      <div style="font-size:30px;font-weight:800;text-align:center" id="testLeft"></div>
-    </div>
-    <div class="card">
-      <div class="sec">🎯 きょうの目標 <small id="goalTxt"></small></div>
-      <div class="goal"><div class="bar"><i id="goalBar"></i></div><b id="goalNum">0 / 8</b></div>
-    </div>
+    </details>
   </section>
 
   <!-- きろく -->
   <section class="page" id="p-stats">
     <div class="card">
-      <div class="sec">📊 きろく <small>日本時間</small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="note"></i>きろく<em class="en">record</em></span> <small>日本時間</small></div>
       <div class="kpi">
         <div><b id="k1">0</b><span>きょうの🍅</span></div>
         <div><b id="k2">0</b><span>きょう(分)</span></div>
         <div><b id="k3">0</b><span>ぜんぶ(時間)</span></div>
       </div>
-      <div class="sec">さいきん7日 <small>🍅の数</small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="chart"></i>さいきん7日<em class="en">week</em></span> <small>🍅の数</small></div>
       <div class="week" id="week"></div>
     </div>
     <div class="card">
-      <div class="sec">📚 教科べつ <small>ぜんぶの合計</small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="book"></i>教科べつ<em class="en">subjects</em></span> <small>ぜんぶの合計</small></div>
       <div id="bySubj"></div>
     </div>
   </section>
@@ -402,13 +485,13 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
   <!-- ごほうび -->
   <section class="page" id="p-reward">
     <div class="card">
-      <div class="sec">🎰 ミセスッちガチャ <small>🪙コイン1まいで1回</small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="capsule"></i>ミセスッちガチャ<em class="en">gacha</em></span> <small>🪙コイン1まいで1回</small></div>
       <div class="tk">🪙 コイン <b id="gTk">0</b> まい</div>
       <div class="gm" id="gm"><div id="gmSvg"></div><div class="knobHit" id="knob"></div><div class="outCap" id="outCap"><div class="wob"><div class="cap"><div class="t" id="outT"></div><div class="b"></div><div class="ln"></div></div></div></div></div>
       <p class="ghint" id="gHint">ハンドルを指でぐるっと1回まわしてね ↻</p>
     </div>
     <div class="card">
-      <div class="sec">🧸 グッズコレクション <small id="pCount"></small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="heart"></i>グッズコレクション<em class="en">collection</em></span> <small id="pCount"></small></div>
       <div class="pgrid" id="pGrid"></div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="chip" id="pEdit">✏️ ガチャの中身をへんしゅう</button></div>
       <p class="muted" id="pNote">「＋」からグッズの写真を追加できるよ。へんしゅう中は、タップでレア度をかえられるよ。</p>
@@ -418,7 +501,7 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       <div class="lvbox"><div class="big" id="lvIc">🌱</div><div style="flex:1"><h3 id="lvName">Lv.1</h3><p id="lvNext"></p><div class="xbar"><i id="lvBar"></i></div></div></div>
     </div>
     <div class="card">
-      <div class="sec">🎁 シールちょう <small id="stCount"></small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="sparkle"></i>シールちょう<em class="en">stickers</em></span> <small id="stCount"></small></div>
       <div class="grid" id="stickers"></div>
       <p class="muted">🍅を1つ終えるたびにシールが1まいもらえるよ。4つ連続で終えるとレアが出やすくなる！</p>
     </div>
@@ -427,7 +510,7 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
   <!-- ヒント先生 -->
   <section class="page" id="p-ai">
     <div class="card">
-      <div class="aihead"><div class="face" id="aiFace"></div><div><div class="sec" style="margin:0">💡 ヒント先生</div><p>答えは教えないよ。ヒントと質問で、いっしょに考えよう！<br>わからない問題を書くか、📷で写真を送ってね。</p></div></div>
+      <div class="aihead"><div class="face" id="aiFace"></div><div><div class="sec" style="margin:0"><span class="sh"><i class="ic" data-ic="bulb"></i>ヒント先生<em class="en">tutor</em></span></div><p>答えは教えないよ。ヒントと質問で、いっしょに考えよう！<br>わからない問題を書くか、📷で写真を送ってね。</p></div></div>
       <div class="chat" id="chat"></div>
       <div class="quickq" id="quickq"></div>
       <div class="photo" id="photo"><img id="photoImg" alt=""><span>この写真もいっしょに送るよ</span><button class="chip" id="photoX" style="padding:4px 10px">×</button></div>
@@ -443,12 +526,21 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
   <!-- せってい -->
   <section class="page" id="p-set">
     <div class="card">
-      <div class="sec">🧸 キャラ <small>iPhoneの画像を使えるよ</small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="brush"></i>きせかえ<em class="en">customize</em></span></div>
+      <div class="set">おなまえ<input id="nmIn" class="tin" maxlength="10" placeholder="なまえ"></div>
+      <div class="set col">テーマカラー<div class="thm" id="thm"></div></div>
+      <div class="set col">もじのスタイル<div class="stsel" id="fnt"></div></div>
+      <div class="set col">じぶんの教科<div class="stsel" id="mySubj"></div><div class="srch"><input id="msIn" maxlength="8" placeholder="例：塾の宿題、英検"><button id="msAdd">ついか</button></div></div>
+      <div class="set col">キャラのおうえんセリフ<div class="stsel" id="myCheer"></div><div class="srch"><input id="mcIn" maxlength="20" placeholder="例：いけるいける！"><button id="mcAdd">ついか</button></div></div>
+      <div class="set col">データのバックアップ<div class="stsel"><button class="chip" id="bkOut">コピーする</button><button class="chip" id="bkIn">はりつけて復元</button></div><small class="muted" style="margin:0">きろく・設定をまとめて保存できます（画像はふくみません）</small></div>
+    </div>
+    <div class="card">
+      <div class="sec"><span class="sh"><i class="ic" data-ic="bear"></i>キャラ<em class="en">friends</em></span> <small>iPhoneの画像を使えるよ</small></div>
       <div class="cgrid" id="charas"></div>
       <p class="muted">背景は自動で消えるよ。キャラがたくさん写った画像は、1人ずつ切り抜いてから入れるときれい。画像はこのiPhoneの中だけに保存されます。</p>
     </div>
     <div class="card">
-      <div class="sec">⏱ タイマー</div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="sliders"></i>タイマー<em class="en">timer</em></span></div>
       <div class="set">しゅうちゅう<div class="seg" data-k="focus"></div></div>
       <div class="set">きゅうけい<div class="seg" data-k="short"></div></div>
       <div class="set">ながいきゅうけい<div class="seg" data-k="long"></div></div>
@@ -457,7 +549,7 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
       <div class="set">つぎを自動スタート<div class="seg" data-k="auto"></div></div>
     </div>
     <div class="card">
-      <div class="sec">🔔 タイマーがおわった時の音 <small>タップで試し聞き</small></div>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="bell"></i>おわりの音<em class="en">sound</em></span> <small>タップで試し聞き</small></div>
       <div class="cpick" id="sndList" style="flex-wrap:wrap"></div>
       <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
         <button class="chip" id="sndImport">🎵 iPhoneの音楽をとりこむ</button>
@@ -473,14 +565,15 @@ nav button.on{color:var(--focus)}nav button.on i{filter:none;opacity:1}
 </div>
 
 <nav>
-  <button class="on" data-p="timer"><i>🍅</i>タイマー</button>
-  <button data-p="stats"><i>📊</i>きろく</button>
-  <button data-p="ai"><i>💡</i>ヒント</button>
-  <button data-p="reward"><i>🎰</i>ガチャ</button>
-  <button data-p="set"><i>⚙️</i>せってい</button>
+  <button class="on" data-p="timer"><i class="ic" data-ic="timer"></i>ホーム</button>
+  <button data-p="stats"><i class="ic" data-ic="note"></i>きろく</button>
+  <button data-p="ai"><i class="ic" data-ic="bulb"></i>ヒント</button>
+  <button data-p="reward"><i class="ic" data-ic="capsule"></i>ガチャ</button>
+  <button data-p="set"><i class="ic" data-ic="brush"></i>きせかえ</button>
 </nav>
 <div class="modal" id="modal"><div class="mbox"><div class="ic" id="mIc"></div><h2 id="mT"></h2><p id="mP"></p><button class="btn" id="mOk">OK</button></div></div>
 <div class="toast" id="toast"></div>
+<div class="modal" id="dlg"><div class="mbox"><p id="dlgP" style="color:var(--ink);font-size:15px"></p><textarea id="dlgT" class="tin" style="width:100%;height:110px;display:none;margin-bottom:10px"></textarea><div style="display:flex;gap:8px"><button class="btn alt" id="dlgNo" style="flex:1;padding:12px">やめる</button><button class="btn" id="dlgYes" style="flex:1;padding:12px">OK</button></div></div></div>
 <div class="modal" id="sheet"><div class="mbox"><div id="shImg" style="width:130px;height:130px;margin:0 auto 6px"></div><h2 id="shT"></h2><p id="shP" style="margin:4px 0 8px"></p><button class="btn" id="shMain">⭐ メインキャラにする</button><button class="btn alt" id="shParty">🏠 画面に出す</button><button class="chip" id="shX" style="margin-top:12px">とじる</button></div></div>
 <div id="gOpen"><div class="rays"></div><div class="bigcap" id="bigcap"><div class="prize" id="prize"></div><div class="ht" id="bigT"></div><div class="hb"></div></div><div class="ginfo"><span class="rr" id="gR">N</span><p id="gTxt"></p><button class="btn" id="gClose">キャラに追加する</button></div></div>
 <input type="file" accept="image/*" id="upl" hidden><input type="file" accept="image/*" id="camIn" hidden>
@@ -659,7 +752,7 @@ function draw(){
   if(!S.onboarded)$('tLabel').textContent='まずはガチャでキャラを決めよう！（キャラをタップ）';
   $('actPill').innerHTML=act?`<span class="act">${act[2]} キャラは${act[1]}</span>`:'';
   const fg=$('ringFg');fg.style.strokeDasharray=C;fg.style.strokeDashoffset=C*(l/tot);fg.style.stroke=m==='focus'?'var(--focus)':'var(--rest)';
-  $('bMain').textContent=S.run?'❚❚':'▶';
+  {const mi=S.run?'pause':'play';if($('bMain').dataset.i!==mi){$('bMain').dataset.i=mi;$('bMain').innerHTML=`<i class="ic">${IC[mi]}</i>`}}
   $('tomatoes').innerHTML=[0,1,2,3].map(i=>`<i class="${i<S.cycle%4?'on':''}">🍅</i>`).join('');
   const mk=S.onboarded?S.chara:'_cap';if(lastChara!==mk){lastChara=mk;$('charaIn').innerHTML=mk==='_cap'?'<div class="capq"><div>？</div></div>':charaHTML(mk);lastParty=''}
   const ak=act?act[0]:'';
@@ -669,12 +762,14 @@ function draw(){
   if(ak!==lastAct){lastAct=ak;$('charaIn').className='in '+(ak?'a-'+ak:'breathe');$('prop').innerHTML=ak?FX[ak]:'';
     document.querySelectorAll('.mate .in').forEach((el,i)=>{el.className='in '+(ak?'a-'+ak:'breathe');el.style.animationDelay=(-.3*(i+1))+'s'})}
   document.title=S.run?`${$('time').textContent} ${m==='focus'?'🍅':'☕'} ミセスッち`:'ミセスッち 勉強タイマー';
-  $('hTotal').textContent=total();$('hStreak').textContent=S.streak;
+  $('hTotal').textContent=total();if($('hCoin'))$('hCoin').textContent=S.tickets||0;$('hStreak').textContent=S.streak;
   const tc=todayCount(),g=S.set.goal;
   $('goalBar').style.width=Math.min(100,tc/g*100)+'%';$('goalNum').textContent=`${tc} / ${g}`;
   $('goalTxt').textContent=tc>=g?'たっせい！🎉':`あと${g-tc}こ（${(g-tc)*S.set.focus}分）`;
 }
-function drawSubj(){$('subj').innerHTML=SUBJ.map(([n])=>`<button class="chip ${S.subj===n?'on':''}" data-s="${n}">${n}</button>`).join('');
+const PALX=['#e48f8a','#8fb79a','#9b87c9','#e3b24a','#6fa8c9','#c98a5a'];
+const subjList=()=>SUBJ.concat((S.mySubj||[]).map((n,i)=>[n,PALX[i%PALX.length]]));
+function drawSubj(){if($('sbCur'))$('sbCur').textContent=S.subj+(S.unit?'・'+S.unit:'');$('subj').innerHTML=subjList().map(([n])=>`<button class="chip ${S.subj===n?'on':''}" data-s="${n}">${n}</button>`).join('');
   const u=UNITS[S.subj];$('units').style.display=u?'flex':'none';
   if(u)$('units').innerHTML=['ぜんぱん',...u].map(x=>`<button class="chip ${(S.unit||'ぜんぱん')===x?'on':''}" data-u="${x}" style="font-size:12px;padding:6px 11px">${x}</button>`).join('');}
 $('units').onclick=e=>{const u=e.target.dataset.u;if(!u)return;S.unit=u==='ぜんぱん'?'':u;save();drawSubj();draw()};
@@ -693,7 +788,7 @@ function drawStats(){
   const cnt=days.map(d=>S.logs.filter(l=>l.d===d).length),mx=Math.max(4,...cnt);
   $('week').innerHTML=days.map((d,i)=>`<div class="day ${i===6?'today':''}">${cnt[i]||''}<i style="height:${Math.max(3,cnt[i]/mx*100)}px"></i>${+d.slice(5,7)}/${+d.slice(8)}</div>`).join('');
   const by={};S.logs.forEach(l=>by[l.subj]=(by[l.subj]||0)+l.min);const mxs=Math.max(1,...Object.values(by));
-  $('bySubj').innerHTML=SUBJ.filter(([n])=>by[n]).sort((a,b)=>by[b[0]]-by[a[0]]).map(([n,c])=>`<div class="srow"><span>${n}</span><div class="bar"><i style="width:${by[n]/mxs*100}%;background:${c}"></i></div><em>${by[n]>=60?(by[n]/60).toFixed(1)+'時間':by[n]+'分'}</em></div>`).join('')||'<p class="muted">まだきろくがないよ。🍅を1つやってみよう！</p>';
+  $('bySubj').innerHTML=subjList().filter(([n])=>by[n]).sort((a,b)=>by[b[0]]-by[a[0]]).map(([n,c])=>`<div class="srow"><span>${n}</span><div class="bar"><i style="width:${by[n]/mxs*100}%;background:${c}"></i></div><em>${by[n]>=60?(by[n]/60).toFixed(1)+'時間':by[n]+'分'}</em></div>`).join('')||'<p class="muted">まだきろくがないよ。🍅を1つやってみよう！</p>';
 }
 function drawReward(){
   const n=total(),i=levelOf(n),cur=LV[i],nx=LV[i+1];
@@ -706,7 +801,7 @@ function drawReward(){
 function myCharas(){return ['apple',...IMGS.map((u,i)=>'img'+i),...(typeof PRIZES!=='undefined'?PRIZES:[]).filter(x=>S.got[x.id]).map(x=>'p'+x.id),...(S.ems||[])]}
 function validKey(k){return myCharas().includes(k)}
 function pickerHTML(del){return myCharas().map(k=>`<button class="cb ${S.chara===k?'on':''}" data-c="${k}">${charaHTML(k)}${S.chara===k?'<span class="mn">⭐</span>':''}${(S.party||[]).includes(k)?'<span class="pt">🏠</span>':''}${del&&k.startsWith('img')?`<span data-del="${k.slice(3)}">×</span>`:''}</button>`).join('')+(IMGS.length<10?'<button class="cb add" data-add="1">＋<small>画像</small></button>':'')}
-function drawPick(){$('cpick').innerHTML=pickerHTML(false)}
+function drawPick(){$('cpick').innerHTML=pickerHTML(false);if($('chCur'))$('chCur').textContent=S.onboarded?`なかま ${(S.party||[]).length}人`:''}
 function drawSet(){
   $('testIn').value=S.test||'';
   $('charas').innerHTML=pickerHTML(true);
@@ -714,9 +809,9 @@ function drawSet(){
 }
 document.querySelectorAll('.seg').forEach(el=>el.onclick=e=>{const v=e.target.dataset.v;if(v===undefined)return;const k=el.dataset.k;S.set[k]=JSON.parse(v);
   if(['focus','short','long'].includes(k)&&!S.run&&S.mode===k)S.remain=dur(k);save();drawSet();draw()});
-function onPick(e){
+async function onPick(e){
   const d=e.target.dataset.del;
-  if(d!==undefined){if(!confirm('この画像をけす？'))return;const i=+d;IMGS.splice(i,1);saveImgs();
+  if(d!==undefined){if(!await ask('この画像をけす？'))return;const i=+d;IMGS.splice(i,1);saveImgs();
     if(S.chara==='img'+i)S.chara='apple';else if(S.chara.startsWith('img')&&+S.chara.slice(3)>i)S.chara='img'+(+S.chara.slice(3)-1);lastChara='';save();drawSet();drawPick();draw();return}
   if(e.target.closest('[data-add]')){$('upl').click();return}
   const b=e.target.closest('[data-c]');if(!b)return;openSheet(b.dataset.c)}
@@ -743,7 +838,7 @@ $('upl').onchange=e=>{
     IMGS.push(u);if(!saveImgs()){IMGS.pop();toast('容量がいっぱい。画像をへらしてね');return}
     S.chara='img'+(IMGS.length-1);save();drawSet();drawPick();draw();toast('📷 キャラにしたよ！')};im.src=r.result};r.readAsDataURL(f)};
 $('testIn').onchange=e=>{S.test=e.target.value;save();drawTest();toast(S.test?'📝 テストの日を設定したよ':'テストの日をけしたよ')};
-$('reset').onclick=()=>{if(confirm('きろくとシールをリセットする？（キャラ画像は残ります）')){const c=S.chara,st=S.set;S=fresh();S.chara=c;S.set=st;S.remain=dur('focus');save();dayCheck();draw();drawSet();toast('リセットしたよ')}};
+$('reset').onclick=async()=>{if(await ask('きろくとシールをリセットする？（キャラ画像は残ります）')){const c=S.chara,st=S.set;S=fresh();S.chara=c;S.set=st;S.remain=dur('focus');save();dayCheck();draw();drawSet();toast('リセットしたよ')}};
 
 // ===== 中学2年の学習内容（検索用） =====
 const KB=[
@@ -984,9 +1079,9 @@ function drawGacha(){
   if(!n)$('gHint').textContent='ガチャの中身がからっぽです。下の「＋」からグッズ画像を入れてね';else if(!gBusy)$('gHint').textContent=S.tickets>0?'ハンドルを指でぐるっと1回まわしてね ↻':'🍅を終えるとコインがもらえるよ';
 }
 $('pEdit').onclick=()=>{pEditing=!pEditing;drawGacha()};
-$('pGrid').onclick=e=>{
+$('pGrid').onclick=async e=>{
   if(e.target.closest('#pAdd')){$('pIn').click();return}
-  const d=e.target.dataset.del;if(d){if(!confirm('このグッズをガチャからけす？'))return;PRIZES=PRIZES.filter(x=>String(x.id)!==d);savePrizes();drawGacha();return}
+  const d=e.target.dataset.del;if(d){if(!await ask('このグッズをガチャからけす？'))return;PRIZES=PRIZES.filter(x=>String(x.id)!==d);savePrizes();drawGacha();return}
   const z=e.target.closest('.pz');if(!z)return;if(!pEditing){if(S.got[z.dataset.id])openSheet('p'+z.dataset.id);return}const x=PRIZES.find(x=>String(x.id)===z.dataset.id);x.r=RR[(RR.indexOf(x.r)+1)%4];savePrizes();drawGacha();
 };
 $('pIn').onchange=async e=>{
@@ -1125,10 +1220,11 @@ function drawScene(){
   if(key!==sceneKey){sceneKey=key;
     $('scene').innerHTML=sel==='custom'&&bgURL?`<img src="${bgURL}" alt="">`:sceneSVG(kind,se,w,t)+particles(kind,se,w,t)}
   if($('stsel')){$('stsel').innerHTML=Object.entries(STAGES).map(([k,n])=>`<button class="chip ${sel===k?'on':''}" data-st="${k}">${n}</button>`).join('')+(bgURL?'<button class="chip" data-st="bgdel" style="color:#c94a64">画像をけす</button>':'');
+    if($('stCur'))$('stCur').textContent=(STAGES[sel]||'').replace(/^\S+ /,'');
     $('today').textContent=`きょう（${+jst().slice(5,7)}/${+jst().slice(8)}）：${STAGES[kind]}・${SEAN[se]}・${WXN[w]}${S.wx&&S.wx.d===jst()&&S.wx.real?'（東京の天気）':''}`;}
 }
 $('stsel').onclick=async e=>{const k=e.target.dataset.st;if(!k)return;
-  if(k==='bgdel'){if(!confirm('背景の画像をけす？'))return;await idbPut('bg',null).catch(()=>{});bgURL='';if(S.stageSel==='custom')S.stageSel='auto';save();sceneKey='';drawScene();return}
+  if(k==='bgdel'){if(!await ask('背景の画像をけす？'))return;await idbPut('bg',null).catch(()=>{});bgURL='';if(S.stageSel==='custom')S.stageSel='auto';save();sceneKey='';drawScene();return}
   if(k==='custom'&&!bgURL){$('bgIn').click();return}
   S.stageSel=k;save();sceneKey='';drawScene();toast(STAGES[k]+' にしたよ')};
 $('bgIn').onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
@@ -1202,6 +1298,61 @@ document.querySelector('.ringbox').addEventListener('pointermove',e=>{
   if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);
   if(dragBase){save();const el=dragBase.el;dragBase=ptrs.size?{L:{...lget(el)},pts:new Map([...ptrs].map(([k,v])=>[k,{...v}])),el}:null}
 }));
+
+// ===== 手書きアイコン =====
+const IC={
+timer:'<path d="M5.2 13.5c0-4.3 3-7 6.9-7 4 0 6.8 2.8 6.7 6.9-.1 4.2-3.1 6.9-6.9 6.9-3.9.1-6.8-2.6-6.7-6.8z"/><path d="M9 6.8c1-.2 2-.9 3-2.2.8 1.3 1.9 2 3.2 2.1M12 4.4l.3-1.9"/><path d="M8.3 12.6c.4-1.2 1.2-2 2.3-2.4"/>',
+note:'<path d="M6.5 3.8c3.9-.2 7.9-.1 11.6.1.3 5.4.2 10.8-.1 16.2-3.8.2-7.6.1-11.4 0-.3-5.4-.3-10.9-.1-16.3z"/><path d="M4.6 7h2.6M4.4 11.6h2.7M4.6 16.2h2.5M10.4 16.6v-3.1M13.3 16.7l-.1-5.6M16.1 16.5v-7.4"/>',
+bulb:'<path d="M8.6 15.3c-1.9-1.4-2.9-3.3-2.8-5.4.2-3.4 2.9-5.9 6.3-5.8 3.3.1 6 2.8 5.9 6.1 0 2.1-1.1 3.8-2.9 5.1l-.1 2.2c-2.1.3-4.2.3-6.3 0z"/><path d="M9.6 20.2c1.6.3 3.2.3 4.8 0M10.8 12.1l1.2 1.6 1.3-1.7"/>',
+capsule:'<path d="M4.4 12.2c-.1-4.2 3.4-7.6 7.6-7.7 4.3 0 7.8 3.4 7.7 7.6"/><path d="M4.3 12.1c5.1.4 10.3.4 15.5-.1.2 4.2-3.3 7.7-7.6 7.8-4.4.1-7.9-3.4-7.9-7.7z"/><path d="M8.2 8.6c.6-.9 1.6-1.6 2.7-1.9"/>',
+brush:'<path d="M14.8 4.6c1.6-1.4 3.4-1.6 4.6-.4 1.1 1.2.8 3-.6 4.5l-6.2 6.4-3.9-3.9z"/><path d="M8.6 11.3c-2.2.1-3.6 1.6-3.8 3.6-.2 1.8-.9 3-2.1 3.9 3.1.9 6.3.4 7.9-1.4 1.1-1.3 1.3-2.6.9-3.8"/>',
+flag:'<path d="M4 19.6c2.8-4.8 5.4-9.7 8-14.6 2.7 4.8 5.3 9.7 8 14.7M12 5c-.1 4.9-.1 9.7.1 14.6M3.2 19.8c5.9.2 11.8.2 17.7-.1M12.1 5.1l1-2.2 2.2.6-1.3 1.6"/>',
+search:'<path d="M10.4 4.3c3.4-.1 6 2.5 6.1 5.8 0 3.4-2.6 6.1-6 6.1-3.3.1-6-2.6-6-5.9-.1-3.3 2.6-6 5.9-6z"/><path d="M15 14.8l4.7 4.9M7.8 8.6c.5-1 1.3-1.6 2.4-1.8"/>',
+bear:'<path d="M6.6 7.4c-1.3-.3-2.2-1.4-1.9-2.6.3-1.3 1.7-1.8 2.9-1.3M17.4 7.3c1.3-.4 2.1-1.5 1.8-2.7-.4-1.2-1.8-1.7-3-1.1"/><path d="M12 5.4c4 0 7.1 3.2 7 7.2-.1 4-3.2 7-7.1 6.9-3.9 0-7-3.1-6.9-7.1.1-3.9 3.1-7 7-7z"/><path d="M9.4 11.2v.4M14.6 11.2v.4M10.4 14.6c1 .9 2.3.9 3.2 0"/>',
+book:'<path d="M3.8 6c2.8-.9 5.6-.6 8.2 1 2.6-1.6 5.4-1.9 8.2-1 .2 4.3.2 8.6 0 12.9-2.8-.8-5.6-.6-8.2.9-2.6-1.5-5.4-1.7-8.2-.8-.2-4.3-.2-8.7 0-13z"/><path d="M12 7c-.1 4.2-.1 8.5 0 12.8"/>',
+calendar:'<path d="M4.3 6.4c5.1-.3 10.3-.2 15.5 0 .2 4.4.2 8.9 0 13.4-5.2.2-10.3.2-15.5 0-.2-4.5-.2-9 0-13.4z"/><path d="M4.4 10.1c5 .2 10.1.1 15.2-.1M8.2 4.2v3.6M15.9 4.1v3.7M11.3 13.4l1.4 1.5 2.6-3"/>',
+goal:'<path d="M6.2 20.4c-.3-5.6-.3-11.2.1-16.8"/><path d="M6.4 4.2c3.3-1.2 5.4 1.4 8.6.3 1.4-.5 2.6-.7 3.9-.5-.2 2.9-.2 5.8 0 8.6-3.9-.6-6.2 2.2-12.4.6"/>',
+chart:'<path d="M4 20.2c5.4.2 10.8.2 16.2-.1M7.1 17.4v-5.2M12 17.5V7.6M16.9 17.4v-8.3"/>',
+bell:'<path d="M6.3 16.3c.8-1.4 1-3 1-4.8 0-3 2-5.3 4.8-5.4 2.8 0 4.8 2.3 4.8 5.3 0 1.8.3 3.5 1.1 4.9-3.9.4-7.8.4-11.7 0z"/><path d="M10.4 19.1c.9.9 2.3.9 3.2 0M12 4.1v1.9"/>',
+sliders:'<path d="M4.2 7.5c5.2-.2 10.4-.2 15.6 0M4.3 16.6c5.1.2 10.3.1 15.5-.1"/><path d="M9.2 5.4c1.2-.1 2.1.8 2.1 2.1 0 1.1-.9 2-2.1 2-1.1 0-2-.9-2-2 0-1.2.8-2.1 2-2.1zM15 14.5c1.2 0 2.1.9 2.1 2.1 0 1.1-.9 2-2.1 2s-2-.9-2-2c0-1.2.9-2.1 2-2.1z"/>',
+heart:'<path d="M12 19.4c-3.6-2.5-7.6-5.6-7.7-9.2-.1-2.5 1.8-4.4 4.1-4.4 1.6 0 2.8.9 3.6 2.3.8-1.4 2-2.3 3.6-2.3 2.3 0 4.2 1.9 4.1 4.4-.1 3.6-4.1 6.7-7.7 9.2z"/>',
+sparkle:'<path d="M12 3.6c.6 3.9 2.4 6.1 6.4 7.1-4 1-5.8 3.2-6.4 7.4-.7-4.2-2.4-6.4-6.4-7.4 4-1 5.7-3.2 6.4-7.1zM18.6 3.9l.1 2.6M17.3 5.2h2.6"/>',
+play:'<path d="M8.4 5.3c3.8 2 7.3 4.3 10.5 6.8-3.2 2.5-6.7 4.8-10.6 6.7-.3-4.5-.3-9 .1-13.5z" fill="currentColor"/>',
+pause:'<path d="M8.6 5.6c.3 4.3.2 8.6 0 12.9M15.4 5.5c.2 4.3.2 8.6 0 13" stroke-width="3.4"/>',
+reset:'<path d="M6.4 8.6c1.4-2.6 4.1-4 7-3.6 3.6.6 6.1 3.9 5.6 7.6-.5 3.6-3.9 6.1-7.5 5.6-2.4-.3-4.3-1.9-5.1-4M5.6 4.6l.6 4.2 4.1-.9"/>',
+skip:'<path d="M5.4 6.2c2.9 1.8 5.5 3.7 7.8 5.9-2.3 2.1-4.9 4-7.7 5.8-.2-3.9-.3-7.8-.1-11.7zM17.6 5.8c.2 4.1.2 8.3 0 12.4"/>',
+};
+for(const k in IC)IC[k]=`<svg viewBox="0 0 24 24">${IC[k]}</svg>`;
+function paintIcons(root=document){root.querySelectorAll('i.ic[data-ic]').forEach(e=>{if(!e.firstChild)e.innerHTML=IC[e.dataset.ic]||''})}
+// ===== 確認ダイアログ（ブラウザの確認画面のかわり） =====
+function ask(msg,withText){return new Promise(res=>{$('dlgP').textContent=msg;const t=$('dlgT');t.style.display=withText?'block':'none';t.value='';$('dlg').classList.add('on');
+  const done=v=>{$('dlg').classList.remove('on');$('dlgYes').onclick=$('dlgNo').onclick=null;res(v)};
+  $('dlgYes').onclick=()=>done(withText?t.value:true);$('dlgNo').onclick=()=>done(withText?null:false)})}
+// ===== きせかえ =====
+const THEMES=[['sakura','#f3bdb4'],['mint','#acd8ca'],['lavender','#cdc0ea'],['lemon','#f3d891'],['night','#302e39']];
+const FONTS=[['pen','ペン字'],['maru','まるもじ'],['marker','マーカー']];
+const BASE_FOCUS=TALK.focus.slice(),BASE_IDLE=TALK.idle.slice();
+function applyLook(){document.documentElement.dataset.theme=S.theme||'sakura';document.documentElement.dataset.font=S.font||'pen';
+  TALK.focus=BASE_FOCUS.concat(S.cheers||[]);TALK.idle=BASE_IDLE.concat(S.cheers||[]);
+  const h=+new Date().toLocaleString('en-US',{timeZone:'Asia/Tokyo',hour:'numeric',hour12:false})%24;
+  const g=h<5?'こんばんは':h<11?'おはよう':h<17?'こんにちは':'こんばんは',d=new Date(jst()+'T12:00:00+09:00');
+  $('hello').textContent=`${+jst().slice(5,7)}.${+jst().slice(8)} ${['sun','mon','tue','wed','thu','fri','sat'][d.getUTCDay()]} ・ ${g}${S.name?'、'+S.name:''}`}
+function drawLook(){
+  $('nmIn').value=S.name||'';
+  $('thm').innerHTML=THEMES.map(([k,c])=>`<button class="${(S.theme||'sakura')===k?'on':''}" data-t="${k}" style="background:${c}" aria-label="${k}"></button>`).join('');
+  $('fnt').innerHTML=FONTS.map(([k,n])=>`<button class="chip ${(S.font||'pen')===k?'on':''}" data-f="${k}">${n}</button>`).join('');
+  $('mySubj').innerHTML=(S.mySubj||[]).map((n,i)=>`<button class="chip" data-ms="${i}">${esc(n)} ×</button>`).join('');
+  $('myCheer').innerHTML=(S.cheers||[]).map((n,i)=>`<button class="chip" data-mc="${i}">${esc(n)} ×</button>`).join('');
+}
+$('nmIn').onchange=e=>{S.name=e.target.value.trim().slice(0,10);save();applyLook();toast('おなまえを保存したよ')};
+$('thm').onclick=e=>{const t=e.target.dataset.t;if(!t)return;S.theme=t;save();applyLook();drawLook();sceneKey=''};
+$('fnt').onclick=e=>{const f=e.target.dataset.f;if(!f)return;S.font=f;save();applyLook();drawLook()};
+$('msAdd').onclick=()=>{const v=$('msIn').value.trim();if(!v)return;if(subjList().some(x=>x[0]===v)){toast('もうあるよ');return}(S.mySubj=S.mySubj||[]).push(v);$('msIn').value='';save();drawLook();drawSubj();toast('教科を追加したよ')};
+$('mySubj').onclick=async e=>{const i=e.target.dataset.ms;if(i===undefined)return;if(!(await ask('この教科をけす？（きろくは残ります）')))return;S.mySubj.splice(+i,1);save();drawLook();drawSubj()};
+$('mcAdd').onclick=()=>{const v=$('mcIn').value.trim();if(!v)return;(S.cheers=S.cheers||[]).push(v);$('mcIn').value='';save();applyLook();drawLook();say(v)};
+$('myCheer').onclick=e=>{const i=e.target.dataset.mc;if(i===undefined)return;S.cheers.splice(+i,1);save();applyLook();drawLook()};
+$('bkOut').onclick=async()=>{const t=JSON.stringify(S);try{await navigator.clipboard.writeText(t);toast('📋 コピーしたよ。メモなどに貼って保存してね')}catch(e){await ask('下の文字を全部コピーして保存してね',true).catch(()=>{});}};
+$('bkIn').onclick=async()=>{const t=await ask('バックアップの文字を貼りつけてね',true);if(!t)return;try{const o=JSON.parse(t);if(!o||typeof o!=='object'||!o.set)throw 0;S=Object.assign(fresh(),o);save();applyLook();drawLook();drawSubj();refreshChars();toast('✅ 復元したよ')}catch(e){toast('読みこめなかった。全部貼れているか確認してね')}};
 // ===== 演出 =====
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
@@ -1216,12 +1367,12 @@ $('chara').onclick=()=>{if(editing)return;if(!S.onboarded){go('reward');return}b
 // ===== 操作 =====
 $('bMain').onclick=()=>S.run?pause():start();
 $('bReset').onclick=()=>{S.remain=dur(S.mode);S.run=false;save();draw();toast('リセットしたよ')};
-$('bSkip').onclick=()=>{if(S.mode==='focus'&&!confirm('この🍅をスキップする？（きろくされません）'))return;finish(true)};
-document.querySelectorAll('.mode b').forEach(b=>b.onclick=()=>{if(S.run&&!confirm('タイマーを止めて切りかえる？'))return;setMode(b.dataset.m,false)});
+$('bSkip').onclick=async()=>{if(S.mode==='focus'&&!await ask('この🍅をスキップする？（きろくされません）'))return;finish(true)};
+document.querySelectorAll('.mode b').forEach(b=>b.onclick=async()=>{if(S.run&&!await ask('タイマーを止めて切りかえる？'))return;setMode(b.dataset.m,false)});
 function go(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
-  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha()}if(p==='set'){drawSet();drawSnd()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
+  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
   window.scrollTo({top:0});
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
@@ -1233,7 +1384,7 @@ setInterval(()=>{
   draw();
 },250);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){dayCheck();drawTest();draw()}});
-dayCheck();drawSubj();drawTest();drawPick();draw();applyLayout();fetchWx();
+paintIcons();applyLook();dayCheck();drawSubj();drawTest();drawPick();draw();applyLayout();fetchWx();
 setTimeout(()=>say(S.run?'おかえり！つづいてるよ':pick(TALK.idle)),500);
 if(!S.onboarded){if(!(S.tickets>0))S.tickets=1;save();setTimeout(()=>{modal('🎰','ようこそ ミセスッちへ！','まずはガチャをまわして、いっしょにがんばる<b>キャラ</b>を決めよう！');onboardGo='reward'},700)}
 </script>
