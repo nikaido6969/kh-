@@ -317,6 +317,9 @@ h1 span{color:var(--focus)}
 .stage.focus .a-read{animation-duration:4.5s!important}
 .stage.focus .fx{animation-duration:3.5s!important;opacity:.85}
 .stage.focus .f-sweep,.stage.focus .f-strum{animation-duration:2.2s!important}
+.nmin{display:block;width:100%;max-width:260px;margin:0 auto 12px;text-align:center;font-family:var(--head);font-size:18px}
+.pz .nm,.cb .nm{position:absolute;left:0;right:0;bottom:-16px;font-size:10px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);font-family:var(--font)}
+.pgrid{row-gap:20px}.cpick{padding-bottom:16px}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -579,8 +582,8 @@ details.fold[open]>summary{margin-bottom:10px}
 <div class="modal" id="modal"><div class="mbox"><div class="ic" id="mIc"></div><h2 id="mT"></h2><p id="mP"></p><button class="btn" id="mOk">OK</button></div></div>
 <div class="toast" id="toast"></div>
 <div class="modal" id="dlg"><div class="mbox"><p id="dlgP" style="color:var(--ink);font-size:15px"></p><textarea id="dlgT" class="tin" style="width:100%;height:110px;display:none;margin-bottom:10px"></textarea><div style="display:flex;gap:8px"><button class="btn alt" id="dlgNo" style="flex:1;padding:12px">やめる</button><button class="btn" id="dlgYes" style="flex:1;padding:12px">OK</button></div></div></div>
-<div class="modal" id="sheet"><div class="mbox"><div id="shImg" style="width:130px;height:130px;margin:0 auto 6px"></div><h2 id="shT"></h2><p id="shP" style="margin:4px 0 8px"></p><button class="btn" id="shMain">⭐ メインキャラにする</button><button class="btn alt" id="shParty">🏠 画面に出す</button><button class="chip" id="shX" style="margin-top:12px">とじる</button></div></div>
-<div id="gOpen"><div class="rays"></div><div class="bigcap" id="bigcap"><div class="prize" id="prize"></div><div class="ht" id="bigT"></div><div class="hb"></div></div><div class="ginfo"><span class="rr" id="gR">N</span><p id="gTxt"></p><button class="btn" id="gClose">キャラに追加する</button></div></div>
+<div class="modal" id="sheet"><div class="mbox"><div id="shImg" style="width:130px;height:130px;margin:0 auto 6px"></div><input id="shName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね"><h2 id="shT"></h2><p id="shP" style="margin:4px 0 8px"></p><button class="btn" id="shMain">⭐ メインキャラにする</button><button class="btn alt" id="shParty">🏠 画面に出す</button><button class="chip" id="shX" style="margin-top:12px">とじる</button></div></div>
+<div id="gOpen"><div class="rays"></div><div class="bigcap" id="bigcap"><div class="prize" id="prize"></div><div class="ht" id="bigT"></div><div class="hb"></div></div><div class="ginfo"><span class="rr" id="gR">N</span><p id="gTxt"></p><input id="gName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね（あとでも変えられるよ）"><button class="btn" id="gClose">キャラに追加する</button></div></div>
 <input type="file" accept="image/*" id="upl" hidden><input type="file" accept="image/*" id="camIn" hidden>
 
 <script>
@@ -821,7 +824,7 @@ function fixMain(){const g=myCharas();if(isGot(S.chara))return;
   if(g.length){S.chara=g[0];S.onboarded=true}else if(S.onboarded){S.onboarded=false;if(!(S.tickets>0))S.tickets=1;setTimeout(()=>{modal('🎰','まずはガチャ！','ガチャをまわして、メインのキャラを決めよう！');onboardGo='reward'},400)}
   save()}
 function validKey(k){return myCharas().includes(k)}
-function pickerHTML(del){return myCharas().map(k=>`<button class="cb ${S.chara===k?'on':''}" data-c="${k}">${charaHTML(k)}${S.chara===k?'<span class="mn">⭐</span>':''}${(S.party||[]).includes(k)?'<span class="pt">🏠</span>':''}${del&&k.startsWith('img')?`<span data-del="${k.slice(3)}">×</span>`:''}</button>`).join('')}
+function pickerHTML(del){return myCharas().map(k=>`<button class="cb ${S.chara===k?'on':''}" data-c="${k}">${charaHTML(k)}${S.chara===k?'<span class="mn">⭐</span>':''}${nameOf(k)?`<span class="nm">${esc(nameOf(k))}</span>`:''}${(S.party||[]).includes(k)?'<span class="pt">🏠</span>':''}${del&&k.startsWith('img')?`<span data-del="${k.slice(3)}">×</span>`:''}</button>`).join('')}
 function drawPick(){$('cpick').innerHTML=pickerHTML(false);if($('chCur'))$('chCur').textContent=S.onboarded?`なかま ${(S.party||[]).length}人`:''}
 function drawSet(){
   $('testIn').value=S.test||'';
@@ -837,14 +840,18 @@ async function onPick(e){
   if(e.target.closest('[data-add]')){$('upl').click();return}
   const b=e.target.closest('[data-c]');if(!b)return;openSheet(b.dataset.c)}
 let shKey='';
+const nameOf=k=>{const id=k&&k[0]==='p'?k.slice(1):k;return (S.names||{})[id]||''};
+function setName(k,v){const id=k&&k[0]==='p'?k.slice(1):k;S.names=S.names||{};v=(v||'').trim().slice(0,12);if(v)S.names[id]=v;else delete S.names[id];save()}
 function openSheet(k){shKey=k;$('shImg').innerHTML=`<div class="chara" style="position:static;transform:none;width:100%;height:100%"><div class="in breathe">${charaHTML(k)}</div></div>`;
   const isMain=S.chara===k,inP=(S.party||[]).includes(k);
+  $('shName').value=nameOf(k);
   $('shT').textContent=isMain?'⭐ いまのメインキャラ':inP?'🏠 画面に出ているよ':'このキャラをどうする？';
   $('shP').textContent=isMain?'':'メインはまん中、ほかは まわりに4人まで出せるよ';
   $('shMain').style.display=isMain?'none':'';
   $('shParty').style.display=isMain?'none':'';$('shParty').textContent=inP?'↩️ 画面からもどす':'🏠 画面に出す';
   $('sheet').classList.add('on')}
-$('shX').onclick=()=>$('sheet').classList.remove('on');
+$('shName').onchange=e=>{setName(shKey,e.target.value);drawPick();drawGacha();toast(nameOf(shKey)?`「${nameOf(shKey)}」になったよ！`:'なまえをけしたよ')};
+$('shX').onclick=()=>{setName(shKey,$('shName').value);$('sheet').classList.remove('on');drawPick();drawGacha()};
 $('shMain').onclick=()=>{const old=S.chara;S.chara=shKey;S.party=(S.party||[]).filter(k=>k!==shKey);if(old&&old!==shKey&&validKey(old)&&S.party.length<4)S.party.push(old);save();$('sheet').classList.remove('on');refreshChars();bounce();toast('⭐ メインキャラにしたよ！')};
 $('shParty').onclick=()=>{S.party=S.party||[];const i=S.party.indexOf(shKey);
   if(i>=0){S.party.splice(i,1);toast('↩️ もどしたよ')}else{if(S.party.length>=4){toast('画面に出せるのは4人までだよ');return}S.party.push(shKey);toast('🏠 画面に出したよ！')}
@@ -1131,7 +1138,7 @@ function drawGacha(){
   if(!gBusy){$('gmSvg').innerHTML=machineSVG()}
   const n=PRIZES.length;$('pCount').textContent=n?`${PRIZES.filter(x=>S.got[x.id]).length} / ${n}`:'';
   $('pEdit').textContent=pEditing?'✅ へんしゅうをおわる':'✏️ ガチャの中身をへんしゅう';
-  $('pGrid').innerHTML=PRIZES.map(x=>{const c=S.got[x.id]||0,show=pEditing||c;return `<div class="pz ${show?'':'lock'}" data-id="${x.id}"><img src="${x.d}" alt=""><span class="rb ${x.r}">${x.r}</span>${c?`<span class="ct">×${c}</span>`:''}${pEditing?`<span class="dl" data-del="${x.id}">×</span>`:''}</div>`}).join('')+'<button class="pz add" id="pAdd">＋<small>グッズ画像</small></button>';
+  $('pGrid').innerHTML=PRIZES.map(x=>{const c=S.got[x.id]||0,show=pEditing||c;return `<div class="pz ${show?'':'lock'}" data-id="${x.id}"><img src="${x.d}" alt=""><span class="rb ${x.r}">${x.r}</span>${show&&S.names&&S.names[x.id]?`<span class="nm">${esc(S.names[x.id])}</span>`:''}${c?`<span class="ct">×${c}</span>`:''}${pEditing?`<span class="dl" data-del="${x.id}">×</span>`:''}</div>`}).join('')+'<button class="pz add" id="pAdd">＋<small>グッズ画像</small></button>';
   if(!n)$('gHint').textContent='ガチャの中身がからっぽです。下の「＋」からグッズ画像を入れてね';else if(!gBusy)$('gHint').textContent=S.tickets>0?'ハンドルを指でぐるっと1回まわしてね ↻':'🍅を終えるとコインがもらえるよ';
 }
 $('pEdit').onclick=()=>{pEditing=!pEditing;drawGacha()};
@@ -1180,7 +1187,7 @@ $('outCap').onclick=()=>{
   if(!pending)return;const p=pending;
   $('bigT').style.background=`linear-gradient(160deg,${p.c},${p.c}cc)`;
   $('prize').innerHTML=p.img?`<img src="${p.img}" alt="">`:`<span class="em">${p.em}</span>`;
-  $('gR').textContent=p.r;$('gR').className='rr '+p.r;
+  $('gName').value=p.id?nameOf('p'+p.id):'';$('gR').textContent=p.r;$('gR').className='rr '+p.r;
   const isNew=p.id?!S.got[p.id]:!S.st[p.em];
   $('gTxt').innerHTML=(isNew?'🆕 はじめてゲット！':'ゲット！')+(p.r==='SSR'?'<br>✨ 超レア！ ✨':'');
   const g=$('gOpen');g.classList.remove('done');g.classList.add('on');$('outCap').classList.remove('on');
@@ -1189,8 +1196,8 @@ $('outCap').onclick=()=>{
   if(p.id)S.got[p.id]=(S.got[p.id]||0)+1;else S.st[p.em]=(S.st[p.em]||0)+1;save();
 };
 $('gClose').onclick=()=>{$('gOpen').classList.remove('on','done');
-  if(pending){const k=pending.id?'p'+pending.id:'e:'+pending.em;if(!pending.id&&!(S.ems||[]).includes(k))(S.ems=S.ems||[]).push(k);
-    if(!S.onboarded){S.chara=k;S.onboarded=true;setTimeout(()=>{modal('⭐','メインキャラが決まったよ！','このキャラといっしょに🍅をはじめよう！<br>25分ごとにガチャがまわせて、なかまがふえるよ');onboardGo='timer'},300)}
+  if(pending){const k=pending.id?'p'+pending.id:'e:'+pending.em;if(pending.id)setName(k,$('gName').value);if(!pending.id&&!(S.ems||[]).includes(k))(S.ems=S.ems||[]).push(k);
+    if(!S.onboarded){S.chara=k;S.onboarded=true;setTimeout(()=>{modal('⭐',nameOf(k)?`「${esc(nameOf(k))}」がメインキャラに！`:'メインキャラが決まったよ！','このキャラといっしょに🍅をはじめよう！<br>25分ごとにガチャがまわせて、なかまがふえるよ');onboardGo='timer'},300)}
     else if(k!==S.chara&&!(S.party||[]).includes(k)){if((S.party||[]).length<4){(S.party=S.party||[]).push(k);toast('🏠 なかまが画面に追加されたよ！')}else toast('キャラに追加したよ（タイマー画面の「わたしのキャラ」で入れかえてね）')}
     save();refreshChars()}
   pending=null;gBusy=false;drawGacha();drawReward();$('gHint').textContent=S.tickets>0?'もう1回まわせるよ ↻':'🍅を終えるとコインがもらえるよ'};
@@ -1431,8 +1438,8 @@ let tt;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on'
 function modal(ic,t,p){$('mIc').textContent=ic;$('mT').textContent=t;$('mP').innerHTML=p;$('modal').classList.add('on')}
 let onboardGo='';
 $('mOk').onclick=()=>{$('modal').classList.remove('on');stopSound();if(onboardGo){const g=onboardGo;onboardGo='';go(g)}};
-$('mates').onclick=e=>{if(editing)return;const m=e.target.closest('.mate');if(!m)return;m.classList.remove('jump');void m.offsetWidth;m.classList.add('jump');say(pick(['なかまもいっしょ！','ファイト〜！','がんばろうね♪','そのちょうし！']))};
-$('chara').onclick=()=>{if(editing)return;if(!S.onboarded){go('reward');return}bounce();say(pick(S.run?(S.mode==='focus'?TALK.focus:TALK.rest):TALK.idle))};
+$('mates').onclick=e=>{if(editing)return;const m=e.target.closest('.mate');if(!m)return;m.classList.remove('jump');void m.offsetWidth;m.classList.add('jump');const n=nameOf(m.dataset.k);say((n?n+'：':'')+pick(['なかまもいっしょ！','ファイト〜！','がんばろうね♪','そのちょうし！']))};
+$('chara').onclick=()=>{if(editing)return;if(!S.onboarded){go('reward');return}bounce();const n=nameOf(S.chara);say(n&&Math.random()<.35?pick([`${n}だよ！`,`${n}もいっしょにがんばる！`,`${n}、ちゃんと見てるよ👀`,`えらい！${n}より`]):pick(S.run?(S.mode==='focus'?TALK.focus:TALK.rest):TALK.idle))};
 // ===== 操作 =====
 $('bMain').onclick=()=>S.run?pause():start();
 $('bReset').onclick=()=>{S.remain=dur(S.mode);S.run=false;save();draw();toast('リセットしたよ')};
