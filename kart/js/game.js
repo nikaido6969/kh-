@@ -38,6 +38,8 @@ const Input = {
       if (b(12)) this.up = true;
     }
     if (this.autoAccel && !brake) accel = true;
+    // タッチは押しっぱなしで自動ドリフト
+    if (t.l || t.r) { this.tHold = (this.tHold || 0) + 1 / 60; if (this.tHold > 0.3) drift = true; } else this.tHold = 0;
     steer = U.clamp(steer, -1, 1);
     this.itemEdge = item && !this.prevItem; this.prevItem = item;
     this.driftEdge = drift && !this.prevDrift; this.prevDrift = drift;
@@ -741,7 +743,7 @@ class Game {
     c.fov = U.damp(c.fov, fov, 4, dt); c.updateProjectionMatrix();
     // 水中/トンネル演出
     const def = this.def, sc = this.scene;
-    if (def.water != null && c.position.y < def.water) { sc.fog.color.setHex(0x1a6aa8); sc.fog.near = 5; sc.fog.far = 160; }
+    if (def.water != null && c.position.y < def.water) { sc.fog.color.setHex(def.waterColor ? new THREE.Color(def.waterColor).multiplyScalar(0.5).getHex() : 0x1a6aa8); sc.fog.near = 5; sc.fog.far = 160; }
     else { sc.fog.color.copy(this.baseFog.c); sc.fog.near = this.baseFog.near; sc.fog.far = this.baseFog.far; }
     if (this.track.sky) this.track.sky.position.copy(c.position);
   }

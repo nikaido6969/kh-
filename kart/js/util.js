@@ -109,6 +109,29 @@ Object.assign(SURF, {
   candy: (g, s) => { for (let i = 0; i < 8; i++) { g.fillStyle = ['#ff7ab0', '#fff0f6', '#7ad8ff', '#fff0f6', '#ffd23a', '#fff0f6', '#9aff8a', '#fff0f6'][i]; g.save(); g.translate(0, i * 32); g.transform(1, 0.3, 0, 1, 0, 0); g.fillRect(-60, 0, s + 120, 32); g.restore(); } const r = U.rng(2); for (let i = 0; i < 80; i++) { g.fillStyle = ['#ff3a6a', '#3a8aff', '#ffe03a', '#3aff8a'][i % 4]; g.fillRect(r() * s, r() * s, 7, 3); } },
   candy2: (g, s) => { noise(g, s, '#ffc0dc', 0.2, 4000, 3); const r = U.rng(5); for (let i = 0; i < 60; i++) { g.fillStyle = ['#ff3a6a', '#3a8aff', '#ffe03a', '#fff'][i % 4]; g.fillRect(r() * s, r() * s, 6, 3); } },
 });
+// 自然路面（線なし）
+function stones(g, s, n, cols, rmin, rmax, seed) { const r = U.rng(seed); for (let i = 0; i < n; i++) { g.fillStyle = cols[Math.floor(r() * cols.length)]; g.beginPath(); g.ellipse(r() * s, r() * s, rmin + r() * (rmax - rmin), (rmin + r() * (rmax - rmin)) * 0.7, r() * 3, 0, 7); g.fill(); } }
+Object.assign(SURF, {
+  gravel: (g, s) => { noise(g, s, '#8a8070', 0.3, 5000, 3); stones(g, s, 700, ['#a09888', '#6a6258', '#c0b8a8', '#7a7060', '#5a5248'], 2, 7, 3); },
+  meadow: (g, s) => { noise(g, s, '#5a9a3a', 0.35, 9000, 2); const r = U.rng(4); for (let i = 0; i < 500; i++) { g.strokeStyle = r() < 0.5 ? '#7ac850' : '#3a7a2a'; g.lineWidth = 2; const x = r() * s, y = r() * s; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (r() - 0.5) * 6, y - 8); g.stroke(); } stones(g, s, 20, ['#ffffff', '#ffe04a', '#ff8ac0'], 2, 3, 9); },
+  mudpath: (g, s) => { noise(g, s, '#5a4428', 0.35, 6000, 4); stones(g, s, 40, ['rgba(40,28,14,0.7)', 'rgba(90,70,40,0.6)'], 10, 30, 5); stones(g, s, 30, ['rgba(120,140,90,0.5)'], 3, 8, 6); },
+  swampgrass: (g, s) => { noise(g, s, '#4a5a2a', 0.35, 7000, 3); stones(g, s, 60, ['rgba(30,40,20,0.6)', 'rgba(90,100,50,0.5)'], 8, 22, 7); },
+  trail: (g, s) => { noise(g, s, '#8a6a48', 0.35, 7000, 3); stones(g, s, 160, ['#7a7a72', '#9a9a90', '#5a5a52', '#6a5038'], 3, 12, 8); },
+  mountain: (g, s) => { noise(g, s, '#6a6a52', 0.35, 8000, 3); stones(g, s, 90, ['#8a8a80', '#5a5a48', '#7a8a5a'], 5, 20, 12); },
+  forest: (g, s) => { noise(g, s, '#5a4430', 0.35, 7000, 3); stones(g, s, 260, ['#8a5a2a', '#a06a30', '#6a7a2a', '#c08a3a', '#4a3a20'], 3, 9, 13); const r = U.rng(14); g.strokeStyle = 'rgba(60,40,20,0.85)'; g.lineWidth = 9; for (let i = 0; i < 4; i++) { g.beginPath(); let x = r() * s, y = r() * s; g.moveTo(x, y); for (let k = 0; k < 4; k++) { x += (r() - 0.5) * 100; y += (r() - 0.5) * 50; g.lineTo(x, y); } g.stroke(); } },
+  leaves: (g, s) => { noise(g, s, '#3a5a2a', 0.3, 6000, 3); stones(g, s, 300, ['#6a8a2a', '#8a6a2a', '#a05a20', '#4a7a3a'], 3, 8, 15); },
+  venus: (g, s) => { noise(g, s, '#5a3a20', 0.35, 7000, 3); const r = U.rng(16); g.strokeStyle = 'rgba(255,140,30,0.9)'; g.lineWidth = 3; for (let i = 0; i < 14; i++) { g.beginPath(); let x = r() * s, y = r() * s; g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += (r() - 0.5) * 50; y += (r() - 0.5) * 50; g.lineTo(x, y); } g.stroke(); } stones(g, s, 80, ['#3a2a1a', '#7a5a30', '#c8a050'], 3, 10, 17); },
+  basalt: (g, s) => { noise(g, s, '#3a2a22', 0.35, 6000, 3); stones(g, s, 40, ['rgba(255,120,30,0.6)'], 2, 5, 18); },
+  seabed: (g, s) => { noise(g, s, '#d8c890', 0.25, 6000, 3); stones(g, s, 90, ['#ffffff', '#f0a0b0', '#a08a60', '#c0b080'], 2, 6, 19); const r = U.rng(20); g.strokeStyle = 'rgba(160,140,90,0.4)'; g.lineWidth = 3; for (let y = 0; y < s; y += 18) { g.beginPath(); for (let x = 0; x <= s; x += 8) g.lineTo(x, y + Math.sin(x / 20 + r()) * 4); g.stroke(); } },
+  cave: (g, s) => { noise(g, s, '#3a2a26', 0.35, 8000, 3); stones(g, s, 100, ['#5a4a42', '#2a1e1a', '#6a3a2a'], 4, 14, 21); stones(g, s, 30, ['rgba(255,120,40,0.8)', 'rgba(160,80,255,0.8)'], 1, 3, 22); },
+  islandgrass: (g, s) => { SURF.meadow(g, s); stones(g, s, 40, ['#ffffff', '#ffd0e8', '#d0e8ff'], 2, 4, 23); },
+  crystalground: (g, s) => { g.fillStyle = '#2a1a4a'; g.fillRect(0, 0, s, s); const r = U.rng(24); for (let i = 0; i < 70; i++) { g.fillStyle = `hsla(${250 + r() * 80},80%,${40 + r() * 30}%,0.85)`; g.beginPath(); const x = r() * s, y = r() * s, z = 6 + r() * 16; g.moveTo(x, y - z); g.lineTo(x + z * 0.6, y); g.lineTo(x, y + z); g.lineTo(x - z * 0.6, y); g.fill(); } },
+  crystal2: (g, s) => { noise(g, s, '#1a0e30', 0.3, 5000, 3); stones(g, s, 50, ['#7a4aff', '#ff6ae0', '#5ae8ff'], 1, 3, 25); },
+  jupiter: (g, s) => { const cols = ['#e6b07a', '#d88f55', '#f2d2a6', '#c8703c', '#efc596']; for (let i = 0; i < 16; i++) { g.fillStyle = cols[i % 5]; g.fillRect(0, i * s / 16, s, s / 16 + 1); } g.globalAlpha = 0.3; stones(g, s, 80, ['#ffffff', '#8a4a28'], 6, 30, 26); g.globalAlpha = 1; },
+  moon: (g, s) => { noise(g, s, '#9a9aa4', 0.35, 9000, 3); const r = U.rng(31); for (let i = 0; i < 14; i++) { const x = r() * s, y = r() * s, rad = 6 + r() * 20; g.strokeStyle = 'rgba(60,60,70,0.6)'; g.lineWidth = 3; g.beginPath(); g.arc(x, y, rad, 0, 7); g.stroke(); g.fillStyle = 'rgba(40,40,50,0.35)'; g.fill(); } },
+  alien: (g, s) => { g.fillStyle = '#2a0a40'; g.fillRect(0, 0, s, s); const r = U.rng(17); for (let i = 0; i < 40; i++) { g.fillStyle = `hsla(${280 + r() * 60},80%,${35 + r() * 25}%,0.8)`; g.beginPath(); g.ellipse(r() * s, r() * s, 10 + r() * 22, 8 + r() * 18, r() * 3, 0, 7); g.fill(); } },
+  earthside: (g, s) => { noise(g, s, '#6a4a30', 0.35, 6000, 3); stones(g, s, 60, ['#8a6a4a', '#4a3020', '#7a7a70'], 4, 12, 27); },
+});
 U.surfTex = (k) => makeTex('s_' + k, 256, SURF[k] || SURF.asphalt);
 U.checkerTex = () => makeTex('checker', 128, (g, s) => { for (let i = 0; i < 8; i++) for (let j = 0; j < 2; j++) { g.fillStyle = (i + j) % 2 ? '#111' : '#fff'; g.fillRect(i * s / 8, j * s / 2, s / 8, s / 2); } });
 U.boostTex = () => makeTex('boost', 128, (g, s) => {

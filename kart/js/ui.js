@@ -108,7 +108,7 @@ const UI = {
     on('btnChar', () => { this.store.set('ch', this.sel.ch); if (this.sel.mode === 'online') this.openOnline(); else if (this.sel.mode === 'battle') this.openArena(); else this.openCourse(); });
     on('btnHelp', () => this.show('s-help'));
     on('btnSet', () => this.openSettings());
-    on('optAuto', () => { Input.autoAccel = !Input.autoAccel; this.store.set('auto', Input.autoAccel); this.$('tAcc').style.display = Input.autoAccel ? 'none' : ''; this.openSettings(); });
+    on('optAuto', () => { Input.autoAccel = !Input.autoAccel; this.store.set('auto', Input.autoAccel); this.openSettings(); });
     on('resNext', () => this.resultsNext());
     on('resRetry', () => this.retry());
     on('resQuit', () => this.quit());
@@ -120,18 +120,32 @@ const UI = {
     on('netJoin', () => this.netJoin());
     on('netGo', () => this.netGo());
     on('netCopy', () => { try { navigator.clipboard.writeText(NET.code || ''); NET.status('コードをコピーしました：' + NET.code); } catch (e) { } });
-    // タッチ
-    const tb = (id, key) => {
-      const e = this.$(id);
-      const set = (v) => (ev) => { ev.preventDefault(); SND.init(); Input.touch[key] = v; e.classList.toggle('on', v); };
-      e.addEventListener('touchstart', set(true), { passive: false });
-      e.addEventListener('touchend', set(false), { passive: false });
-      e.addEventListener('touchcancel', set(false), { passive: false });
-      e.addEventListener('mousedown', set(true)); e.addEventListener('mouseup', set(false)); e.addEventListener('mouseleave', set(false));
+    // タッチ：画面左右でハンドル
+    const zones = () => {
+      const ts = this._touches || {}; let l = false, r = false;
+      for (const id in ts) { if (ts[id] < innerWidth / 2) l = true; else r = true; }
+      const both = l && r;
+      Input.touch.l = l && !both; Input.touch.r = r && !both; Input.touch.b = both;
+      this.$('tzL').classList.toggle('on', l); this.$('tzR').classList.toggle('on', r);
     };
-    tb('tL', 'l'); tb('tR', 'r'); tb('tDrift', 'drift'); tb('tItem', 'item'); tb('tBrake', 'b'); tb('tAcc', 'a');
+    this._touches = {};
+    const active = () => GAME.running && !GAME.paused && !this.cur;
+    const tstart = (e) => {
+      if (!active()) return;
+      if (e.target.closest && e.target.closest('#hitem,#btnPause')) return;
+      SND.init();
+      for (const t of e.changedTouches) this._touches[t.identifier] = t.clientX;
+      zones(); this.$('thint').style.opacity = 0; e.preventDefault();
+    };
+    const tmove = (e) => { if (!active()) return; for (const t of e.changedTouches) if (t.identifier in this._touches) this._touches[t.identifier] = t.clientX; zones(); };
+    const tend = (e) => { for (const t of e.changedTouches) delete this._touches[t.identifier]; zones(); };
+    document.addEventListener('touchstart', tstart, { passive: false });
+    document.addEventListener('touchmove', tmove, { passive: true });
+    document.addEventListener('touchend', tend); document.addEventListener('touchcancel', tend);
+    const itemTap = (e) => { e.preventDefault(); Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); };
+    this.$('hitem').addEventListener('touchstart', itemTap, { passive: false });
+    this.$('hitem').addEventListener('mousedown', itemTap);
     this.$('touch').style.display = U.isTouch ? 'block' : 'none';
-    this.$('tAcc').style.display = Input.autoAccel ? 'none' : '';
     document.addEventListener('keydown', (e) => {
       if (!GAME.running && this.cur && (e.code === 'Escape' || e.code === 'Backspace')) {
         const b = document.querySelector('#' + this.cur + ' [data-back]'); if (b) b.click();
@@ -259,7 +273,7 @@ const UI = {
         if (ITEMS[sp]) { GAME.player.item = sp; GAME.player.itemN = 1; setTimeout(() => HUD.toast(`🎁 スペシャル持ち込み：${ITEMS[sp].icon}${ITEMS[sp].name}`), 1500); }
       }
       this.$('loading').classList.remove('on');
-      this.$('btnPause').style.display = 'block';
+      this.$('btnPause').style.display = 'block'; this.$('thint').style.opacity = 1;
       if (extra.onReady) extra.onReady();
     }, 30);
   },

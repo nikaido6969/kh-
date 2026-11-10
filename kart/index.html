@@ -122,12 +122,12 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #touch{position:fixed;inset:0;pointer-events:none;z-index:12;display:none}
 #touch button{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.6);color:#fff;font-weight:900;font-size:22px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);touch-action:none}
 #touch button.on{background:rgba(255,255,255,.55)}
-#tL{left:max(14px,env(safe-area-inset-left));bottom:172px;width:84px;height:84px}
-#tR{left:calc(max(14px,env(safe-area-inset-left)) + 94px);bottom:172px;width:84px;height:84px}
-#tDrift{right:max(14px,env(safe-area-inset-right));bottom:150px;width:96px;height:96px;font-size:14px!important}
-#tItem{right:max(14px,env(safe-area-inset-right));bottom:258px;width:72px;height:72px}
-#tBrake{right:calc(max(14px,env(safe-area-inset-right)) + 118px);bottom:150px;width:62px;height:62px;font-size:12px!important}
-#tAcc{right:calc(max(14px,env(safe-area-inset-right)) + 118px);bottom:224px;width:62px;height:62px;font-size:12px!important}
+#tzL,#tzR{position:absolute;top:0;bottom:0;width:50%;transition:background .1s}
+#tzL{left:0}#tzR{right:0}
+#tzL.on{background:linear-gradient(90deg,rgba(255,255,255,.18),transparent 60%)}
+#tzR.on{background:linear-gradient(270deg,rgba(255,255,255,.18),transparent 60%)}
+#thint{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;padding:10px 16px;border-radius:16px;font-size:14px;line-height:1.6;text-align:center;transition:opacity .6s;pointer-events:none;width:max-content;max-width:90vw}
+#hitem{pointer-events:auto}
 @media (min-aspect-ratio:1/1){#s-title{align-items:flex-start;padding-left:7vw}#s-title .logo,#s-title .tag{text-align:left}#s-title>div[style]{height:3vh!important}}
 #s-pause,#s-results{justify-content:center;background:rgba(246,239,228,.4)}
 </style>
@@ -147,8 +147,8 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 </div>
 <button id="btnPause">Ⅱ</button>
 <div id="touch">
-  <button id="tL">◀</button><button id="tR">▶</button>
-  <button id="tDrift">ドリフト</button><button id="tItem">🎁</button><button id="tBrake">ブレーキ</button><button id="tAcc">アクセル</button>
+  <div id="tzL"></div><div id="tzR"></div>
+  <div id="thint">画面の<b>左</b>を押すと左、<b>右</b>を押すと右<br>押しっぱなしでドリフト／左右同時でブレーキ<br>上のアイテム枠をタップで使う</div>
 </div>
 <div id="loading">コース生成中…</div>
 
@@ -230,7 +230,7 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
     🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
     🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
-    📱 スマホは画面のボタンで操作（オートアクセルON）。</p>
+    📱 スマホ：画面の左半分／右半分を押してハンドル。押しっぱなしで自動ドリフト（ミニターボ）、左右同時でブレーキ、上のアイテム枠をタップで使用（アクセルは自動）。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
     <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>
     <p><b>乱入者</b>：ときどき画面が暗くなり、じじい・ばばあ・お化け18種が乱入。邪魔する者、応援する者、仲間になる者も…</p>

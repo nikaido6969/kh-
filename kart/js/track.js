@@ -89,7 +89,9 @@ class Track {
       for (let j = 0; j < N; j++) { let s = 0; for (let o = -w; o <= w; o++) s += arr[(j + o + N) % N]; out[j] = s / (2 * w + 1); }
       return out;
     };
-    const hwS = smooth(hw, 10), shS = smooth(sh, 10), bankS = smooth(smooth(bank, 18), 10);
+    const hwS = smooth(hw, 10), shS = smooth(sh, 10);
+    if (!def.battle) for (let j = 0; j < N; j++) { const q = j * ds; hwS[j] *= 1 + 0.16 * Math.sin(q * 0.031) + 0.08 * Math.sin(q * 0.093 + 1); shS[j] *= 1 + 0.4 * Math.sin(q * 0.07 + 2); }
+    const _u = 0, bankS = smooth(smooth(bank, 18), 10);
     // フレーム
     const v = new THREE.Vector3(), t = new THREE.Vector3(), u = new THREE.Vector3(), rr = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     let prevU = new THREE.Vector3(0, 1, 0);
@@ -194,7 +196,7 @@ class Track {
     if (nr.i < 0) return base + Math.max(0, hill) * A + (def.id === 'touge' ? 10 : 0);
     const j = nr.i, fl = this.flags[j];
     const edge = this.hw[j] + this.sh[j];
-    let near = nr.y - 1.3;
+    let near = nr.y - 0.45;
     if (def.id === 'canyon') near = Math.max(base, nr.y - 1.3);
     if (fl & 1) near = base - 30;
     const w = U.clamp((nr.d - edge - 8) / 70, 0, 1);
@@ -228,7 +230,7 @@ class Track {
       const b = this.bounds;
       const geo = new THREE.PlaneGeometry(b.maxX - b.minX + 1600, b.maxZ - b.minZ + 1600);
       geo.rotateX(-Math.PI / 2);
-      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x2a9ad8, transparent: true, opacity: 0.55, roughness: 0.15, metalness: 0.2, side: THREE.DoubleSide, depthWrite: false }));
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: def.waterColor || 0x2a9ad8, transparent: true, opacity: def.waterColor ? 0.78 : 0.55, roughness: 0.15, metalness: 0.2, side: THREE.DoubleSide, depthWrite: false }));
       m.position.set((b.minX + b.maxX) / 2, def.water, (b.minZ + b.maxZ) / 2);
       m.renderOrder = 2;
       G.add(m); this.waterMesh = m;
@@ -280,29 +282,63 @@ class Track {
 
   _buildRoad(G) {
     const def = this.def;
-    const surfMats = this.surfList.map(sf => new THREE.MeshStandardMaterial({ map: U.surfTex(sf), roughness: 0.85, metalness: 0.0, side: THREE.DoubleSide, emissive: ['neon', 'alien', 'rock', 'cloudroad'].includes(sf) ? 0xffffff : 0, emissiveMap: ['neon', 'alien', 'rock', 'cloudroad'].includes(sf) ? U.surfTex(sf) : null, emissiveIntensity: 0.55 }));
+    const surfMats = this.surfList.map(sf => new THREE.MeshStandardMaterial({ map: U.surfTex(sf), roughness: 0.95, metalness: 0.0, side: THREE.DoubleSide, emissive: ['alien', 'cave', 'crystalground', 'venus'].includes(sf) ? 0xffffff : 0, emissiveMap: ['alien', 'cave', 'crystalground', 'venus'].includes(sf) ? U.surfTex(sf) : null, emissiveIntensity: 0.45 }));
     this.surfList.forEach((sf, si) => {
       this._ribbon(j => this.surfI[j] === si, j => -this.hw[j], j => this.hw[j], 0, 0, surfMats[si], 16).forEach(m => G.add(m));
     });
     const shTex = U.surfTex(def.shSurf || 'grass');
-    const shMat = new THREE.MeshStandardMaterial({ map: shTex, roughness: 0.9, side: THREE.DoubleSide, emissive: ['neon2'].includes(def.shSurf) ? 0x4020a0 : 0, emissiveIntensity: 0.4 });
+    const shMat = new THREE.MeshStandardMaterial({ map: shTex, roughness: 0.9, side: THREE.DoubleSide, emissive: ['neon2', 'crystal2'].includes(def.shSurf) ? 0x4020a0 : 0, emissiveIntensity: 0.4 });
     this._ribbon(j => true, j => -this.hw[j] - this.sh[j], j => -this.hw[j], -0.02, -0.02, shMat, 8).forEach(m => G.add(m));
     this._ribbon(j => true, j => this.hw[j], j => this.hw[j] + this.sh[j], -0.02, -0.02, shMat, 8).forEach(m => G.add(m));
-    if (def.id === 'garden' || def.id === 'coaster') {
+    if (false) {
       const cm = new THREE.MeshStandardMaterial({ map: U.surfTex('curb'), roughness: 0.7, side: THREE.DoubleSide });
       this._ribbon(j => true, j => -this.hw[j] - 0.9, j => -this.hw[j], 0.01, 0.01, cm, 6).forEach(m => G.add(m));
       this._ribbon(j => true, j => this.hw[j], j => this.hw[j] + 0.9, 0.01, 0.01, cm, 6).forEach(m => G.add(m));
     }
     // 裏面と側面
-    const under = new THREE.MeshStandardMaterial({ color: def.space ? 0x2a2a4a : 0x55504a, roughness: 0.9, side: THREE.DoubleSide });
+    const under = new THREE.MeshStandardMaterial({ map: U.surfTex(def.space ? 'crystal2' : def.lava ? 'basalt' : 'earthside'), color: 0xffffff, roughness: 1, side: THREE.DoubleSide });
+    const dep = def.noGround ? -3.2 : -1.2;
     const ed = j => this.hw[j] + this.sh[j];
-    this._ribbon(j => !(this.flags[j] & 8), j => -ed(j), j => ed(j), -0.9, -0.9, under, 10).forEach(m => G.add(m));
-    this._ribbon(j => !(this.flags[j] & 8), j => -ed(j), j => -ed(j), -0.9, 0, under, 10).forEach(m => G.add(m));
-    this._ribbon(j => !(this.flags[j] & 8), j => ed(j), j => ed(j), -0.9, 0, under, 10).forEach(m => G.add(m));
+    this._ribbon(j => !(this.flags[j] & 8), j => -ed(j) * 0.8, j => ed(j) * 0.8, dep, dep, under, 10).forEach(m => G.add(m));
+    this._ribbon(j => !(this.flags[j] & 8), j => -ed(j) * 0.8, j => -ed(j), dep, -0.02, under, 10).forEach(m => G.add(m));
+    this._ribbon(j => !(this.flags[j] & 8), j => ed(j), j => ed(j) * 0.8, -0.02, dep, under, 10).forEach(m => G.add(m));
+    this._buildEdge(G);
+  }
+
+  _buildEdge(G) {
+    const def = this.def, types = def.edge || [];
+    if (!types.length) return;
+    const rng = U.rng(def.id.length * 31 + 5);
+    const fr = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
+    const lists = types.map(() => []);
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), ry = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
+    const step = def.battle ? 7 : 4;
+    for (let j = 0; j < this.N; j += step) {
+      if (this.flags[j] & (1 | 8 | 16)) continue;
+      this.frame(j * this.ds, fr);
+      for (const side of [-1, 1]) {
+        if (rng() < 0.15) continue;
+        const ti = Math.floor(rng() * types.length);
+        const d = side * (this.hw[j] + this.sh[j] + 0.3 + rng() * 1.6);
+        p.copy(fr.p).addScaledVector(fr.r, d).addScaledVector(fr.u, -0.1);
+        m4.makeBasis(fr.r, fr.u, fr.t.clone().negate()); q.setFromRotationMatrix(m4);
+        ry.setFromAxisAngle(new THREE.Vector3(0, 1, 0), rng() * 6.28); q.multiply(ry);
+        const k = 0.6 + rng() * 0.8; sc.set(k, k, k);
+        lists[ti].push(new THREE.Matrix4().compose(p.clone(), q.clone(), sc.clone()));
+      }
+    }
+    types.forEach((t, ti) => {
+      const parts = DECO[t] ? DECO[t]() : null; if (!parts || !lists[ti].length) return;
+      for (const part of parts) {
+        const im = new THREE.InstancedMesh(part.geo, part.mat, lists[ti].length);
+        lists[ti].forEach((mm, k) => { m4.multiplyMatrices(mm, part.m); im.setMatrixAt(k, m4); });
+        G.add(im);
+      }
+    });
   }
 
   _buildWalls(G) {
-    const w = this.def.wall; if (!w) return;
+    const w = this.def.wall; if (!w || w === 'none') return;
     const styles = {
       hedge: [0x3f8f34, 1.3, 0], guard: [0xdfe4ea, 1.0, 0.3], fence: [0x9a6a3a, 1.1, 0], logs: [0x7a4f2a, 1.2, 0],
       rail: [0xff4fa0, 1.2, 0.3], candywall: [0xff7ab0, 1.6, 0.2], rock: [0x9a5a34, 1.8, 0], coral: [0xff7aa8, 1.3, 0], crystal: [0xa05aff, 1.5, 0.6], glow: [0x40e8ff, 0.9, 1.0],
@@ -390,13 +426,13 @@ class Track {
     m.quaternion.setFromRotationMatrix(mat);
     m.position.copy(fr.p).addScaledVector(fr.u, 0.04);
     G.add(m);
-    this._gantry(G, 2, 'START', 0xffffff, 0xff3a6a, true);
+    this._gantry(G, 2, 'START', 0xfff4d0, 0x8a4a20, true);
   }
 
   _gantry(G, j, text, fg, bg, checker) {
     const fr = this.frame(j * this.ds, { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() });
     const ed = this.hw[j] + this.sh[j] + 0.6;
-    const pm = U.mat(0x6a6f78, { m: 0.6, r: 0.4 });
+    const pm = U.mat(0x7a5a3a, { r: 0.9 });
     const g = new THREE.Group();
     const basis = new THREE.Matrix4().makeBasis(fr.r, fr.u, fr.t.clone().negate());
     g.quaternion.setFromRotationMatrix(basis); g.position.copy(fr.p);
@@ -578,6 +614,17 @@ const DECO = (() => {
     flag: () => [P(new THREE.CylinderGeometry(0.08, 0.08, 5, 5), 0xdddddd, M4(0, 2.5, 0)), P(new THREE.BoxGeometry(2.2, 1.3, 0.05), 0xffd23a, M4(1.1, 4.3, 0))],
     pillar: () => [P(new THREE.CylinderGeometry(2.2, 2.6, 26, 10), 0xe8dcc0, M4(0, 13, 0)), P(new THREE.BoxGeometry(6, 1.6, 6), 0xd8ccb0, M4(0, 26.5, 0))],
     lollipop: () => [P(new THREE.CylinderGeometry(0.3, 0.3, 9, 6), 0xffffff, M4(0, 4.5, 0)), P(new THREE.CylinderGeometry(3.2, 3.2, 0.8, 18), 0xff5aa8, M4(0, 10.5, 0, 1, 1, 1), { e: 0x401030 })].map((p, i) => { if (i) p.m.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2)); return p; }),
+    bush: () => [P(new THREE.IcosahedronGeometry(1.3, 0), 0x3f8a34, M4(0, 0.8, 0, 1.3, 0.9, 1), { flat: true }), P(new THREE.IcosahedronGeometry(0.9, 0), 0x5aa83f, M4(0.9, 0.6, 0.3), { flat: true })],
+    reed: () => [P(new THREE.CylinderGeometry(0.05, 0.08, 3, 3), 0x8a9a4a, M4(0, 1.5, 0)), P(new THREE.CylinderGeometry(0.05, 0.08, 2.6, 3), 0x7a8a3a, M4(0.4, 1.3, 0.2)), P(new THREE.CylinderGeometry(0.16, 0.16, 0.7, 5), 0x6a4a2a, M4(0, 3.1, 0))],
+    log: () => [P(new THREE.CylinderGeometry(0.5, 0.55, 4, 8), 0x7a5230, M4(0, 0.5, 0, 1, 1, 1).multiply(new THREE.Matrix4().makeRotationZ(Math.PI / 2)), { flat: true })],
+    root: () => [P(new THREE.TorusGeometry(1.4, 0.35, 5, 10, Math.PI), 0x6a4a2a, M4(0, 0, 0), { flat: true }), P(new THREE.TorusGeometry(0.9, 0.25, 5, 8, Math.PI), 0x5a3a20, M4(1.2, 0, 0.6, 1, 1, 1, 1), { flat: true })],
+    lavarock: () => [P(new THREE.DodecahedronGeometry(1.4, 0), 0x2a1a14, M4(0, 0.6, 0, 1, 0.8, 1.2), { flat: true, e: 0x401000 }), P(new THREE.OctahedronGeometry(0.4, 0), 0xff7a20, M4(0.6, 1.2, 0.3), { e: 0xff5a00 })],
+    moonrock: () => [P(new THREE.DodecahedronGeometry(1.2, 0), 0x8a8a94, M4(0, 0.5, 0, 1.2, 0.7, 1), { flat: true })],
+    cloudlet: () => [P(new THREE.IcosahedronGeometry(1.6, 1), 0xffe0c0, M4(0, 0.6, 0, 1.4, 0.7, 1), { op: 0.85, e: 0x604020 })],
+    flowerclump: () => [P(new THREE.SphereGeometry(0.4, 6, 5), 0xff8ac0, M4(0, 0.4, 0)), P(new THREE.SphereGeometry(0.35, 6, 5), 0xffe04a, M4(0.6, 0.35, 0.2)), P(new THREE.SphereGeometry(0.35, 6, 5), 0x8ac8ff, M4(-0.5, 0.35, 0.4)), P(new THREE.IcosahedronGeometry(0.8, 0), 0x5aa83f, M4(0, 0.2, 0, 1.5, 0.5, 1.5), { flat: true })],
+    tentacle_s: () => [P(new THREE.TorusGeometry(1.2, 0.3, 6, 12, Math.PI * 1.2), 0x7dffb0, M4(0, 1, 0), { e: 0x20a060, ei: 0.6 })],
+    lollipop_s: () => [P(new THREE.CylinderGeometry(0.12, 0.12, 3, 5), 0xffffff, M4(0, 1.5, 0)), P(new THREE.SphereGeometry(0.9, 10, 8), 0xff5aa8, M4(0, 3.3, 0, 1, 1, 0.4), { e: 0x401030 })],
+    deadtree: () => [P(new THREE.CylinderGeometry(0.3, 0.6, 8, 6), 0x4a3a2a, M4(0, 4, 0), { flat: true }), P(new THREE.CylinderGeometry(0.12, 0.2, 3.5, 5), 0x4a3a2a, M4(1, 6.5, 0).multiply(new THREE.Matrix4().makeRotationZ(-0.9)), { flat: true }), P(new THREE.CylinderGeometry(0.1, 0.18, 3, 5), 0x4a3a2a, M4(-0.9, 5.5, 0.3).multiply(new THREE.Matrix4().makeRotationZ(0.8)), { flat: true })],
     tentacle: () => [P(new THREE.TorusGeometry(10, 1.6, 8, 24, Math.PI * 1.3), 0x7dffb0, M4(0, 10, 0), { e: 0x20a060, ei: 0.6 }), P(new THREE.SphereGeometry(3, 10, 8), 0xff5ad8, M4(10, 10, 0), { e: 0x802060 })],
   };
 })();
