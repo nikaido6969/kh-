@@ -97,6 +97,26 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #hink{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at 30% 40%,#111 0 12%,transparent 13%),radial-gradient(circle at 65% 55%,#111 0 16%,transparent 17%),radial-gradient(circle at 45% 75%,#111 0 10%,transparent 11%),radial-gradient(circle at 80% 25%,#111 0 9%,transparent 10%)}
 #hflash{position:absolute;inset:0;background:#fff;opacity:0}
 #hlines{position:absolute;inset:0;opacity:0;transition:opacity .2s;background:repeating-conic-gradient(from 0deg at 50% 55%,rgba(255,255,255,.18) 0 1.2deg,transparent 1.2deg 9deg);-webkit-mask:radial-gradient(circle at 50% 55%,transparent 32%,#000 70%);mask:radial-gradient(circle at 50% 55%,transparent 32%,#000 70%)}
+#htoasts{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;width:min(92vw,520px)}
+.toast{background:rgba(20,16,30,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 14px;border-radius:999px;font-weight:800;font-size:15px;animation:tin .25s cubic-bezier(.2,1.5,.4,1)}
+@keyframes tin{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+#hgas{position:absolute;inset:0;background:radial-gradient(circle,transparent 30%,rgba(90,200,40,.7));opacity:0;transition:opacity .4s}
+#hhorror{position:absolute;inset:0;opacity:0;transition:opacity .8s;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 20%,rgba(0,0,0,.92) 80%)}
+#hhorror.on{opacity:1;animation:flick 2.3s infinite}
+@keyframes flick{0%,100%{opacity:1}47%{opacity:.85}48%{opacity:.4}49%{opacity:1}80%{opacity:.9}81%{opacity:.6}}
+#hblind{position:absolute;inset:0;opacity:0;transition:opacity .3s;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#hblind.on{opacity:1}
+#hblind i{display:none;font-style:normal;color:#222;text-shadow:none;font-size:clamp(20px,5vw,40px);font-weight:900;writing-mode:vertical-rl;line-height:1.6;padding:6vh}
+#hblind.paper{background:repeating-linear-gradient(90deg,#efe9da 0 60px,#e4dcc8 60px 62px)}
+#hblind.paper i{display:block}
+#hblind.blanket{background:repeating-linear-gradient(45deg,#5a8ad8 0 40px,#4a7ac8 40px 80px)}
+#hblind.flash{background:radial-gradient(circle,#fff 40%,rgba(255,255,255,.7))}
+#hblind.ghost{background:radial-gradient(circle,rgba(220,230,255,.85),rgba(20,20,40,.95))}
+#hbanner{position:absolute;left:0;right:0;top:18%;text-align:center;opacity:0;transform:scale(1.3);transition:all .3s}
+#hbanner.on{opacity:1;transform:none}
+#hbanner b{display:block;font-size:clamp(30px,7vw,64px);color:#ff3a3a;font-weight:900;letter-spacing:.05em;text-shadow:0 0 18px #000,0 3px 0 #000}
+#hbanner span{display:inline-block;margin-top:6px;font-size:clamp(15px,3.4vw,22px);font-weight:800;background:rgba(0,0,0,.55);padding:4px 14px;border-radius:12px}
+#cv{transition:filter .3s}
 #btnPause{position:fixed;right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));z-index:15;display:none;background:rgba(255,255,255,.3);color:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;font-weight:900}
 /* タッチ */
 #touch{position:fixed;inset:0;pointer-events:none;z-index:12;display:none}
@@ -122,7 +142,8 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
   <div id="hspeed"></div><div id="hpos"></div>
   <canvas id="hmap" width="170" height="170"></canvas>
   <div id="hmtw"><div id="hmt"></div></div>
-  <div id="hmsg"></div><div id="hink"></div><div id="hflash"></div>
+  <div id="hgas"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
+  <div id="hmsg"></div><div id="hink"></div><div id="hflash"></div><div id="hbanner"></div><div id="htoasts"></div>
 </div>
 <button id="btnPause">Ⅱ</button>
 <div id="touch">
@@ -134,11 +155,12 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 <!-- タイトル -->
 <div class="screen" id="s-title">
   <h1 class="logo">くねくね<br>カート</h1>
-  <p class="tag">18人の変なやつらと、12の本格コースで爆走せよ</p>
+  <p class="tag">18人の変なやつらと、12の空想コース・8つのバトルステージで暴れろ</p>
   <div style="height:min(30vh,240px)"></div>
   <div class="menu">
     <button class="btn pri" data-mode="gp"><span class="ic">🏆</span><span>グランプリ<small>4コース連戦・ポイントで総合優勝を狙え</small></span></button>
     <button class="btn" data-mode="vs"><span class="ic">🏁</span><span>VSレース<small>好きなコースで1レース</small></span></button>
+    <button class="btn pri" data-mode="battle" style="background:linear-gradient(135deg,#3aa8ff,#9a5aff)"><span class="ic">🎈</span><span>風船バトル<small>風船10個を守りきれ！8ステージ・ありえない武器</small></span></button>
     <button class="btn" data-mode="tt"><span class="ic">⏱️</span><span>タイムアタック<small>ひとりで最速タイムに挑戦</small></span></button>
     <button class="btn" data-mode="online"><span class="ic">🌐</span><span>友達対戦<small>部屋コードでオンライン対戦（最大8人）</small></span></button>
     <div class="row2"><button class="btn" id="btnHelp"><span class="ic">🎮</span>操作方法</button><button class="btn" id="btnSet"><span class="ic">⚙️</span>設定</button></div>
@@ -173,6 +195,7 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 <div class="screen" id="s-results">
   <div class="panel">
     <h2 id="resTitle" style="margin-top:0"></h2>
+    <p id="resPrize" style="text-align:center;font-weight:800;color:var(--acc);margin:0 0 8px"></p>
     <table><thead><tr id="resHead"></tr></thead><tbody id="resBody"></tbody></table>
     <div class="row2" style="margin-top:14px">
       <button class="btn pri" id="resNext">次へ</button><button class="btn" id="resRetry">もう一度</button><button class="btn" id="resQuit">タイトル</button>
@@ -208,7 +231,10 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
     🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
     📱 スマホは画面のボタンで操作（オートアクセルON）。</p>
-    <p><b>アイテム</b>：🥕ターボにんじん　🌰ドングリ弾（直進・壁で跳ねる）　🪲カメムシミサイル（前の相手を追尾）　🫘納豆トラップ　🍙無敵おにぎり　⚡雷さま（全員ちぢむ）　🐙墨ダコ（前の人の視界を奪う）　🛸牽引UFO（自動で爆走）</p>
+    <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
+    <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>
+    <p><b>乱入者</b>：ときどき画面が暗くなり、じじい・ばばあ・お化け18種が乱入。邪魔する者、応援する者、仲間になる者も…</p>
+    <p><b>勝利賞品</b>：1位になるとスペシャルおもろアイテム（🦷👑🍬🪭🏠）をゲット。次の試合に持ち込める。</p>
   </div>
 </div>
 
@@ -251,6 +277,9 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 <script src="js/chars.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/game.js"></script>
+<script src="js/items.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/npc.js"></script>
 <script src="js/net.js"></script>
 <script src="js/ui.js"></script>
 </body>

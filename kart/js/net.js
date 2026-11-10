@@ -73,7 +73,7 @@ const NET = {
       case 'sts': m.list.forEach(s => this.applyState(s)); if (this.isHost) { } break;
       case 'proj': if (GAME && GAME.running) GAME.spawnProj(Object.assign({}, m.p)); break;
       case 'phit': if (GAME && GAME.running) { const p = GAME.projs.find(q => q.id === m.id); if (p) GAME.removeProj(p); } break;
-      case 'fx': if (GAME && GAME.running) { if (m.fx === 'kaminari') GAME.applyKaminari(m.from); if (m.fx === 'sumi') GAME.applySumi(m.from); } break;
+      case 'fx': if (GAME && GAME.running && m.fx === 'hit') { const k = GAME.karts.find(x => x.id === m.id); if (k && !k.isRemote) GAME.damage(k, m.kind, m.opt || {}); } break;
       case 'back': UI.netBackToLobby(); break;
     }
   },

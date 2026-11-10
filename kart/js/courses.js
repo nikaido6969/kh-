@@ -7,82 +7,46 @@ const C = (ang, r, o = {}) => Object.assign({ t: 'c', ang, r }, o);
 const L = (r, o = {}) => Object.assign({ t: 'l', r }, o);
 
 const COURSES = [
-  // ---------- 柴犬カップ ----------
+  // ---------- 柴犬カップ（大地のオフロード） ----------
   {
-    id: 'garden', name: '柴犬ガーデン', cup: 0, desc: '芝生と犬小屋の初心者向けサーキット',
-    w: 22, sh: 7, surf: 'asphalt', shSurf: 'grass', wall: 'hedge', gravity: 30,
-    theme: { skyTop: 0x5aa8ff, skyBot: 0xd8f0ff, fog: 0xcfe8ff, fogFar: 650, ground: 0x6cbf4a, groundTex: 'grass', sun: 1.0, amb: 0.75 },
-    deco: [['tree', 60], ['doghouse', 14], ['flower', 50], ['round', 30]],
-    music: { bpm: 132, root: 60, scale: 'major', seed: 11 },
+    id: 'mori', name: '苔むす巨木の森', cup: 0, desc: '根っこだらけの苔道。巨大キノコの間を駆け抜けろ',
+    w: 20, sh: 6, surf: 'moss', shSurf: 'mud', wall: 'logs', gravity: 30,
+    theme: { skyTop: 0x3a7a5a, skyBot: 0xcfe8b0, fog: 0xb8d8a0, fogFar: 520, ground: 0x4a7a3a, groundTex: 'moss2', sun: 0.95, amb: 0.8 },
+    deco: [['bigtree', 34], ['mushroom', 40], ['glowflower', 60], ['rock', 20]],
+    music: { bpm: 136, root: 57, scale: 'dorian', seed: 11 },
     cmds: [
-      S(130, { fit: 1, items: 0.55 }), C(90, 48), S(80, { fit: 2, boost: 0.5 }), C(90, 42, { dy: 6 }), S(60),
-      C(-75, 38), C(165, 40, { dy: -6 }), S(70, { items: 0.5 }), C(-60, 45), C(150, 50), S(90),
+      S(130, { fit: 1, items: 0.5 }), C(90, 40, { dy: 12 }), S(70, { fit: 2, bumps: 0.8 }), C(-60, 30, { dy: -14 }), C(60, 30),
+      S(60, { ramp: { h: 4, len: 20 } }), S(40), C(90, 38, { dy: 10, items: 0.5 }), S(80, { bumps: 0.6 }), C(-60, 35, { dy: -10 }), C(60, 35),
+      C(90, 40, { boost: 0.5 }), S(80, { dy: 2 }), C(90, 45), S(90),
     ],
   },
   {
-    id: 'kokudo', name: 'ニッポン国道', cup: 0, desc: '電柱・自販機・軽トラが走る日本の一般道',
-    w: 17, sh: 2.5, surf: 'jproad', shSurf: 'sidewalk', wall: 'guard', gravity: 30, traffic: 7,
-    theme: { skyTop: 0x6fb2ee, skyBot: 0xf4efe0, fog: 0xe8e6dc, fogFar: 600, ground: 0x7aa05a, groundTex: 'field', sun: 1.0, amb: 0.75 },
-    deco: [['house', 46], ['pole', 70], ['vending', 16], ['tree', 26], ['konbini', 5]],
-    music: { bpm: 140, root: 62, scale: 'yonanuki', seed: 23 },
-    cmds: [
-      S(160, { fit: 1, sign: '柴犬市 3km', items: 0.6 }), C(90, 26), S(120, { fit: 2, boost: 0.4 }), C(-90, 26), S(90),
-      C(90, 30), C(45, 60), S(140, { items: 0.5, sign: '木星 6億km' }), C(135, 30), S(100), C(-45, 40), C(45, 40),
-      S(80, { sign: '止まれ…ない' }), C(90, 28), S(110),
-    ],
-  },
-  {
-    id: 'gatagata', name: 'ガタガタ田舎道', cup: 0, desc: '田んぼの間の凸凹道。跳ねまくり注意',
-    w: 16, sh: 6, surf: 'oldroad', shSurf: 'dirt', wall: 'fence', gravity: 30,
-    theme: { skyTop: 0x79b8f0, skyBot: 0xfff2d6, fog: 0xf4ecd8, fogFar: 620, ground: 0x8cbf3f, groundTex: 'rice', sun: 1.05, amb: 0.75 },
-    deco: [['tree', 30], ['house', 12], ['pole', 30], ['scarecrow', 20], ['rock', 20]],
-    music: { bpm: 126, root: 57, scale: 'yonanuki', seed: 37 },
-    cmds: [
-      S(110, { fit: 1, bumps: 0.5, items: 0.5 }), C(70, 40), S(90, { bumps: 0.7, fit: 2 }), C(-50, 35), C(130, 30, { dy: 5 }),
-      S(80, { bumps: 0.9 }), C(110, 35, { dy: -5 }), S(60, { boost: 0.5 }), C(-70, 30), C(170, 38), S(70, { bumps: 0.6, items: 0.4 }),
-    ],
-  },
-  {
-    id: 'offroad', name: '泥んこオフロード', cup: 0, desc: '泥と丸太のワイルドコース。ジャンプ台あり',
+    id: 'offroad', name: '泥んこジャングル', cup: 0, desc: '泥沼・丸太・ジャンプ台のワイルドコース',
     w: 22, sh: 8, surf: 'dirt', shSurf: 'mud', wall: 'logs', gravity: 30,
-    theme: { skyTop: 0x8bb7d9, skyBot: 0xf2e3c4, fog: 0xe5d6b8, fogFar: 600, ground: 0x7a5a36, groundTex: 'dirt', sun: 1.0, amb: 0.7 },
-    deco: [['tree', 50], ['rock', 40], ['stump', 24]],
+    theme: { skyTop: 0x5a9a7a, skyBot: 0xf0e0b0, fog: 0xd8d0a0, fogFar: 560, ground: 0x6a5a30, groundTex: 'dirt', sun: 1.0, amb: 0.75 },
+    deco: [['palm', 40], ['bigtree', 16], ['rock', 30], ['stump', 24], ['mushroom', 14]],
     music: { bpm: 146, root: 55, scale: 'minor', seed: 41 },
     cmds: [
-      S(120, { fit: 1, items: 0.5 }), C(100, 40, { dy: 4 }), S(70, { ramp: { h: 3, len: 18 } }), S(50, { fit: 2 }),
-      C(-90, 30, { bumps: 0.4 }), C(140, 36, { dy: -4 }), S(90, { bumps: 0.8, items: 0.6 }), C(70, 40),
+      S(120, { fit: 1, items: 0.5 }), C(100, 40, { dy: 8 }), S(70, { ramp: { h: 3, len: 18 } }), S(50, { fit: 2 }),
+      C(-90, 30, { bumps: 0.6 }), C(140, 36, { dy: -8 }), S(90, { bumps: 0.9, items: 0.6 }), C(70, 40),
       S(60, { ramp: { h: 4, len: 20 } }), S(60), C(-40, 50), C(180, 42), S(90, { boost: 0.4 }),
     ],
   },
-  // ---------- カメムシカップ ----------
   {
-    id: 'touge', name: '峠とトンネル', cup: 1, desc: 'ヘアピン連続の峠道と長いトンネル',
-    w: 16, sh: 2.5, surf: 'jproad', shSurf: 'sidewalk', wall: 'guard', gravity: 30,
-    theme: { skyTop: 0x4f8fd8, skyBot: 0xe6eef5, fog: 0xd6e0e8, fogFar: 560, ground: 0x4f7f3a, groundTex: 'grass', sun: 1.0, amb: 0.7 },
-    deco: [['pine', 90], ['mountain', 14], ['rock', 20], ['pole', 20]],
+    id: 'gake', name: '超激坂マウンテン', cup: 0, desc: '壁みたいな登り坂と、落ちるような下り坂',
+    w: 18, sh: 3, surf: 'cliff', shSurf: 'rock2', wall: 'rock', gravity: 30,
+    theme: { skyTop: 0x4a6ad8, skyBot: 0xf0d8f0, fog: 0xd8d0f0, fogFar: 650, ground: 0x7a6a5a, groundTex: 'cliff', sun: 1.05, amb: 0.75 },
+    deco: [['floatrock', 30], ['pine', 50], ['crystal', 16]],
     music: { bpm: 150, root: 59, scale: 'minor', seed: 53 },
     cmds: [
-      S(120, { fit: 1, items: 0.6 }), C(60, 50, { dy: 10 }), S(90, { dy: 12, tunnel: 'arch' }), C(-180, 20, { dy: 6 }),
-      S(70, { dy: 8, fit: 2 }), C(180, 20, { dy: 4 }), S(80, { boost: 0.5 }), C(-60, 40), C(120, 45, { dy: -10 }),
-      S(140, { tunnel: 'arch', dy: -14, items: 0.5 }), C(90, 35, { dy: -8 }), C(-50, 40, { dy: -8 }), C(200, 42), S(100),
+      S(120, { fit: 1, items: 0.5 }), C(90, 40, { dy: 20 }), S(70, { dy: 35, lin: true }), C(180, 30, { bank: 25 }),
+      S(90, { dy: -55, lin: true, boost: 0.2 }), S(40, { ramp: { h: 5, len: 25 } }), S(30, { gap: true }), S(50, { fit: 2 }),
+      C(-90, 30, { dy: 15, bumps: 0.5 }), C(90, 35, { dy: -15 }), C(90, 40, { items: 0.5 }), S(100),
     ],
   },
   {
-    id: 'coaster', name: 'ジェットコースター', cup: 1, desc: '一回転ループ・ひねり・急降下の絶叫コース',
-    w: 15, sh: 1, surf: 'rail', shSurf: 'steel', wall: 'rail', gravity: 32, groundDrop: 30,
-    theme: { skyTop: 0xff9ec4, skyBot: 0xffe6c8, fog: 0xffe0d0, fogFar: 700, ground: 0x7fc36a, groundTex: 'grass', sun: 1.05, amb: 0.8 },
-    deco: [['tent', 16], ['balloon', 30], ['round', 30], ['ferris', 1]],
-    music: { bpm: 160, root: 64, scale: 'major', seed: 67 },
-    cmds: [
-      S(110, { fit: 1, items: 0.5 }), C(90, 35, { dy: 30 }), S(60, { dy: 20, fit: 2 }), C(90, 30, { bank: 30 }),
-      S(70, { dy: -45, lin: true, boost: 0.25 }), L(20), S(60, { items: 0.5 }), C(90, 30, { bank: 30, dy: 10 }),
-      S(120, { cork: 360, dy: -5 }), C(-90, 32, { bank: 30 }), C(90, 32, { bank: 30, dy: -10 }), S(60, { ramp: { h: 3, len: 15 } }), S(26, { gap: true }),
-      S(40), C(90, 32, { bank: 25 }), S(80),
-    ],
-  },
-  {
-    id: 'canyon', name: '大ジャンプ渓谷', cup: 1, desc: '谷を飛び越える巨大ジャンプ台',
-    w: 20, sh: 4, surf: 'sandroad', shSurf: 'sand', wall: 'rock', gravity: 30, groundDrop: 45,
+    id: 'canyon', name: '大ジャンプ渓谷', cup: 0, desc: '赤い谷を飛び越える巨大ジャンプ台',
+    w: 20, sh: 4, surf: 'redsand', shSurf: 'sand', wall: 'rock', gravity: 30, groundDrop: 45,
     theme: { skyTop: 0x4aa3e8, skyBot: 0xffd9a8, fog: 0xf0c898, fogFar: 700, ground: 0xc77a44, groundTex: 'sand', sun: 1.15, amb: 0.7 },
     deco: [['mesa', 26], ['cactus', 50], ['rock', 30]],
     music: { bpm: 138, root: 52, scale: 'dorian', seed: 79 },
@@ -93,9 +57,10 @@ const COURSES = [
       S(28, { gap: true }), S(50), C(-50, 40, { dy: 8 }), C(50, 40), C(90, 45, { dy: 10 }), S(90),
     ],
   },
+  // ---------- カメムシカップ（海・空・地底） ----------
   {
-    id: 'kaitei', name: '海底トンネル', cup: 1, desc: '桟橋から海へダイブ！水中はふわふわ',
-    w: 20, sh: 4, surf: 'sandroad', shSurf: 'sand', wall: 'coral', gravity: 30, water: -6,
+    id: 'kaitei', name: '海底トンネル', cup: 1, desc: '浜辺から海へダイブ！水中はふわふわ',
+    w: 20, sh: 4, surf: 'sand', shSurf: 'sand', wall: 'coral', gravity: 30, water: -6,
     theme: { skyTop: 0x39a6ff, skyBot: 0xc8f2ff, fog: 0xbfe8ff, fogFar: 650, ground: 0xe0cf98, groundTex: 'sand', sun: 1.1, amb: 0.8, groundDrop: 4 },
     deco: [['coral', 60], ['seaweed', 80], ['rock', 30], ['palm', 10]],
     music: { bpm: 118, root: 62, scale: 'dorian', seed: 83 },
@@ -105,12 +70,36 @@ const COURSES = [
       S(40), C(100, 38, { dy: 28 }), S(90),
     ],
   },
-  // ---------- くねくねカップ ----------
   {
-    id: 'chitei', name: '地底マグマ洞窟', cup: 2, desc: '地下深くへ潜る。足元はマグマの海',
+    id: 'kumo', name: '天空の浮島', cup: 1, desc: '浮島から浮島へ大ジャンプ。らせんで雲の上へ',
+    w: 18, sh: 3, surf: 'cloudroad', shSurf: 'grass', wall: 'glow', gravity: 22, noGround: true,
+    theme: { skyTop: 0x5ab0ff, skyBot: 0xfff0f8, fog: 0xf0f4ff, fogFar: 800, ground: null, sun: 1.1, amb: 0.85 },
+    deco: [['floatrock', 60], ['cloudpuff', 50], ['rainbow', 4]],
+    music: { bpm: 132, root: 64, scale: 'lydian', seed: 61 },
+    cmds: [
+      S(140, { fit: 1, items: 0.5, boost: 0.85 }), S(40, { ramp: { h: 4, len: 24 } }), S(36, { gap: true }), C(90, 40, { wall: false, dy: -10 }),
+      S(60, { fit: 2 }), C(450, 32, { dy: 30, bank: 20, items: 0.4 }), C(90, 40), S(60, { ramp: { h: 4, len: 22 } }), S(40, { gap: true }),
+      C(-60, 35, { dy: -10 }), C(60, 35, { dy: -10, wall: false }), C(90, 40, { dy: -10 }), S(90),
+    ],
+  },
+  {
+    id: 'coaster', name: '雲上ジェットコースター', cup: 1, desc: '一回転ループ・ひねり・急降下の絶叫レール',
+    w: 15, sh: 1, surf: 'rail', shSurf: 'steel', wall: 'rail', gravity: 32, noGround: true,
+    theme: { skyTop: 0xff9ec4, skyBot: 0xffe6c8, fog: 0xffe0d0, fogFar: 800, ground: null, sun: 1.05, amb: 0.85 },
+    deco: [['cloudpuff', 60], ['balloon', 30], ['ferris', 1]],
+    music: { bpm: 160, root: 64, scale: 'major', seed: 67 },
+    cmds: [
+      S(110, { fit: 1, items: 0.5 }), C(90, 35, { dy: 30 }), S(60, { dy: 20, fit: 2 }), C(90, 30, { bank: 30 }),
+      S(70, { dy: -45, lin: true, boost: 0.25 }), L(20), S(60, { items: 0.5 }), C(90, 30, { bank: 30, dy: 10 }),
+      S(120, { cork: 360, dy: -5 }), C(-90, 32, { bank: 30 }), C(90, 32, { bank: 30, dy: -10 }), S(60, { ramp: { h: 3, len: 15 } }), S(26, { gap: true }),
+      S(40), C(90, 32, { bank: 25 }), S(80),
+    ],
+  },
+  {
+    id: 'chitei', name: '地底マグマ洞窟', cup: 1, desc: '地下深くへ潜る。足元はマグマの海',
     w: 18, sh: 2, surf: 'rock', shSurf: 'rock2', wall: 'crystal', gravity: 30, noGround: true, lava: true,
     theme: { skyTop: 0x0a0508, skyBot: 0x2a0d06, fog: 0x1a0806, fogFar: 380, ground: null, sun: 0.35, amb: 0.45 },
-    deco: [['crystal', 60], ['stalag', 40]],
+    deco: [['crystal', 60], ['stalag', 40], ['mushroom', 20]],
     music: { bpm: 152, root: 50, scale: 'phrygian', seed: 97 },
     cmds: [
       S(110, { fit: 1, items: 0.5, tunnel: 'tube' }), C(90, 35, { tunnel: 'tube', dy: -15 }), S(70, { boost: 0.5 }),
@@ -119,6 +108,7 @@ const COURSES = [
       C(90, 40, { dy: 20 }), S(80, { tunnel: 'tube' }),
     ],
   },
+  // ---------- くねくねカップ（宇宙・空想） ----------
   {
     id: 'jupiter', name: '木星ガス雲', cup: 2, desc: '重力2.5倍(体感)。大赤斑のらせんを下れ',
     w: 19, sh: 2, surf: 'jupiter', shSurf: 'jupiter2', wall: 'glow', gravity: 44, noGround: true,
@@ -129,6 +119,18 @@ const COURSES = [
       S(130, { fit: 1, items: 0.5 }), C(90, 45, { dy: 15, bank: 15 }), S(80, { wall: false, boost: 0.5 }),
       C(450, 36, { dy: -30, bank: 20, items: 0.3 }), S(70, { fit: 2 }), C(90, 40, { dy: 15 }), S(60, { ramp: { h: 4, len: 22 } }),
       S(28, { gap: true }), S(60), C(90, 50), S(80),
+    ],
+  },
+  {
+    id: 'tsuki', name: '月面クレーター', cup: 2, desc: '重力1/6。クレーターを跳ねて宇宙を飛べ',
+    w: 20, sh: 3, surf: 'moon', shSurf: 'moon2', wall: 'glow', gravity: 12, noGround: true, space: true, moonGround: true,
+    theme: { skyTop: 0x000006, skyBot: 0x101028, fog: 0x080818, fogFar: 900, ground: null, sun: 1.0, amb: 0.6 },
+    deco: [['crater', 30], ['asteroid', 30], ['flag', 3]],
+    music: { bpm: 124, root: 55, scale: 'lydian', seed: 131 },
+    cmds: [
+      S(140, { fit: 1, items: 0.5 }), C(90, 45, { bumps: 0.8 }), S(60, { ramp: { h: 5, len: 26 } }), S(60, { gap: true }), S(60, { fit: 2 }),
+      C(90, 35, { dy: 15 }), S(60), C(-60, 40, { bumps: 1.0 }), C(60, 40, { dy: -15, items: 0.5 }), S(80, { boost: 0.3 }), S(40, { ramp: { h: 6, len: 26 } }),
+      S(50, { gap: true }), S(60), C(90, 40, { wall: false }), S(60), C(90, 45), S(90),
     ],
   },
   {
@@ -158,6 +160,27 @@ const COURSES = [
     ],
   },
 ];
+
+// ===== 風船バトル ステージ（正多角形リング：自動で閉じる） =====
+const ARENA_BASE = { w: 56, sh: 2, gravity: 28, laps: 0 };
+const ARENAS = [
+  { id: 'b_niwa', name: '柴犬の庭ドーナツ', n: 4, side: 70, r: 36, hill: 6, surf: 'moss', shSurf: 'grass', wall: 'hedge', theme: { skyTop: 0x5aa8ff, skyBot: 0xe0f4ff, fog: 0xd8ecff, fogFar: 600, ground: 0x6cbf4a, groundTex: 'grass', sun: 1, amb: 0.8 }, deco: [['bigtree', 20], ['mushroom', 20], ['glowflower', 40]] },
+  { id: 'b_tsuki', name: '月面リング', n: 6, side: 50, r: 34, hill: 0, bumps: 1.2, surf: 'moon', shSurf: 'moon2', wall: 'glow', gravity: 12, noGround: true, space: true, theme: { skyTop: 0x000006, skyBot: 0x101028, fog: 0x080818, fogFar: 900, ground: null, sun: 1, amb: 0.6 }, deco: [['crater', 20], ['asteroid', 20]] },
+  { id: 'b_kaitei', name: '海底神殿', n: 4, side: 60, r: 40, hill: 0, surf: 'sand', shSurf: 'sand', wall: 'coral', water: 30, theme: { skyTop: 0x39a6ff, skyBot: 0xc8f2ff, fog: 0xbfe8ff, fogFar: 650, ground: 0xe0cf98, groundTex: 'sand', sun: 1.1, amb: 0.8 }, deco: [['coral', 40], ['seaweed', 50], ['pillar', 16]] },
+  { id: 'b_magma', name: 'マグマ大鍋', n: 3, side: 70, r: 40, hill: 0, bumps: 0.6, surf: 'rock', shSurf: 'rock2', wall: 'crystal', noGround: true, lava: true, theme: { skyTop: 0x0a0508, skyBot: 0x3a0d06, fog: 0x2a0806, fogFar: 420, ground: null, sun: 0.4, amb: 0.5 }, deco: [['crystal', 40], ['stalag', 20]] },
+  { id: 'b_okashi', name: 'お菓子の城', n: 4, side: 56, r: 38, hill: 8, surf: 'candy', shSurf: 'candy2', wall: 'candywall', theme: { skyTop: 0xff9ad8, skyBot: 0xfff0f8, fog: 0xffe0f0, fogFar: 600, ground: 0xffc8e0, groundTex: 'candy2', sun: 1.05, amb: 0.85 }, deco: [['lollipop', 40], ['mushroom', 20]] },
+  { id: 'b_kumo', name: '雲の上リング', n: 5, side: 50, r: 36, hill: 0, surf: 'cloudroad', shSurf: 'grass', wall: 'glow', gravity: 20, noGround: true, theme: { skyTop: 0x5ab0ff, skyBot: 0xfff0f8, fog: 0xf0f4ff, fogFar: 800, ground: null, sun: 1.1, amb: 0.85 }, deco: [['cloudpuff', 40], ['floatrock', 30], ['rainbow', 3]] },
+  { id: 'b_jupiter', name: '木星の大渦', n: 6, side: 46, r: 36, hill: 0, bumps: 0.5, surf: 'jupiter', shSurf: 'jupiter2', wall: 'glow', gravity: 40, noGround: true, theme: { skyTop: 0x3a1a10, skyBot: 0xe0904a, fog: 0xd08a50, fogFar: 520, ground: null, sun: 1, amb: 0.7 }, deco: [['cloud', 40]] },
+  { id: 'b_bosen', name: '母船格納庫', n: 4, side: 64, r: 34, hill: 5, surf: 'alien', shSurf: 'neon2', wall: 'glow', gravity: 22, noGround: true, space: true, theme: { skyTop: 0x0a0018, skyBot: 0x2a0a3a, fog: 0x1a0828, fogFar: 800, ground: null, sun: 0.9, amb: 0.65 }, deco: [['tentacle', 20], ['asteroid', 20]] },
+].map(a => {
+  const cmds = [];
+  for (let i = 0; i < a.n; i++) {
+    const dy = a.hill && a.n % 2 === 0 ? (i % 2 ? -a.hill : a.hill) : 0;
+    cmds.push(S(a.side, { items: 0.5, dy, bumps: a.bumps }));
+    cmds.push(C(360 / a.n, a.r, { items: i % 2 ? 0.5 : undefined }));
+  }
+  return Object.assign({}, ARENA_BASE, a, { battle: true, cmds, music: { bpm: 156, root: 57 + (a.n % 3), scale: 'minor', seed: 200 + a.n * 7 + a.side } });
+});
 
 const CUPS = [
   { name: '柴犬カップ', icon: '🐕' },
@@ -235,4 +258,4 @@ function turtle(def) {
   return r;
 }
 
-if (typeof module !== 'undefined') module.exports = { COURSES, turtle, cmdLength };
+if (typeof module !== 'undefined') module.exports = { COURSES, ARENAS, turtle, cmdLength };

@@ -98,6 +98,17 @@ const SURF = {
     g.fillStyle = '#7dffb0'; g.fillRect(0, 0, 8, s); g.fillRect(s - 8, 0, 8, s);
   },
 };
+Object.assign(SURF, {
+  moss: (g, s) => { noise(g, s, '#4f7a34', 0.35, 9000, 3); const r = U.rng(21); g.strokeStyle = 'rgba(90,60,30,0.7)'; g.lineWidth = 7; for (let i = 0; i < 5; i++) { g.beginPath(); let x = r() * s, y = r() * s; g.moveTo(x, y); for (let k = 0; k < 4; k++) { x += (r() - 0.5) * 90; y += r() * 40; g.lineTo(x, y); } g.stroke(); } g.fillStyle = 'rgba(160,220,90,0.5)'; for (let i = 0; i < 40; i++) g.fillRect(r() * s, r() * s, 6, 6); },
+  moss2: (g, s) => { noise(g, s, '#3f6a2a', 0.3, 7000, 3); },
+  cliff: (g, s) => { noise(g, s, '#8a7a68', 0.35, 9000, 3); const r = U.rng(8); g.fillStyle = 'rgba(60,45,35,0.5)'; for (let i = 0; i < 25; i++) { g.beginPath(); g.ellipse(r() * s, r() * s, 6 + r() * 14, 4 + r() * 8, r() * 3, 0, 7); g.fill(); } g.fillStyle = 'rgba(255,230,160,0.6)'; g.fillRect(4, 0, 5, s); g.fillRect(s - 9, 0, 5, s); },
+  redsand: (g, s) => { noise(g, s, '#c0703a', 0.32, 8000, 3); g.fillStyle = 'rgba(90,40,20,0.3)'; g.fillRect(s * 0.3, 0, 16, s); g.fillRect(s * 0.65, 0, 16, s); },
+  cloudroad: (g, s) => { g.fillStyle = '#f4f6ff'; g.fillRect(0, 0, s, s); const r = U.rng(4); for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(${200 + r() * 55},${210 + r() * 45},255,0.7)`; g.beginPath(); g.arc(r() * s, r() * s, 8 + r() * 22, 0, 7); g.fill(); } const cols = ['#ff7aa8', '#ffd23a', '#7ae8a0', '#7ab0ff']; cols.forEach((c, i) => { g.fillStyle = c; g.fillRect(i * 4, 0, 4, s); g.fillRect(s - 16 + i * 4, 0, 4, s); }); },
+  moon: (g, s) => { noise(g, s, '#9a9aa4', 0.35, 9000, 3); const r = U.rng(31); for (let i = 0; i < 14; i++) { const x = r() * s, y = r() * s, rad = 6 + r() * 20; g.strokeStyle = 'rgba(60,60,70,0.6)'; g.lineWidth = 3; g.beginPath(); g.arc(x, y, rad, 0, 7); g.stroke(); g.fillStyle = 'rgba(40,40,50,0.35)'; g.fill(); } g.fillStyle = '#5af2ff'; g.fillRect(3, 0, 5, s); g.fillRect(s - 8, 0, 5, s); },
+  moon2: (g, s) => { noise(g, s, '#6a6a74', 0.3, 6000, 3); },
+  candy: (g, s) => { for (let i = 0; i < 8; i++) { g.fillStyle = ['#ff7ab0', '#fff0f6', '#7ad8ff', '#fff0f6', '#ffd23a', '#fff0f6', '#9aff8a', '#fff0f6'][i]; g.save(); g.translate(0, i * 32); g.transform(1, 0.3, 0, 1, 0, 0); g.fillRect(-60, 0, s + 120, 32); g.restore(); } const r = U.rng(2); for (let i = 0; i < 80; i++) { g.fillStyle = ['#ff3a6a', '#3a8aff', '#ffe03a', '#3aff8a'][i % 4]; g.fillRect(r() * s, r() * s, 7, 3); } },
+  candy2: (g, s) => { noise(g, s, '#ffc0dc', 0.2, 4000, 3); const r = U.rng(5); for (let i = 0; i < 60; i++) { g.fillStyle = ['#ff3a6a', '#3a8aff', '#ffe03a', '#fff'][i % 4]; g.fillRect(r() * s, r() * s, 6, 3); } },
+});
 U.surfTex = (k) => makeTex('s_' + k, 256, SURF[k] || SURF.asphalt);
 U.checkerTex = () => makeTex('checker', 128, (g, s) => { for (let i = 0; i < 8; i++) for (let j = 0; j < 2; j++) { g.fillStyle = (i + j) % 2 ? '#111' : '#fff'; g.fillRect(i * s / 8, j * s / 2, s / 8, s / 2); } });
 U.boostTex = () => makeTex('boost', 128, (g, s) => {

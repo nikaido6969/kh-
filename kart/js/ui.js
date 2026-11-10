@@ -100,12 +100,12 @@ const UI = {
     document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
       SND.init(); SND.play('select');
       this.sel.mode = b.dataset.mode;
-      if (this.sel.mode === 'online') { this.sel.cc = 150; this.openChar(); return; }
+      if (this.sel.mode === 'online' || this.sel.mode === 'battle') { this.sel.cc = 150; this.openChar(); return; }
       this.openCC();
     }));
     document.querySelectorAll('[data-cc]').forEach(b => b.addEventListener('click', () => { SND.play('select'); this.sel.cc = +b.dataset.cc; this.openChar(); }));
     document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => { SND.init(); SND.play('back'); this.back(b.dataset.back); }));
-    on('btnChar', () => { this.store.set('ch', this.sel.ch); if (this.sel.mode === 'online') this.openOnline(); else this.openCourse(); });
+    on('btnChar', () => { this.store.set('ch', this.sel.ch); if (this.sel.mode === 'online') this.openOnline(); else if (this.sel.mode === 'battle') this.openArena(); else this.openCourse(); });
     on('btnHelp', () => this.show('s-help'));
     on('btnSet', () => this.openSettings());
     on('optAuto', () => { Input.autoAccel = !Input.autoAccel; this.store.set('auto', Input.autoAccel); this.$('tAcc').style.display = Input.autoAccel ? 'none' : ''; this.openSettings(); });
@@ -203,6 +203,24 @@ const UI = {
     this.show('s-course');
   },
 
+  openArena() {
+    const box = this.$('courseList'); box.innerHTML = '';
+    this.$('courseTitle').textContent = 'バトルステージをえらぶ';
+    const sec = document.createElement('div'); sec.className = 'cup';
+    const row = document.createElement('div'); row.className = 'crow';
+    ARENAS.forEach(a => {
+      const b = document.createElement('button'); b.className = 'course';
+      b.innerHTML = `<img src="${this.courseThumb(a)}" alt=""><b>${a.name}</b><small>風船10個×8人</small>`;
+      b.onclick = () => { SND.play('select'); this.sel.course = a.id; this.startBattle(); };
+      row.appendChild(b);
+    });
+    sec.appendChild(row); box.appendChild(sec);
+    this.show('s-course');
+  },
+  startBattle() {
+    const racers = this.makeField(8).map((a, i) => Object.assign({ id: 'ai' + i }, a)).concat([{ ch: this.sel.ch, type: 'player', name: 'あなた', id: 'P' }]);
+    this.launch(racers);
+  },
   // ---- レース開始 ----
   makeField(n) {
     const others = CHARS.filter(c => c.id !== this.sel.ch).sort(() => Math.random() - 0.5).slice(0, n - 1);
@@ -234,7 +252,12 @@ const UI = {
     this.$('loading').classList.add('on');
     setTimeout(() => {
       GAME.setup(Object.assign({ course: this.sel.course, cc: this.sel.cc, racers, mode: this.sel.mode, laps: 3, onResults: (r) => this.showResults(r) }, extra));
-      if (this.sel.mode === 'tt' && GAME.player) { GAME.player.item = 'turbo3'; GAME.player.itemN = 3; }
+      if (this.sel.mode === 'tt' && GAME.player) { GAME.player.item = 'karaage'; GAME.player.itemN = 3; }
+      const inv = this.store.get('specials', []);
+      if (inv.length && GAME.player && !['tt', 'online'].includes(this.sel.mode)) {
+        const sp = inv.shift(); this.store.set('specials', inv);
+        if (ITEMS[sp]) { GAME.player.item = sp; GAME.player.itemN = 1; setTimeout(() => HUD.toast(`🎁 スペシャル持ち込み：${ITEMS[sp].icon}${ITEMS[sp].name}`), 1500); }
+      }
       this.$('loading').classList.remove('on');
       this.$('btnPause').style.display = 'block';
       if (extra.onReady) extra.onReady();
@@ -259,11 +282,18 @@ const UI = {
     const pts = [15, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
     const render = () => {
       const r = GAME.running ? GAME.results() : res;
-      tbody.innerHTML = r.map((x, i) => `<tr class="${x.k.isPlayer ? 'me' : ''}"><td>${i + 1}</td><td><img src="${this.thumbs[x.k.ch.id]}"></td><td>${x.k.isPlayer ? 'あなた' : x.k.name}</td><td>${x.est ? '<span class="est">走行中</span>' : HUD.fmt(x.t)}</td>${g ? `<td>+${pts[i] || 0}</td>` : ''}</tr>`).join('');
+      tbody.innerHTML = r.map((x, i) => `<tr class="${x.k.isPlayer ? 'me' : ''}"><td>${i + 1}</td><td><img src="${this.thumbs[x.k.ch.id]}"></td><td>${x.k.isPlayer ? 'あなた' : x.k.name}</td><td>${x.battle ? (x.k.out ? '脱落' : '🎈×' + x.t) : x.est ? '<span class="est">走行中</span>' : HUD.fmt(x.t)}</td>${g ? `<td>+${pts[i] || 0}</td>` : ''}</tr>`).join('');
     };
     render();
     if (NET.active) { clearInterval(this.resTimer); this.resTimer = setInterval(() => { if (this.cur === 's-results') render(); else clearInterval(this.resTimer); }, 1000); }
     const me = res.findIndex(x => x.k.isPlayer);
+    let prize = '';
+    if (me === 0 && !['tt', 'online'].includes(this.sel.mode) && !this.awarded) {
+      const sp = SPECIALS[Math.floor(Math.random() * SPECIALS.length)];
+      const inv = this.store.get('specials', []); inv.push(sp); this.store.set('specials', inv.slice(-5));
+      prize = `🎁 スペシャル「${ITEMS[sp].icon}${ITEMS[sp].name}」ゲット！（${ITEMS[sp].line}）次の試合で使えます`;
+    }
+    this.$('resPrize').textContent = prize;
     this.$('resTitle').textContent = this.sel.mode === 'tt' ? 'タイムアタック' : (me + 1) + '位 ' + (me === 0 ? '🏆 優勝！' : me < 3 ? '🎉 表彰台！' : 'おつかれさま！');
     if (this.sel.mode === 'tt' && GAME.player) {
       const key = 'tt_' + this.sel.course + '_' + this.sel.cc;
@@ -274,17 +304,18 @@ const UI = {
     if (g) {
       res.forEach((x, i) => { const id = x.k.isPlayer ? 'P' : x.k.ch.id; g.pts[id] = (g.pts[id] || 0) + (pts[i] || 0); });
       this.$('resNext').textContent = g.race < 3 ? '次のレースへ' : '最終結果へ';
-    } else this.$('resNext').textContent = NET.active ? (NET.isHost ? 'ロビーへ戻る' : '待機') : 'コース選択へ';
+    } else this.$('resNext').textContent = NET.active ? (NET.isHost ? 'ロビーへ戻る' : '待機') : this.sel.mode === 'battle' ? 'ステージ選択へ' : 'コース選択へ';
     this.$('resNext').style.display = NET.active && !NET.isHost ? 'none' : '';
     this.$('resRetry').style.display = NET.active ? 'none' : '';
-    this.$('resHead').innerHTML = `<th>順位</th><th></th><th>名前</th><th>タイム</th>${g ? '<th>pt</th>' : ''}`;
+    this.$('resHead').innerHTML = `<th>順位</th><th></th><th>名前</th><th>${this.sel.mode === 'battle' ? '風船' : 'タイム'}</th>${g ? '<th>pt</th>' : ''}`;
+    if (this.sel.mode === 'battle') this.$('resTitle').textContent = me === 0 ? '🎈 バトル優勝！' : (me + 1) + '位 おしい！';
     this.$('btnPause').style.display = 'none';
     this.show('s-results');
   },
   resultsNext() {
     const g = this.gp;
     if (NET.active) { NET.send({ t: 'back' }); this.netBackToLobby(); return; }
-    if (!g) { GAME.dispose(); HUD.hide(); this.openCourse(); return; }
+    if (!g) { GAME.dispose(); HUD.hide(); if (this.sel.mode === 'battle') this.openArena(); else this.openCourse(); return; }
     if (this.$('resNext').dataset.stage === 'stand') {
       this.$('resNext').dataset.stage = '';
       if (g.race >= 3) { GAME.dispose(); HUD.hide(); this.gp = null; this.show('s-title'); return; }

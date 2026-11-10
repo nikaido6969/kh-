@@ -188,7 +188,7 @@ class Track {
     const def = this.def, b = this.bounds;
     const base = b.minY - (def.groundDrop ?? this.theme.groundDrop ?? 0.8);
     const hill = (Math.sin(x * 0.011) * Math.cos(z * 0.013) + 0.5 * Math.sin(x * 0.027 + z * 0.019) + 0.3 * Math.cos(x * 0.05 - z * 0.041)) / 1.8;
-    const A = def.id === 'touge' ? 45 : def.id === 'canyon' ? 30 : def.id === 'kaitei' ? 8 : 6;
+    const A = def.id === 'gake' ? 55 : def.id === 'mori' ? 14 : def.id === 'touge' ? 45 : def.id === 'canyon' ? 30 : def.id === 'kaitei' ? 8 : 6;
     if (def.groundDrop && def.id === 'coaster') return base;
     const nr = this.nearest(x, z, 90);
     if (nr.i < 0) return base + Math.max(0, hill) * A + (def.id === 'touge' ? 10 : 0);
@@ -200,7 +200,7 @@ class Track {
     const w = U.clamp((nr.d - edge - 8) / 70, 0, 1);
     const ws = w * w * (3 - 2 * w);
     let h = near + hill * A * ws;
-    if (def.id === 'touge') h = near + (Math.abs(hill) * A + 6) * ws;
+    if (def.id === 'touge' || def.id === 'gake') h = near + (Math.abs(hill) * A + 6) * ws;
     if (def.id === 'canyon') h = near + (hill > -0.1 ? 1 : -1) * A * ws;
     if (fl & 4) {
       if (nr.d < edge + 3) h = nr.y - 4;
@@ -280,7 +280,7 @@ class Track {
 
   _buildRoad(G) {
     const def = this.def;
-    const surfMats = this.surfList.map(sf => new THREE.MeshStandardMaterial({ map: U.surfTex(sf), roughness: 0.85, metalness: 0.0, side: THREE.DoubleSide, emissive: ['neon', 'alien', 'rock'].includes(sf) ? 0xffffff : 0, emissiveMap: ['neon', 'alien', 'rock'].includes(sf) ? U.surfTex(sf) : null, emissiveIntensity: 0.55 }));
+    const surfMats = this.surfList.map(sf => new THREE.MeshStandardMaterial({ map: U.surfTex(sf), roughness: 0.85, metalness: 0.0, side: THREE.DoubleSide, emissive: ['neon', 'alien', 'rock', 'cloudroad'].includes(sf) ? 0xffffff : 0, emissiveMap: ['neon', 'alien', 'rock', 'cloudroad'].includes(sf) ? U.surfTex(sf) : null, emissiveIntensity: 0.55 }));
     this.surfList.forEach((sf, si) => {
       this._ribbon(j => this.surfI[j] === si, j => -this.hw[j], j => this.hw[j], 0, 0, surfMats[si], 16).forEach(m => G.add(m));
     });
@@ -305,7 +305,7 @@ class Track {
     const w = this.def.wall; if (!w) return;
     const styles = {
       hedge: [0x3f8f34, 1.3, 0], guard: [0xdfe4ea, 1.0, 0.3], fence: [0x9a6a3a, 1.1, 0], logs: [0x7a4f2a, 1.2, 0],
-      rail: [0xff4fa0, 1.2, 0.3], rock: [0x9a5a34, 1.8, 0], coral: [0xff7aa8, 1.3, 0], crystal: [0xa05aff, 1.5, 0.6], glow: [0x40e8ff, 0.9, 1.0],
+      rail: [0xff4fa0, 1.2, 0.3], candywall: [0xff7ab0, 1.6, 0.2], rock: [0x9a5a34, 1.8, 0], coral: [0xff7aa8, 1.3, 0], crystal: [0xa05aff, 1.5, 0.6], glow: [0x40e8ff, 0.9, 1.0],
     };
     const [col, hgt, emi] = styles[w] || styles.guard;
     const mat = new THREE.MeshStandardMaterial({ color: col, roughness: 0.5, metalness: 0.3, emissive: emi ? col : 0, emissiveIntensity: emi, side: THREE.DoubleSide, transparent: w === 'glow', opacity: w === 'glow' ? 0.75 : 1 });
@@ -461,7 +461,7 @@ class Track {
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
     for (const [type, count] of def.deco || []) {
       const parts = DECO[type] ? DECO[type]() : null; if (!parts) continue;
-      const far = ['mountain', 'mesa', 'cloud', 'asteroid', 'satellite', 'ferris', 'tentacle'].includes(type);
+      const far = ['mountain', 'mesa', 'cloud', 'asteroid', 'satellite', 'ferris', 'tentacle', 'floatrock', 'cloudpuff', 'rainbow', 'bigtree'].includes(type);
       const mats = [];
       let tries = 0;
       while (mats.length < count && tries < count * 12) {
@@ -470,12 +470,13 @@ class Track {
         if (this.flags[j] & (8 | 16)) continue;
         const side = rng() < 0.5 ? -1 : 1;
         const ed = this.hw[j] + this.sh[j];
-        const dist = far ? ed + 60 + rng() * 260 : ed + 4 + rng() * (type === 'pole' ? 3 : 45);
+        const dist = type === 'bigtree' ? ed + 8 + rng() * 60 : far ? ed + 40 + rng() * 260 : ed + 4 + rng() * (type === 'pole' ? 3 : 45);
         const x = this.P[j * 3] + this.R[j * 3] * side * dist, z = this.P[j * 3 + 2] + this.R[j * 3 + 2] * side * dist;
         const nr = this.nearest(x, z, 40);
         if (nr.i >= 0 && nr.d < this.hw[nr.i] + this.sh[nr.i] + (type === 'pole' ? 1.5 : 3)) continue;
         let y;
         if (def.noGround) y = this.P[j * 3 + 1] + (rng() - 0.5) * (far ? 160 : 30) - (far ? 0 : 6);
+        if (def.noGround && ['crater', 'flag', 'mushroom', 'glowflower', 'crystal'].includes(type)) y = this.P[j * 3 + 1] - 1;
         else y = this.terrainH(x, z);
         if (def.water != null && ['palm'].includes(type) && y < def.water) continue;
         if (def.water != null && ['coral', 'seaweed'].includes(type) && y > def.water - 2) continue;
@@ -567,6 +568,16 @@ const DECO = (() => {
     cloud: () => [P(new THREE.SphereGeometry(14, 10, 8), 0xf0b078, M4(0, 0, 0, 1.6, 0.6, 1), { op: 0.65, e: 0x603010 }), P(new THREE.SphereGeometry(10, 10, 8), 0xffd0a0, M4(14, 3, 4, 1.4, 0.6, 1), { op: 0.6, e: 0x603010 })],
     asteroid: () => [P(new THREE.IcosahedronGeometry(6, 0), 0x6a6470, M4(0, 0, 0, 1, 0.8, 1.2), { flat: true })],
     satellite: () => [P(new THREE.BoxGeometry(4, 4, 6), 0xd8d8e0, M4(0, 0, 0), { m: 0.7 }), P(new THREE.BoxGeometry(20, 0.2, 5), 0x2a4ad8, M4(0, 0, 0), { e: 0x101860 })],
+    bigtree: () => [P(new THREE.CylinderGeometry(3, 4.5, 40, 9), 0x6a4a2a, M4(0, 20, 0), { flat: true }), P(new THREE.IcosahedronGeometry(16, 1), 0x2f7a3a, M4(0, 44, 0, 1, 0.7, 1), { flat: true }), P(new THREE.IcosahedronGeometry(11, 1), 0x4a9a3a, M4(9, 36, 5, 1, 0.7, 1), { flat: true })],
+    mushroom: () => [P(new THREE.CylinderGeometry(0.8, 1.2, 6, 10), 0xf4ead8, M4(0, 3, 0)), P(new THREE.SphereGeometry(4, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), 0xe04a6a, M4(0, 5.6, 0, 1, 0.7, 1), { e: 0x401020 }), P(new THREE.SphereGeometry(0.7, 8, 6), 0xffffff, M4(1.8, 7.6, 1), {}), P(new THREE.SphereGeometry(0.6, 8, 6), 0xffffff, M4(-1.6, 7.4, -1.2), {})],
+    glowflower: () => [P(new THREE.CylinderGeometry(0.08, 0.1, 1.6, 4), 0x3a8a3a, M4(0, 0.8, 0)), P(new THREE.IcosahedronGeometry(0.5, 0), 0x7affe0, M4(0, 1.8, 0), { e: 0x30c0a0, ei: 1 }), P(new THREE.IcosahedronGeometry(0.4, 0), 0xff8ae0, M4(0.7, 1.3, 0.2), { e: 0xc040a0, ei: 1 })],
+    floatrock: () => [P(new THREE.ConeGeometry(9, 14, 7), 0x8a7060, M4(0, -7, 0, 1, 1, 1), { flat: true }), P(new THREE.CylinderGeometry(9, 9, 1.6, 7), 0x5ab04a, M4(0, 0.6, 0), { flat: true }), P(new THREE.ConeGeometry(2, 5, 6), 0x2f8a3a, M4(3, 3.5, 2), { flat: true })],
+    cloudpuff: () => [P(new THREE.IcosahedronGeometry(10, 1), 0xffffff, M4(0, 0, 0, 1.6, 0.7, 1), { e: 0x8a8a9a, op: 0.92 }), P(new THREE.IcosahedronGeometry(7, 1), 0xffffff, M4(10, 2, 3, 1.4, 0.7, 1), { e: 0x8a8a9a, op: 0.92 })],
+    rainbow: () => [0xff4a4a, 0xffa03a, 0xffe03a, 0x5ad86a, 0x4a9aff, 0x9a5aff].map((c, i) => P(new THREE.TorusGeometry(70 - i * 3, 1.5, 6, 40, Math.PI), c, M4(0, -20, 0), { e: c, ei: 0.5, op: 0.8 })),
+    crater: () => [P(new THREE.TorusGeometry(8, 1.6, 6, 18), 0x8a8a94, M4(0, 0.3, 0, 1, 1, 1), { flat: true })].map(p => { p.m.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2)); return p; }),
+    flag: () => [P(new THREE.CylinderGeometry(0.08, 0.08, 5, 5), 0xdddddd, M4(0, 2.5, 0)), P(new THREE.BoxGeometry(2.2, 1.3, 0.05), 0xffd23a, M4(1.1, 4.3, 0))],
+    pillar: () => [P(new THREE.CylinderGeometry(2.2, 2.6, 26, 10), 0xe8dcc0, M4(0, 13, 0)), P(new THREE.BoxGeometry(6, 1.6, 6), 0xd8ccb0, M4(0, 26.5, 0))],
+    lollipop: () => [P(new THREE.CylinderGeometry(0.3, 0.3, 9, 6), 0xffffff, M4(0, 4.5, 0)), P(new THREE.CylinderGeometry(3.2, 3.2, 0.8, 18), 0xff5aa8, M4(0, 10.5, 0, 1, 1, 1), { e: 0x401030 })].map((p, i) => { if (i) p.m.multiply(new THREE.Matrix4().makeRotationX(Math.PI / 2)); return p; }),
     tentacle: () => [P(new THREE.TorusGeometry(10, 1.6, 8, 24, Math.PI * 1.3), 0x7dffb0, M4(0, 10, 0), { e: 0x20a060, ei: 0.6 }), P(new THREE.SphereGeometry(3, 10, 8), 0xff5ad8, M4(10, 10, 0), { e: 0x802060 })],
   };
 })();
