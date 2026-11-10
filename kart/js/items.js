@@ -243,8 +243,8 @@ Object.assign(Game.prototype, {
       if (k.hoverT > 0 && ['spin', 'slip', 'nattoT'].includes(kind)) return;
     }
     switch (kind) {
-      case 'spin': case 'slip': k.spinT = 1.0; break;
-      case 'knock': k.knockT = 1.3; k.vh = 8; k.grounded = false; k.airT = 0; break;
+      case 'spin': case 'slip': k.spinT = 0.8; break;
+      case 'knock': k.knockT = 1.0; k.vh = 4.2; k.grounded = false; k.airT = 0; break;
       case 'flat': k.flatT = 2.4; k.spinT = 0.4; break;
       case 'shock': k.flatT = 2.0; k.spinT = 0.8; this.spark(k, 0x9ad8ff, 30); break;
       case 'sleep': k.sleepT = opt.t || 1.8; break;
@@ -255,7 +255,7 @@ Object.assign(Game.prototype, {
       case 'grab': k.grabT = 1.5; break;
     }
     if (kind !== 'grab') { k.drift = 0; k.mt = 0; k.boostT = 0; }
-    k.invT = this.battle ? 1.8 : 0.6;
+    k.invT = this.battle ? 1.8 : 0.6; k.flow *= 0.45;
     if (k.isPlayer) { SND.play({ spin: 'hit', slip: 'slip', knock: 'hit', flat: 'squash', shock: 'bzzt', sleep: 'snore', burn: 'achi', natto: 'squish', grab: 'grab' }[kind] || 'hit'); HUD.shake(0.5); }
     this.spark(k, 0xffe060, 12);
     if (this.battle && !opt.noBalloon) {

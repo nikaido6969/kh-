@@ -1,5 +1,5 @@
 // ===== レースエンジン =====
-const CC_BASE = { 100: 33, 150: 43, 200: 55 };
+const CC_BASE = { 100: 26.5, 150: 34.5, 200: 44 }; // 従来比 -20%（ノリノリ加速で伸びる）
 const MT_COL = [0xffffff, 0x4ac8ff, 0xffa020, 0xd060ff];
 const MT_TIME = [0, 0.55, 1.05, 1.65];
 
@@ -103,7 +103,7 @@ class Kart {
       boostT: 0, boostCol: 0, spinT: 0, knockT: 0, starT: 0, shrinkT: 0, ufoT: 0, inkT: 0, respawnT: 0, fallT: -1, offEdge: false, fromGap: false,
       item: null, itemN: 0, rollT: 0, finished: false, finishTime: 0, lap: 0, rank: 0, lastSafe: 0, trick: false, trickT: 0, spinVis: 0, flipVis: 0,
       steerVis: 0, wheelRot: 0, aiOff: 0, aiOffT: 0, aiItemT: 0, skill: 1, rb: 1, input: { steer: 0, accel: false, brake: false, drift: false }, prevDrift: false, prevItem: false,
-      netT: null, rubber: 1, padCool: 0,
+      netT: null, rubber: 1, padCool: 0, flow: 0, wallCd: 0, draftT: 0, squash: 0,
       blindT: 0, sleepT: 0, flatT: 0, gasT: 0, hoverT: 0, zoneT: 0, eyeburnT: 0, bellyT: 0, giantT: 0, invT: 0, shieldT: 0, windT: 0, windDir: 0,
       hammerT: 0, reverseT: 0, grabT: 0, gunT: 0, fireT: 0, laser: null, slick: false, slickSteer: 0, balloons: 10, out: false, outT: 0, hp: 0,
     });
@@ -124,7 +124,7 @@ class Game {
     this.cfg = cfg;
     this.def = COURSES.concat(ARENAS).find(c => c.id === cfg.course);
     this.battle = cfg.mode === 'battle';
-    this.ccBase = CC_BASE[cfg.cc] || 43;
+    this.ccBase = CC_BASE[cfg.cc] || 34.5;
     this.laps = cfg.laps || 3;
     const scene = new THREE.Scene(); this.scene = scene;
     const th = this.def.theme;
@@ -186,6 +186,7 @@ class Game {
         scene.add(c.mesh); this.traffic.push(c);
       }
     }
+    this.setupGimmicks();
     // UFO
     this.ufoMesh = new THREE.Group();
     mk(this.ufoMesh, GEO.sph(1.6, 16, 8), 0xc0c8d8, 0, 0, 0, { s: [1.6, 0.35, 1.6], mo: { m: 0.8, r: 0.2 } });
@@ -278,7 +279,7 @@ class Game {
     }
     this.collideKarts();
     if (this.battle) this.updateBattle(dt);
-    if (this.started) this.updateNPC(dt);
+    if (this.started) { this.updateNPC(dt); this.updateGimmicks(dt); }
     this.updateProjs(dt);
     this.updateBoxes(dt);
     this.updateTraffic(dt);
@@ -358,7 +359,11 @@ class Game {
     // アイテム使用
     if (!locked && inp.itemEdge && k.item && k.rollT <= 0) this.useItem(k, inp);
     // 最高速
-    let vm = k.vmax * k.rb * (k.isAI ? k.skill : 1);
+    // ノリノリ加速：ぶつからずに走り続けるほど最高速が伸びる
+    if (this.started && !locked && k.v > k.vmax * 0.6) k.flow = Math.min(1, k.flow + dt / 13); else if (k.v < k.vmax * 0.3) k.flow = Math.max(0, k.flow - dt * 0.25);
+    k.wallCd = Math.max(0, k.wallCd - dt); k.squash = Math.max(0, k.squash - dt * 5);
+    const VM = k.vmax * (1 + 0.32 * k.flow);
+    let vm = VM * k.rb * (k.isAI ? k.skill : 1);
     if (k.shrinkT > 0) vm *= 0.72;
     if (k.flatT > 0) vm *= 0.6; if (k.gasT > 0) vm *= 0.7; if (k.bellyT > 0) vm *= 0.5; if (k.giantT > 0) vm *= 0.78;
     if (k.grabT > 0) vm *= 0.45; if (k.windT > 0) vm *= 0.8; if (k.zoneT > 0) vm *= 1.05; if (k.hoverT > 0) vm *= 1.1;
@@ -372,10 +377,10 @@ class Game {
     const inWater = def.water != null && wy < def.water;
     if (inWater) vm *= 0.94;
     if (k.inWater !== inWater) { if (k.isPlayer) SND.play('splash'); k.inWater = inWater; }
-    if (k.boostT > 0) vm = Math.max(vm, k.vmax * 1.3);
-    if (k.starT > 0) vm = Math.max(vm, k.vmax * 1.14);
+    if (k.boostT > 0) vm = Math.max(vm, VM * 1.24);
+    if (k.starT > 0) vm = Math.max(vm, VM * 1.12);
     const ufo = k.ufoT > 0;
-    if (ufo) vm = k.vmax * 1.65;
+    if (ufo) vm = VM * 1.5;
     // 縦方向
     if (ufo) {
       k.v = U.damp(k.v, vm, 3, dt);
@@ -455,9 +460,13 @@ class Game {
         const sg = Math.sign(k.d); k.d = sg * edge;
         if (k.yaw * sg > 0) {
           const imp = Math.abs(Math.sin(k.yaw));
-          k.v *= 1 - 0.55 * imp; k.yaw = -k.yaw * 0.3;
-          if (imp > 0.15 && k.v > 6) { if (k.isPlayer) { SND.play('wall'); HUD.shake(0.25 * imp); } this.spark(k, 0xffd080, 6); }
-          if (imp > 0.35 && k.drift) { k.drift = 0; k.mt = 0; }
+          k.yaw = U.damp(k.yaw, sg * 0.015, 14, dt);           // 向きはほぼそのまま、壁と平行にじわっと戻す
+          k.v -= Math.min(k.v, 7 * imp * dt * 10 * 0.1 + 5 * imp * dt); // こすれ抵抗
+          if (k.wallCd <= 0 && imp > 0.2 && k.v > 8) {
+            k.wallCd = 0.45; k.v *= 1 - 0.16 * imp; k.flow = Math.max(0, k.flow - 0.3 * imp);
+            if (k.isPlayer) { SND.play('wall'); HUD.shake(0.1 * imp); } this.spark(k, 0xffd080, 4);
+          }
+          if (imp > 0.7 && k.drift) { k.drift = 0; k.mt = 0; }
         }
       }
     } else if (Math.abs(k.d) > tr.hw[i2] + tr.sh[i2] + 0.6 && !k.offEdge && !ufo) {
@@ -474,7 +483,7 @@ class Game {
       if (gap) { k.grounded = false; k.fromGap = true; }
       else {
         const nv = (sOff - k.h) / dt, pred = k.vh - g * dt;
-        if (nv < pred - 0.8 && sOff < k.h) { k.grounded = false; k.vh = pred; k.airT = 0; k.hop = false; }
+        if (nv < pred - 6 && sOff < k.h) { k.grounded = false; k.vh = pred; k.airT = 0; k.hop = false; }
         else { k.h = sOff; k.vh = U.clamp(nv, -30, 30); }
       }
     }
@@ -484,6 +493,7 @@ class Game {
       if (gap) k.fromGap = true;
       if (!gap && k.h <= sOff) {
         if (k.fromGap && k.h < sOff - 1.6) { this.fallOut(k, true); return; }
+        if (k.airT > 0.3) k.squash = 1;
         k.h = sOff; k.grounded = true; k.vh = 0; k.fromGap = false;
         if (k.airT > 0.35 && k.isPlayer) SND.play('land');
         if (k.trick) { k.boostT = Math.max(k.boostT, 0.9); k.boostCol = 1; if (k.isPlayer) SND.play('boost'); }
@@ -493,6 +503,14 @@ class Game {
     }
     if (k.grounded && !(fl2 & 1) && Math.abs(k.d) < tr.hw[i2] && !k.offEdge) k.lastSafe = k.dist;
     // ダッシュ板
+    // スリップストリーム
+    if (!this.battle && !k.isRemote && k.v > 18 && k.grounded) {
+      let beh = false;
+      for (const o of this.karts) { if (o === k || o.out) continue; const dd = this.dDist(o.dist, k.dist); if (dd > 3 && dd < 17 && Math.abs(o.d - k.d) < 1.7) { beh = true; break; } }
+      k.draftT = beh ? k.draftT + dt : Math.max(0, k.draftT - dt * 2);
+      if (beh && k.draftT > 0.4 && Math.random() < 0.5) this.particles.emit(k.model.root.position.clone().add(new THREE.Vector3((Math.random() - 0.5) * 2, 0.6 + Math.random(), (Math.random() - 0.5) * 2)), this.fwdVec(k).multiplyScalar(-14), 0xffffff, 0.25, 0.25, 0.05, 0);
+      if (k.draftT > 1.3) { k.draftT = 0; k.boostT = Math.max(k.boostT, 1.1); k.boostCol = 1; if (k.isPlayer) { SND.play('boost'); HUD.toast('💨 スリップストリーム！'); } }
+    }
     if (k.padCool <= 0 && k.h < 1.2) for (const p of this.pads) {
       if (Math.abs(this.dDist(k.dist, p.s)) < 2.5 && Math.abs(k.d - p.d) < 2.0) {
         k.boostT = Math.max(k.boostT, 1.15); k.boostCol = 2; k.padCool = 0.4; if (k.isPlayer) SND.play('boost');
@@ -574,12 +592,19 @@ class Game {
   updateTraffic(dt) {
     for (const c of this.traffic) {
       c.dist += c.v * dt;
-      this.placeOnTrack(c.mesh, c.dist, c.d, 0, c.v < 0 ? Math.PI : 0);
+      const hw = this.track.lerpArr(this.track.hw, c.dist);
+      c.d = Math.sin(this.time * 0.45 + c.ph) * hw * 0.65;
+      const fl = this.track.flagAt(c.dist);
+      c.mesh.visible = !(fl & (1 | 16));
+      this.placeOnTrack(c.mesh, c.dist, c.d, c.h || 0, 0);
+      if (c.roll) c.mesh.rotateX(-this.time * 4); else c.mesh.rotateY(Math.sin(this.time * 2 + c.ph) * 0.6);
+      if (!c.mesh.visible) continue;
       for (const k of this.karts) {
-        if (k.isRemote || k.respawnT > 0 || k.knockT > 0) continue;
-        if (Math.abs(this.dDist(k.dist, c.dist)) < 2.8 && Math.abs(k.d - c.d) < 1.9 && k.h < 2) {
+        if (k.isRemote || k.respawnT > 0 || k.out || k.invT > 0) continue;
+        if (Math.abs(this.dDist(k.dist, c.dist)) < c.r && Math.abs(k.d - c.d) < c.r && k.h < c.r + 1) {
           if (k.starT > 0 || k.ufoT > 0) continue;
-          this.hitKart(k, 'knock'); k.d += Math.sign(k.d - c.d || 1) * 1.5;
+          this.damage(k, c.kind, { noBalloon: true }); k.invT = Math.max(k.invT, 1.2);
+          if (k.isPlayer) HUD.toast(c.msg);
         }
       }
     }
@@ -605,12 +630,13 @@ class Game {
       const ov = 1.55 + gr - Math.abs(dd);
       const sg = Math.sign(dd || (a - b));
       const tot = wA + wB;
-      if (!A.isRemote) A.d += sg * ov * (wB / tot);
-      if (!B.isRemote) B.d -= sg * ov * (wA / tot);
+      const push = Math.min(ov, 0.28) ;
+      if (!A.isRemote) A.d += sg * push * (wB / tot);
+      if (!B.isRemote) B.d -= sg * push * (wA / tot);
       if (Math.abs(ds) < 1.2) {
         if (!A.isRemote && ds < 0) A.v *= 0.985; if (!B.isRemote && ds > 0) B.v *= 0.985;
       }
-      if ((A.isPlayer || B.isPlayer) && ov > 0.25) SND.play('wall');
+      if ((A.isPlayer || B.isPlayer) && ov > 0.7 && this.time - (this.bumpAt || 0) > 0.6) { this.bumpAt = this.time; SND.play('wall'); }
     }
   }
 
@@ -655,12 +681,14 @@ class Game {
     this.tmp.m.makeBasis(Lf, fr.u, F);
     m.root.quaternion.setFromRotationMatrix(this.tmp.m);
     if (k.flipVis) m.root.rotateX(-k.flipVis);
+    m.root.rotateZ(k.steerVis * (k.drift ? 0.2 : 0.09) * Math.min(1, Math.abs(k.v) / 25));
+    if (!k.grounded && !k.trick) m.root.rotateX(U.clamp(-k.vh * 0.02, -0.3, 0.3));
     if (k.trick) m.root.rotateZ(k.trickT * 14);
     const lift = k.respawnT > 0 ? k.respawnT * 6 : 0;
     m.root.position.copy(fr.p).addScaledVector(fr.r, k.d).addScaledVector(fr.u, k.h + lift + (k.ufoT > 0 ? 0 : 0));
     const sc = k.giantT > 0 ? 10 : k.shrinkT > 0 ? 0.5 : 1;
     const cur = U.damp(m.root.scale.x, sc, 5, dt);
-    m.root.scale.set(cur, k.flatT > 0 ? cur * 0.18 : cur, cur);
+    m.root.scale.set(cur * (1 + 0.12 * k.squash), (k.flatT > 0 ? cur * 0.18 : cur) * (1 - 0.28 * k.squash), cur * (1 + 0.12 * k.squash));
     m.root.visible = !k.out && !(k.respawnT > 0 && Math.floor(this.time * 15) % 2) && !(k.invT > 0 && this.battle && Math.floor(this.time * 20) % 2);
     this.visualExtra(k, fr, dt);
     // 影
@@ -815,8 +843,9 @@ const HUD = {
     if (k.rollT > 0) { const keys = Object.keys(g.battle ? BATTLE_TABLE : ITEMS).filter(x => !ITEMS[x].sp); this.el.hitemi.textContent = ITEMS[keys[Math.floor(g.time * 14) % keys.length]].icon; this.el.hitemn.textContent = ''; }
     else if (k.item) { this.el.hitemi.textContent = ITEMS[k.item].icon; this.el.hitemn.textContent = k.itemN > 1 ? '×' + k.itemN : ''; }
     else { this.el.hitemi.textContent = ''; this.el.hitemn.textContent = ''; }
-    this.el.hlines.style.opacity = k.boostT > 0 || k.ufoT > 0 ? 1 : Math.max(0, (k.v - k.vmax * 0.95) / (k.vmax * 0.2));
+    this.el.hlines.style.opacity = k.boostT > 0 || k.ufoT > 0 ? 1 : Math.max(0, (k.v - k.vmax * 1.2) / (k.vmax * 0.2));
     this.el.hmt.style.background = k.drift ? '#' + MT_COL[k.mt].toString(16).padStart(6, '0') : 'transparent';
+    const fe = document.getElementById('hflowb'); if (fe) { fe.style.width = (k.flow * 100) + '%'; fe.parentNode.classList.toggle('max', k.flow >= 0.99); }
     this.el.hmt.style.width = k.drift ? Math.min(100, k.driftCharge / 3 * 100) + '%' : '0';
     // ミニマップ
     const c = this.mapCtx, mp = this.map;

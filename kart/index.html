@@ -92,6 +92,10 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #hmsg.small{font-size:clamp(26px,6vw,48px)}
 #hmsg.final{color:#ff5a5a}
 #hmsg.go{color:#ffd23a}
+#hflow{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:124px;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:900;font-style:italic}
+#hflow i{display:block;width:92px;height:9px;border-radius:9px;background:rgba(0,0,0,.28);overflow:hidden}
+#hflow b{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#5ad8ff,#7dff8a,#ffe04a,#ff5a8a)}
+#hflow.max{animation:fl .4s infinite alternate}@keyframes fl{to{filter:brightness(1.6)}}
 #hmtw{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:160px;height:8px;border-radius:9px;background:rgba(0,0,0,.2);overflow:hidden}
 #hmt{height:100%;width:0;border-radius:9px;box-shadow:0 0 10px currentColor}
 #hink{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at 30% 40%,#111 0 12%,transparent 13%),radial-gradient(circle at 65% 55%,#111 0 16%,transparent 17%),radial-gradient(circle at 45% 75%,#111 0 10%,transparent 11%),radial-gradient(circle at 80% 25%,#111 0 9%,transparent 10%)}
@@ -142,6 +146,7 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
   <div id="hspeed"></div><div id="hpos"></div>
   <canvas id="hmap" width="170" height="170"></canvas>
   <div id="hmtw"><div id="hmt"></div></div>
+  <div id="hflow"><span>ノリノリ</span><i><b id="hflowb"></b></i></div>
   <div id="hgas"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
   <div id="hmsg"></div><div id="hink"></div><div id="hflash"></div><div id="hbanner"></div><div id="htoasts"></div>
 </div>
@@ -172,7 +177,7 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
   <h2>排気量をえらぶ</h2>
   <div class="ccs">
     <button class="btn" data-cc="100">100cc<small>のんびり（それでも速い）</small></button>
-    <button class="btn pri" data-cc="150">150cc<small>標準。本家の約1.4倍速</small></button>
+    <button class="btn pri" data-cc="150">150cc<small>標準。ノーミスで走るほど速くなる</small></button>
     <button class="btn" data-cc="200">200cc<small>狂気。ブレーキを覚えよう</small></button>
   </div>
 </div>
@@ -227,6 +232,8 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
       <tr><td>ポーズ</td><td><kbd>Esc</kbd> / <kbd>P</kbd></td><td></td></tr>
     </table>
     <p>🔥 <b>ミニターボ</b>：曲がりながらドリフトボタン長押し → 火花が <span style="color:#2aa8ff">青</span>→<span style="color:#ff9a20">オレンジ</span>→<span style="color:#b050ff">紫</span> で離すと加速。<br>
+    ⚡ <b>ノリノリ加速</b>：ぶつからずに走り続けるほどゲージが溜まり最高速が伸びる。ぶつかると減る。<br>
+    💨 <b>スリップストリーム</b>：相手の真後ろに1秒つくと加速。<br>
     🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
     🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
@@ -280,6 +287,7 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 <script src="js/items.js"></script>
 <script src="js/battle.js"></script>
 <script src="js/npc.js"></script>
+<script src="js/gimmick.js"></script>
 <script src="js/net.js"></script>
 <script src="js/ui.js"></script>
 </body>

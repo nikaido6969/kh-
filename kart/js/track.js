@@ -76,7 +76,7 @@ class Track {
       if (c.bumps) {
         const s = j * ds;
         const taper = Math.min(1, tt[j] * 8, (1 - tt[j]) * 8);
-        o += c.bumps * 0.5 * (1 - Math.cos(2 * Math.PI * s / 7.5)) * (0.65 + 0.35 * Math.sin(s * 0.37)) * taper;
+        o += c.bumps * 0.3 * (1 - Math.cos(2 * Math.PI * s / 11)) * (0.65 + 0.35 * Math.sin(s * 0.37)) * taper;
       }
       off[j] = o;
       bank[j] = c.bank && c.t === 'c' ? c.bank * Math.PI / 180 * Math.sign(c.ang) : 0;
