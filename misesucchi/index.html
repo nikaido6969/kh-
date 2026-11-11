@@ -1535,62 +1535,68 @@ $('myCheer').onclick=e=>{const i=e.target.dataset.mc;if(i===undefined)return;S.c
 
 // ===== おやつミニガチャ =====
 const SNACKS=[
- ['azuki','歯が折れるあずきバァ','かたすぎる棒アイス。かじると歯の方が負ける','R','bar','#8a5a4a'],
- ['umaibo','うまい坊','さくさくの坊主頭スナック。頭をなでると音がする','N','stick','#f3c46a'],
- ['omunie','おむにえさん','むらさき色のスライム。たまに目が合う（超レア）','SSR','slime','#a07ad6'],
- ['hair30','髪の毛30本','どこから来たのか分からない…（ホラー）','R','hair','#3b3330'],
- ['ichou','胃腸グミ','胃腸のやわらかさを再現。ぷるぷるが止まらない','N','gummy','#f2a3a8'],
- ['shukudai','宿題が終わるクッキー','食べても宿題は終わらない','N','cookie','#d9a560'],
- ['getsuyou','月曜日味のポテチ','ひとくちごとにちょっと気分が重くなる','N','bag','#7fa6d6'],
- ['sensei','先生の目線ガム','かんでいると、どこからか見られている気がする','R','gum','#9fd3c0'],
- ['keshikasu','消しゴムかすマカロン','ほんのり鉛筆の香り','N','macaron','#cfd6dd'],
- ['neguse','寝ぐせプリン','ゆらすと上の髪がピンと立つ','N','pudding','#f3d38a'],
- ['zenya','テスト前夜ドーナツ','あせりの味。穴から未来が見える','R','donut','#e79a8a'],
- ['muju','無重力わたあめ','手をはなすと空へ飛んでいく','R','cloud','#f6c3d6'],
- ['kouchou','校長先生の話チョコ','なかなか終わらない長さ','N','longbar','#7a5440'],
- ['nidone','二度寝マシュマロ','食べると5分だけねむくなる','N','marsh','#fff3f0'],
- ['kushami','くしゃみラムネ','はっくしょん味。しゅわっとはじける','N','bottle','#a9d6f0'],
- ['taiikukan','体育館のにおいグミ','なつかしい床の香り','R','gummy','#d9b78a'],
- ['akaten','赤点せんべい','パリッと割れる心の音','N','senbei','#e2735f'],
- ['sekigae','席替えポップコーン','となりがだれになるか分からない','N','popcorn','#f6e2a8'],
- ['wasuremono','わすれものアメ','給食袋に入っていた。ちょっと酸っぱい','N','candy','#b7e08a'],
- ['denchi','電池切れエクレア','食べるとやる気が1%だけ回復','R','eclair','#a7765a'],
- ['anki','ひみつの暗記パン','食べても覚えられない（でもおいしい）','SR','bread','#f1d3a0'],
- ['dangomushi','ダンゴムシだんご','まるまる三兄弟','N','dango','#b9a7c9'],
- ['uchujin','宇宙人のおすそわけ','未確認の甘さ。ぴかぴか光る','SR','ufo','#8fd0b0'],
- ['kinniku','筋肉プロテインバー','重すぎて持ち上げられない','R','bar','#c9a46a'],
- ['kinringo','金色のりんご飴','伝説のおやつ。食べると運気MAX','SSR','apple','#f1c75a'],
+ // [キー, 名前, ひとこと, レア度, 絵, 色, 形(c=丸 r=細長 b=箱)]
+ ['azuki','歯が折れるあずきバァ','かたすぎる棒アイス。かじると歯の方が負ける','R','azuki','#7a3b34','r'],
+ ['umaibo','うまい坊','さくさくの坊主頭スナック。頭をなでると音がする','N','umaibo','#e9b956','r'],
+ ['omunie','おむにえさん','むらさき色のスライム。たまに目が合う（超レア）','SSR','omunie','#9b6bd6','c'],
+ ['hair30','髪の毛30本','どこから来たのか分からない…（ホラー）','R','hair','#2c2420','b'],
+ ['ichou','胃腸グミ','胃腸のやわらかさを再現。ぷるぷるが止まらない','N','ichou','#f29aa3','b'],
+ ['jagarico','じゃがりこ','カップに立ったポテトスティック。カリッと止まらない','N','jagarico','#e9c27a','r'],
+ ['pocky','ポッキー','チョコがけのプレッツェル。持つところだけチョコなし','N','pocky','#5a3426','r'],
+ ['kinoko','きのこの山','クラッカーの柄にチョコのかさ。','N','kinoko','#5a3426','c'],
+ ['takenoko','たけのこの里','クッキーにチョコをまとったたけのこ。','N','takenoko','#5a3426','c'],
+ ['thunder','ブラックサンダー','ザクザク食感のチョコバー。稲妻級のうまさ','SR','thunder','#2a2220','b'],
+ ['country','カントリーマアム','外はサクッ、中はしっとりのクッキー','N','country','#d7a35e','c'],
+ ['alfort','アルフォート','帆船がうかぶチョコとビスケット','R','alfort','#6a3d2a','b'],
+ ['hichew','ハイチュウ','のびーるソフトキャンディ','N','hichew','#f28aa0','b'],
+ ['kajugummy','果汁グミ','ぷにっとしたぶどうのグミ','N','grape','#7d4bb3','c'],
+ ['koala','コアラのマーチ','中にチョコが入ったコアラのビスケット','R','koala','#e3b06a','c'],
+ ['happyturn','ハッピーターン','あまじょっぱい粉がやみつきのおせんべい','N','happyturn','#e6b45c','b'],
+ ['rumando','ルマンド','うすいクレープ生地をココアでつつんだ','R','rumando','#9a6a4a','r'],
+ ['kitkat','キットカット','パキッと折れるウエハースチョコ','N','kitkat','#6a3d2a','b'],
+ ['chips','ポテトチップス','うすしお味の定番','N','chips','#f0cf6a','c'],
+ ['chocopie','チョコパイ','ふわふわケーキにマシュマロとチョコ','R','chocopie','#5e3828','c'],
+ ['kakinotane','柿の種','ピリ辛のあられとピーナッツ','N','kaki','#d9823f','b'],
+ ['babystar','ベビースター','ポリポリのラーメンスナック','N','babystar','#e7b24c','b'],
+ ['painomi','パイの実','64層のパイにチョコがたっぷり','SR','painomi','#e3b067','c'],
+ ['pure','ピュレグミ','すっぱい粉つきのハートのグミ','R','pure','#ef6d87','c'],
+ ['apollo','アポロ','いちごとチョコの2色の山','N','apollo','#f2a0b5','c'],
 ];
 const SW={N:12,R:6,SR:2.2,SSR:.8};
-function snackSVG(type,c){
-  const k='stroke="#4a3f3a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
-  const face='<circle cx="42" cy="52" r="2.6" fill="#4a3f3a"/><circle cx="58" cy="52" r="2.6" fill="#4a3f3a"/><path d="M46 58q4 4 8 0" fill="none" '+k+'/>';
-  const T={
-   bar:`<rect x="34" y="14" width="32" height="54" rx="12" fill="${c}" ${k}/><path d="M50 68v20" ${k}/><path d="M40 26l6 4M54 34l6 4" stroke="#fff" stroke-width="2" opacity=".5"/>`,
-   longbar:`<rect x="38" y="6" width="24" height="86" rx="10" fill="${c}" ${k}/><path d="M38 30h24M38 54h24" stroke="#4a3f3a" stroke-width="1.6"/>`,
-   stick:`<rect x="38" y="18" width="24" height="66" rx="12" fill="${c}" ${k}/><circle cx="50" cy="20" r="14" fill="#f6dcb4" ${k}/><path d="M44 18h.1M56 18h.1" ${k}/><path d="M46 24q4 3 8 0" fill="none" ${k}/>`,
-   slime:`<path d="M18 80q-4-30 18-46q14-20 28 0q22 16 18 46z" fill="${c}" ${k}/><circle cx="40" cy="56" r="5" fill="#fff"/><circle cx="60" cy="56" r="5" fill="#fff"/><circle cx="41" cy="57" r="2.4" fill="#4a3f3a"/><circle cx="61" cy="57" r="2.4" fill="#4a3f3a"/><path d="M28 44q4-6 8-6" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>`,
-   hair:Array.from({length:12},(_,i)=>`<path d="M${22+i*5} 86q${(i%3-1)*16} -30 ${(i%2?10:-10)} -64" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`).join('')+`<circle cx="72" cy="30" r="3" fill="#c94a64"/>`,
-   gummy:`<path d="M30 30q20-18 40 0v34q-20 18-40 0z" fill="${c}" ${k} opacity=".95"/>${face}`,
-   cookie:`<circle cx="50" cy="52" r="32" fill="${c}" ${k}/><circle cx="38" cy="42" r="4" fill="#6b4a3a"/><circle cx="60" cy="46" r="3.5" fill="#6b4a3a"/><circle cx="50" cy="64" r="4" fill="#6b4a3a"/>`,
-   bag:`<path d="M24 22h52l-4 64H28z" fill="${c}" ${k}/><path d="M24 22l4-8h44l4 8" fill="#fff" ${k}/><circle cx="50" cy="54" r="12" fill="#f6dc93" ${k}/>`,
-   gum:`<rect x="20" y="36" width="60" height="28" rx="6" fill="${c}" ${k}/><circle cx="40" cy="50" r="5" fill="#fff" ${k}/><circle cx="60" cy="50" r="5" fill="#fff" ${k}/><circle cx="41" cy="50" r="2" fill="#4a3f3a"/><circle cx="61" cy="50" r="2" fill="#4a3f3a"/>`,
-   macaron:`<ellipse cx="50" cy="40" rx="30" ry="14" fill="${c}" ${k}/><rect x="22" y="44" width="56" height="8" fill="#fff" ${k}/><ellipse cx="50" cy="62" rx="30" ry="14" fill="${c}" ${k}/>`,
-   pudding:`<path d="M28 82l8-46h28l8 46z" fill="${c}" ${k}/><path d="M36 36q14-8 28 0" fill="#8a5a3a" ${k}/><path d="M50 30v-16M46 18l4-4 4 4" ${k}/>`,
-   donut:`<circle cx="50" cy="50" r="32" fill="${c}" ${k}/><circle cx="50" cy="50" r="11" fill="#fffdfa" ${k}/><path d="M30 38l4 2M66 34l-2 4M70 60l-4 0M34 66l4-2" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`,
-   cloud:`<path d="M24 60q-10-14 6-22q2-16 20-12q12-12 24 2q16 0 12 18q10 14-8 18H30q-10 0-6-4z" fill="${c}" ${k}/><path d="M50 74v18" ${k}/>`,
-   marsh:`<rect x="28" y="30" width="44" height="40" rx="16" fill="${c}" ${k}/><path d="M40 50q3-3 6 0M54 50q3-3 6 0" fill="none" ${k}/><text x="66" y="30" font-size="14" fill="#4a3f3a">z</text>`,
-   bottle:`<path d="M42 14h16v14q12 8 12 22v34H30V50q0-14 12-22z" fill="${c}" ${k}/><circle cx="50" cy="38" r="6" fill="#fff" ${k}/>`,
-   senbei:`<circle cx="50" cy="50" r="32" fill="${c}" ${k}/><path d="M50 18l-6 18 10 10-8 14 4 22" fill="none" ${k}/>`,
-   popcorn:`<path d="M28 44h44l-6 44H34z" fill="#fff" ${k}/><path d="M36 44v44M50 44v44M64 44v44" stroke="#e2735f" stroke-width="5"/><circle cx="38" cy="38" r="9" fill="${c}" ${k}/><circle cx="52" cy="32" r="10" fill="${c}" ${k}/><circle cx="64" cy="40" r="8" fill="${c}" ${k}/>`,
-   candy:`<circle cx="50" cy="50" r="18" fill="${c}" ${k}/><path d="M32 50l-14-10v20zM68 50l14-10v20z" fill="${c}" ${k}/>`,
-   eclair:`<rect x="16" y="40" width="68" height="22" rx="11" fill="#f3d38a" ${k}/><path d="M18 46q32-8 64 0v-2q-32-10-64 0z" fill="${c}" ${k}/><rect x="40" y="66" width="20" height="10" rx="2" fill="#eee" ${k}/><path d="M44 71h6" stroke="#e2735f" stroke-width="3"/>`,
-   bread:`<path d="M20 60q0-30 30-30t30 30v16H20z" fill="${c}" ${k}/><path d="M34 46l6 10M50 42v12M66 46l-6 10" ${k}/>`,
-   dango:`<path d="M50 6v90" stroke="#b58a5a" stroke-width="4"/><circle cx="50" cy="26" r="14" fill="#f6c3d6" ${k}/><circle cx="50" cy="50" r="14" fill="${c}" ${k}/><circle cx="50" cy="74" r="14" fill="#c9e3b4" ${k}/>`,
-   ufo:`<ellipse cx="50" cy="56" rx="38" ry="12" fill="${c}" ${k}/><path d="M32 52q2-22 18-22t18 22" fill="#dff3ff" ${k}/><circle cx="34" cy="58" r="3" fill="#fff6a0"/><circle cx="50" cy="62" r="3" fill="#fff6a0"/><circle cx="66" cy="58" r="3" fill="#fff6a0"/>`,
-   apple:`<circle cx="50" cy="56" r="28" fill="${c}" ${k}/><path d="M50 28v-12" ${k}/><path d="M50 22q10-10 20-4q-10 10-20 4z" fill="#8fbf6a" ${k}/><path d="M36 46q4-6 10-6" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/><path d="M50 84v12" ${k}/>`,
+function snackSVG(t,c){
+  const K='stroke="#3b2f2c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"';
+  const lg=(id,a,b,v)=>`<linearGradient id="${t}${id}" x1="0" y1="0" x2="${v?0:1}" y2="${v?1:0}"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+  const rg=(id,a,b)=>`<radialGradient id="${t}${id}" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></radialGradient>`;
+  const U=id=>`url(#${t}${id})`;const shadow='<ellipse cx="50" cy="92" rx="30" ry="5" fill="rgba(0,0,0,.12)"/>';
+  const hl=(x,y,w,h,r=-30)=>`<ellipse cx="${x}" cy="${y}" rx="${w}" ry="${h}" fill="#fff" opacity=".55" transform="rotate(${r} ${x} ${y})"/>`;
+  const A={
+  azuki:`<defs>${lg('a','#9a4e44','#5c2a25')}</defs>${shadow}<path d="M47 66h6v24h-6z" fill="#e8cfa3" ${K}/><rect x="30" y="8" width="40" height="62" rx="10" fill="${U('a')}" ${K}/>${[[38,20],[56,28],[44,40],[60,48],[40,56],[52,60]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="3.4" ry="2.4" fill="#3d1714"/>`).join('')}${hl(37,18,3,10,0)}<path d="M60 12l4 6-3 4" stroke="#fff" stroke-width="1.6" fill="none" opacity=".7"/>`,
+  umaibo:`<defs>${lg('a','#f4cd6c','#d79c3c')}</defs>${shadow}<rect x="34" y="20" width="32" height="70" rx="15" fill="${U('a')}" ${K}/>${Array.from({length:14},(_,i)=>`<circle cx="${38+(i*7)%24}" cy="${32+Math.floor(i/4)*13}" r="1.6" fill="#b5782c"/>`).join('')}<circle cx="50" cy="22" r="17" fill="#f6d9b4" ${K}/><path d="M36 16q14-12 28 0" fill="#e2c39a"/><circle cx="44" cy="23" r="1.8" fill="#3b2f2c"/><circle cx="56" cy="23" r="1.8" fill="#3b2f2c"/><path d="M46 29q4 3 8 0" fill="none" ${K}/>${hl(42,14,5,2.5,-15)}`,
+  omunie:`<defs>${rg('a','#cfa8ff','#7b45c4')}</defs>${shadow}<path d="M14 84q-6-34 20-52q16-22 32 0q26 18 20 52z" fill="${U('a')}" ${K}/>${hl(32,40,7,4)}<circle cx="40" cy="60" r="7" fill="#fff" ${K}/><circle cx="62" cy="60" r="7" fill="#fff" ${K}/><circle cx="42" cy="61" r="3" fill="#2a1a3a"/><circle cx="64" cy="61" r="3" fill="#2a1a3a"/><path d="M46 72q5 4 10 0" fill="none" ${K}/><circle cx="74" cy="34" r="3" fill="#e2d1ff"/>`,
+  hair:`${shadow}`+Array.from({length:30},(_,i)=>`<path d="M${18+(i*13)%64} 90q${(i%5-2)*9} -${30+i%4*8} ${(i%3-1)*14} -${54+i%5*6}" fill="none" stroke="${i%7?'#2c2420':'#5a4a40'}" stroke-width="${i%3?1.1:1.6}" stroke-linecap="round"/>`).join('')+`<path d="M30 12q20 10 40 0" stroke="#8a1c2c" stroke-width="2" fill="none" opacity=".6"/>`,
+  ichou:`<defs>${lg('a','#ffc4c9','#e27a85',1)}</defs>${shadow}<path d="M28 30q-12 16 2 30q8 10 0 20q16 12 30-2q20-6 18-26q-2-18-20-22q-18-6-30 0z" fill="${U('a')}" ${K} opacity=".95"/><path d="M38 40q10 6 6 16t10 14" stroke="#c9566a" stroke-width="2" fill="none" opacity=".6"/>${hl(40,34,8,3.5)}`,
+  jagarico:`<defs>${lg('a','#fbe3a4','#e0aa55')}${lg('b','#fff3dc','#e9dcc4')}</defs>${shadow}${[30,38,46,54,62,70].map((x,i)=>`<rect x="${x-3}" y="${10+i%3*6}" width="7" height="48" rx="3" fill="${U('a')}" ${K}/>`).join('')}<path d="M24 44h52l-6 46H30z" fill="${U('b')}" ${K}/><path d="M30 56h40" stroke="#e46a5a" stroke-width="5"/>`,
+  pocky:`<defs>${lg('a','#7b4a36','#3e2219')}${lg('b','#f2d29a','#d7a65e')}</defs>${shadow}${[0,1,2,3].map(i=>`<g transform="rotate(${-14+i*9} 50 88)"><rect x="47" y="10" width="7" height="58" rx="3" fill="${U('a')}" ${K}/><rect x="47" y="66" width="7" height="22" rx="3" fill="${U('b')}" ${K}/><path d="M49 16v40" stroke="#fff" opacity=".35" stroke-width="1.5"/></g>`).join('')}`,
+  kinoko:`<defs>${rg('a','#8a5a44','#3e2219')}${lg('b','#f6d9a6','#d9a65c')}</defs>${shadow}<rect x="40" y="46" width="20" height="42" rx="9" fill="${U('b')}" ${K}/><path d="M18 52q2-36 32-36t32 36q-32 8-64 0z" fill="${U('a')}" ${K}/>${hl(36,30,9,4)}`,
+  takenoko:`<defs>${lg('a','#f2d6a4','#c99a5c',1)}${lg('b','#8a5a44','#3e2219',1)}</defs>${shadow}<path d="M50 8q22 30 22 58q0 22-22 24q-22-2-22-24q0-28 22-58z" fill="${U('a')}" ${K}/><path d="M50 8q22 30 22 58q-4 10-22 10q-18 0-22-10q0-28 22-58z" fill="${U('b')}" ${K}/><path d="M38 40l12-8 12 8M34 56l16-10 16 10" stroke="#2a160f" stroke-width="2" fill="none"/>${hl(44,30,3,8,10)}`,
+  thunder:`<defs>${lg('a','#4a3a34','#1c1512',1)}</defs>${shadow}<rect x="14" y="30" width="72" height="44" rx="8" fill="${U('a')}" ${K}/>${Array.from({length:22},(_,i)=>`<circle cx="${20+(i*11)%62}" cy="${36+Math.floor(i/6)*9}" r="${1.4+(i%3)}" fill="#6b5446"/>`).join('')}<path d="M56 18l-14 28h12l-8 26 22-34H56l8-20z" fill="#f6d23a" ${K}/>`,
+  country:`<defs>${rg('a','#f3cf8e','#c88a45')}</defs>${shadow}<path d="M16 52q2-30 34-32q34 2 34 32q-2 30-34 32q-34-2-34-32z" fill="${U('a')}" ${K}/>${[[36,40],[58,36],[66,58],[42,62],[52,50]].map(([x,y])=>`<path d="M${x-4} ${y}q4-5 8 0q-4 5-8 0z" fill="#5a3426"/>`).join('')}${hl(34,36,8,3)}`,
+  alfort:`<defs>${lg('a','#8a5a44','#4a2a1e',1)}${lg('b','#f4d9a8','#d7a65e',1)}</defs>${shadow}<rect x="14" y="56" width="72" height="22" rx="5" fill="${U('b')}" ${K}/><rect x="14" y="26" width="72" height="34" rx="5" fill="${U('a')}" ${K}/><path d="M34 52h32l-6 6H40z M50 30v20 M50 32l12 12H50z M50 34l-10 10h10z" fill="#9a6a52" stroke="#3b2218" stroke-width="1.2"/>${hl(30,32,10,2,0)}`,
+  hichew:`<defs>${lg('a','#ffb3c3','#ef6f8c',1)}</defs>${shadow}<path d="M14 50l12-10v20zM86 50l-12-10v20z" fill="#fff" ${K}/><rect x="24" y="34" width="52" height="32" rx="8" fill="${U('a')}" ${K}/><path d="M32 50h36" stroke="#fff" stroke-width="3" stroke-dasharray="4 4"/>${hl(36,40,10,2.5,0)}`,
+  grape:`<defs>${rg('a','#c39be8','#5b2c8f')}</defs>${shadow}<circle cx="50" cy="56" r="30" fill="${U('a')}" ${K} opacity=".95"/><path d="M50 26q2-10 10-14" stroke="#4e8a3a" stroke-width="4" fill="none" stroke-linecap="round"/>${hl(38,44,9,5)}<circle cx="62" cy="68" r="2" fill="#fff" opacity=".6"/>`,
+  koala:`<defs>${rg('a','#f5d39a','#c98f4a')}</defs>${shadow}<circle cx="26" cy="34" r="12" fill="${U('a')}" ${K}/><circle cx="74" cy="34" r="12" fill="${U('a')}" ${K}/><ellipse cx="50" cy="56" rx="32" ry="30" fill="${U('a')}" ${K}/><circle cx="40" cy="50" r="3" fill="#5a3426"/><circle cx="60" cy="50" r="3" fill="#5a3426"/><ellipse cx="50" cy="60" rx="6" ry="4.5" fill="#5a3426"/><path d="M44 70q6 4 12 0" fill="none" stroke="#5a3426" stroke-width="2"/>${hl(36,38,8,3)}`,
+  happyturn:`<defs>${lg('a','#f6d58e','#d39a46')}</defs>${shadow}<path d="M10 50l14-14v28zM90 50l-14-14v28z" fill="#fff6e0" ${K}/><path d="M24 36h52v28H24z" fill="#fff6e0" ${K}/><rect x="30" y="38" width="40" height="24" rx="6" fill="${U('a')}" ${K}/>${Array.from({length:10},(_,i)=>`<circle cx="${34+(i*7)%32}" cy="${42+Math.floor(i/5)*10}" r="1.6" fill="#fff" opacity=".8"/>`).join('')}`,
+  rumando:`<defs>${lg('a','#b9876a','#6e4430',1)}</defs>${shadow}<rect x="40" y="10" width="20" height="80" rx="9" fill="${U('a')}" ${K}/>${Array.from({length:9},(_,i)=>`<path d="M41 ${18+i*8}q9 4 18 0" stroke="#4a2a1e" stroke-width="1.4" fill="none"/>`).join('')}<path d="M44 14v70" stroke="#fff" opacity=".3" stroke-width="2"/>`,
+  kitkat:`<defs>${lg('a','#8a5a44','#4a2a1e',1)}</defs>${shadow}${[0,1,2,3].map(i=>`<rect x="${16+i*18}" y="22" width="16" height="64" rx="5" fill="${U('a')}" ${K}/><path d="M${19+i*18} 28v52" stroke="#fff" opacity=".25" stroke-width="2"/>`).join('')}`,
+  chips:`<defs>${rg('a','#fbe9a6','#e2b048')}</defs>${shadow}<path d="M14 58q4-30 36-34q34 2 36 30q-8 26-40 28q-28-2-32-24z" fill="${U('a')}" ${K}/><path d="M28 48q10 6 22 2M44 66q12 2 22-8" stroke="#c99a3a" stroke-width="2" fill="none"/>${[[30,40],[62,44],[40,60],[66,64]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.4" fill="#fff"/>`).join('')}${hl(36,34,9,3)}`,
+  chocopie:`<defs>${lg('a','#7b4a36','#3e2219',1)}</defs>${shadow}<ellipse cx="50" cy="66" rx="36" ry="14" fill="#4a2a1e" ${K}/><rect x="14" y="44" width="72" height="22" fill="#f6efe6" ${K}/><ellipse cx="50" cy="44" rx="36" ry="14" fill="${U('a')}" ${K}/><path d="M18 56h64" stroke="#e9d9c4" stroke-width="3"/>${hl(36,40,10,3,0)}`,
+  kaki:`<defs>${lg('a','#ee9a52','#c5622a')}</defs>${shadow}${[[30,44,-30],[50,36,10],[68,48,40],[40,64,-10],[62,68,20]].map(([x,y,r])=>`<path d="M${x-12} ${y}q12-10 24 0q-12 8-24 0z" fill="${U('a')}" ${K} transform="rotate(${r} ${x} ${y})"/>`).join('')}${[[52,56],[28,62],[72,30]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="8" ry="6" fill="#f3d9a8" ${K}/>`).join('')}`,
+  babystar:`${shadow}`+Array.from({length:16},(_,i)=>`<path d="M${18+(i*9)%60} ${30+Math.floor(i/4)*12}q6-6 12 0t12 0" stroke="${i%2?'#e7b24c':'#d39a3a'}" stroke-width="5" fill="none" stroke-linecap="round"/>`).join('')+`<path d="M18 30q32 50 64 0" fill="none" stroke="#3b2f2c" stroke-width="0"/>`,
+  painomi:`<defs>${lg('a','#f6d39a','#d39a4c',1)}</defs>${shadow}<path d="M50 18l30 16v32L50 84 20 66V34z" fill="${U('a')}" ${K}/>${[0,1,2,3,4,5].map(i=>`<path d="M${24+i} ${38+i*5}l26 ${-14+i*0}" stroke="#e8b46a" stroke-width="0"/>`).join('')}${[40,48,56,64].map(y=>`<path d="M22 ${y}q28 6 56 0" stroke="#b9823e" stroke-width="1.3" fill="none"/>`).join('')}<path d="M44 34q6-6 12 0" stroke="#5a3426" stroke-width="5" fill="none"/>${hl(38,30,8,3)}`,
+  pure:`<defs>${rg('a','#ffb3c1','#e2496a')}</defs>${shadow}<path d="M50 86C28 70 12 58 14 38c2-16 22-22 36-6c14-16 34-10 36 6c2 20-14 32-36 48z" fill="${U('a')}" ${K}/>${Array.from({length:22},(_,i)=>`<circle cx="${24+(i*13)%52}" cy="${32+Math.floor(i/6)*12}" r="1.3" fill="#fff" opacity=".9"/>`).join('')}${hl(32,36,7,4)}`,
+  apollo:`<defs>${lg('a','#ffb7c8','#e9718f',1)}${lg('b','#7b4a36','#3e2219',1)}</defs>${shadow}<path d="M50 10q14 18 26 50H24q12-32 26-50z" fill="${U('a')}" ${K}/><path d="M24 60h52l-4 24H28z" fill="${U('b')}" ${K}/>${[30,40,50,60,70].map(x=>`<path d="M${x} 60v24" stroke="#2a160f" stroke-width="1.2"/>`).join('')}${hl(44,30,4,10,15)}`,
   };
-  return `<svg viewBox="0 0 100 100">${T[type]||T.candy}</svg>`;
+  return `<svg viewBox="0 0 100 100">${A[t]||A.chips}</svg>`;
 }
 function drawSnack(){
   if(!$('smGrid'))return;S.snacks=S.snacks||{};
@@ -1610,27 +1616,33 @@ const CAT={W:1,L:[2,4,8],C:[16,32,64]};
 function ufoPickSnack(){const tot=SNACKS.reduce((a,x)=>a+SW[x[3]],0);let r=Math.random()*tot;for(const x of SNACKS){r-=SW[x[3]];if(r<0)return x}return SNACKS[0]}
 function ufoAddPrize(x,y,layer,sn){
   const {Bodies,Body,Composite,Constraint}=Matter;
-  const opt={friction:.7,frictionStatic:1.1,frictionAir:.012,restitution:.02,density:.0016,collisionFilter:{category:CAT.L[layer],mask:CAT.W|CAT.L[layer]|CAT.C[layer]}};
-  const sh=SHAPE[sn[4]]||'b';
-  const b=sh==='c'?Bodies.circle(x,y,19,opt):sh==='r'?Bodies.rectangle(x,y,24,50,{...opt,chamfer:{radius:8}}):Bodies.rectangle(x,y,40,34,{...opt,chamfer:{radius:9}});
-  Body.setAngle(b,(Math.random()-.5)*.6);b._snack=sn;b._layer=layer;b._w=sh==='r'?24:sh==='c'?38:40;b._h=sh==='r'?50:sh==='c'?38:34;
+  const opt={friction:.7,frictionStatic:1.1,frictionAir:.012,restitution:.02,density:.0024,collisionFilter:{category:CAT.L[layer],mask:CAT.W|CAT.L[layer]|CAT.C[layer]}};
+  const sh=sn[6]||'b';
+  const b=sh==='c'?Bodies.circle(x,y,25,opt):sh==='r'?Bodies.rectangle(x,y,30,64,{...opt,chamfer:{radius:10}}):Bodies.rectangle(x,y,52,42,{...opt,chamfer:{radius:11}});
+  Body.setAngle(b,(Math.random()-.5)*.5);b._snack=sn;b._layer=layer;b._w=sh==='r'?30:sh==='c'?50:52;b._h=sh==='r'?64:sh==='c'?50:42;
   Composite.add(U.eng.world,b);U.prizes.push(b);
   if(Math.random()<.35){// タグ（ここに爪を引っかけられる）
-    const tag=Bodies.rectangle(x,y-b._h/2-9,16,6,{...opt,density:.0008,chamfer:{radius:2}});tag._tagOf=b;
+    const tag=Bodies.rectangle(x,y-b._h/2-9,18,6,{...opt,density:.0008,chamfer:{radius:2}});tag._tagOf=b;
     const c=Constraint.create({bodyA:b,pointA:{x:0,y:-b._h/2+3},bodyB:tag,pointB:{x:0,y:3},length:7,stiffness:.6,damping:.1});
     Composite.add(U.eng.world,[tag,c]);b._tag=tag;b._tagC=c;U.tags.push(tag)}
 }
-function ufoArm(side){const {Bodies,Body}=Matter;const bar=Bodies.rectangle(0,38,6,76);const tip=Bodies.rectangle(-side*9,76,20,6);
-  const b=Body.create({parts:[bar,tip],isStatic:true,friction:1,frictionStatic:2});b._off={x:b.position.x,y:b.position.y};b._side=side;return b}
+function ufoArm(side){const {Bodies,Body}=Matter;const bar=Bodies.rectangle(0,45,6,90);const tip=Bodies.rectangle(-side*6,90,14,6);
+  const b=Body.create({parts:[bar,tip],isStatic:true,friction:.8,frictionStatic:1.3});b._off={x:b.position.x,y:b.position.y};b._side=side;return b}
 function ufoSetLayer(l){U.layer=l;[U.armL,U.armR].forEach(a=>a.parts.forEach(p=>{p.collisionFilter={category:CAT.C[l],mask:CAT.L[l],group:0}}))}
-function ufoPose(){const {Body}=Matter;[[U.armL,-1,U.aL],[U.armR,1,U.aR]].forEach(([a,s,open])=>{const th=-s*open,px=U.hx+s*9,py=U.hy;const o=a._off;
+function ufoPose(){const {Body}=Matter;if(U.third)U.third.pointA={x:U.hx,y:U.hy+60};[[U.armL,-1,U.aL],[U.armR,1,U.aR]].forEach(([a,s,open])=>{const th=-s*open,px=U.hx+s*9,py=U.hy;const o=a._off;
   const pos={x:px+o.x*Math.cos(th)-o.y*Math.sin(th),y:py+o.x*Math.sin(th)+o.y*Math.cos(th)};Body.setAngle(a,th,true);Body.setPosition(a,pos,true)})}
 function ufoHits(arm,thr,tipOnly){const pr=U.prizes.concat(U.tags).filter(b=>(b._layer??b._tagOf._layer)===U.layer);
   const parts=tipOnly?[arm.parts[2]]:arm.parts.slice(1);return parts.some(pt=>Matter.Query.collides(pt,pr).some(c=>c.depth>thr))}
+// 3本目の爪（奥の爪）：まん中をつかめたときだけ、景品の下を支える
+function ufoThirdClaw(){const pr=U.prizes.filter(b=>b._layer===U.layer);let best=null,bd=1e9;
+  pr.forEach(b=>{const dx=Math.abs(b.position.x-U.hx),half=b._w/2;const touched=[U.armL,U.armR].some(a=>a.parts.slice(1).some(pt=>Matter.Query.collides(pt,[b]).length));
+    const below=b.position.y>U.hy+30&&b.position.y<U.hy+120;if(touched&&below&&dx<half*.45&&dx<bd){bd=dx;best=b}});
+  if(!best)return;const center=1-bd/(best._w/2);const st=.0023+.0105*center*center;
+  U.third=Matter.Constraint.create({pointA:{x:U.hx,y:U.hy+60},bodyB:best,pointB:{x:0,y:0},length:Math.max(4,best.position.y-(U.hy+60)),stiffness:st,damping:.12});Matter.Composite.add(U.eng.world,U.third)}
 function ufoInit(){
   if(U)return true;if(!window.Matter){$('ufoMsg').textContent='読みこみ中…';$('ufoMsg').className='ufo-msg on';return false}
   const {Engine,Bodies,Composite}=Matter;const eng=Engine.create();eng.gravity.y=1;eng.positionIterations=10;eng.velocityIterations=8;
-  U={eng,prizes:[],tags:[],hx:UFO.HOMEX,hy:UFO.TOPY,z:0,layer:0,aL:.55,aR:.55,phase:'off',tries:S.ufoTries||0,t:0,paused:false,won:[]};
+  U={eng,prizes:[],tags:[],hx:UFO.HOMEX,hy:UFO.TOPY,z:0,layer:0,aL:.72,aR:.72,phase:'off',tries:S.ufoTries||0,t:0,paused:false,won:[]};
   const wall=(x,y,w,h)=>Bodies.rectangle(x,y,w,h,{isStatic:true,friction:.8,collisionFilter:{category:CAT.W,mask:0xffff}});
   Composite.add(eng.world,[wall((UFO.CHUTE+UFO.W)/2+12,UFO.FLOOR+20,UFO.W-UFO.CHUTE+24,40),wall(UFO.CHUTE+4,UFO.FLOOR-21,8,42),wall(-10,UFO.H/2,20,UFO.H*2),wall(UFO.W+10,UFO.H/2,20,UFO.H*2)]);
   U.armL=ufoArm(-1);U.armR=ufoArm(1);Composite.add(eng.world,[U.armL,U.armR]);ufoSetLayer(0);ufoPose();
@@ -1640,8 +1652,8 @@ function ufoInit(){
 }
 function ufoRestock(first){// 3列×4こ をバランスよく
   const cnt=[0,0,0];U.prizes.forEach(b=>cnt[b._layer]++);
-  for(let l=0;l<3;l++)while(cnt[l]<4){const xs=[122,176,230,284];const used=U.prizes.filter(b=>b._layer===l).map(b=>b.position.x);
-    const x=xs.find(v=>!used.some(u=>Math.abs(u-v)<30))??(110+Math.random()*190);ufoAddPrize(x+(Math.random()-.5)*14,first?260-l*6:120,l,ufoPickSnack());cnt[l]++}
+  for(let l=0;l<3;l++)while(cnt[l]<3){const xs=[l===1?165:150,l===1?235:220,l===1?300:290];const used=U.prizes.filter(b=>b._layer===l).map(b=>b.position.x);
+    const x=xs.find(v=>!used.some(u=>Math.abs(u-v)<40))??(120+Math.random()*180);ufoAddPrize(x+(Math.random()-.5)*14,first?260-l*6:120,l,ufoPickSnack());cnt[l]++}
 }
 function ufoMsg(t,ms){const m=$('ufoMsg');m.textContent=t;m.className='ufo-msg on';clearTimeout(m._t);if(ms)m._t=setTimeout(()=>m.className='ufo-msg',ms)}
 function ufoUI(){$('ufoTries').textContent=U?`のこり ${U.tries} 回`:'';$('ufoX').disabled=!(U&&U.phase==='ready');$('ufoZ').disabled=!(U&&U.phase==='wz');$('ufoStart').disabled=!!(U&&U.tries>0)}
@@ -1649,20 +1661,22 @@ function ufoStep(){
   const {Engine,Composite}=Matter;const P=U.phase;
   if(P==='mx'){U.hx=Math.min(UFO.W-22,U.hx+1.6);if(U.hx>=UFO.W-22)ufoRelease('x')}
   if(P==='mz'){U.z=Math.min(1,U.z+.012);if(U.z>=1)ufoRelease('z')}
-  if(P==='drop'){U.hy+=1.5;ufoPose();if(U.hy>=UFO.FLOOR-82||ufoHits(U.armL,1.5,true)||ufoHits(U.armR,1.5,true)){U.phase='close';U.t=0}}
+  if(P==='drop'){U.hy+=1.5;ufoPose();if(U.hy>=UFO.FLOOR-96||ufoHits(U.armL,1.5,true)||ufoHits(U.armR,1.5,true)){U.phase='close';U.t=0}}
   if(P==='close'){U.t++;let moved=false;
-    if(!U.stopL){U.aL-=.012;ufoPose();if(ufoHits(U.armL,4.5)){U.aL+=.012;U.stopL=true}else moved=true}
-    if(!U.stopR){U.aR-=.012;ufoPose();if(ufoHits(U.armR,4.5)){U.aR+=.012;U.stopR=true}else moved=true}
+    if(!U.stopL){U.aL-=.012;ufoPose();if(ufoHits(U.armL,5)){U.aL+=.012;U.stopL=true}else moved=true}
+    if(!U.stopR){U.aR-=.012;ufoPose();if(ufoHits(U.armR,5)){U.aR+=.012;U.stopR=true}else moved=true}
     if(U.aL<-.12)U.stopL=true;if(U.aR<-.12)U.stopR=true;ufoPose();
     // タグの輪に爪の先が入ったら、ひっかかる
     U.hooks=U.hooks||[];[U.armL,U.armR].forEach(a=>{const tp=a.parts[2].position;U.tags.forEach(t=>{if(t._tagOf._layer!==U.layer||U.hooks.some(h=>h.bodyB===t))return;
       const dx=tp.x-t.position.x,dy=tp.y-t.position.y;if(Math.abs(dx)<11&&dy>-2&&dy<12){const c=Matter.Constraint.create({bodyA:a,pointA:{x:tp.x-a.position.x,y:tp.y-a.position.y},bodyB:t,length:3,stiffness:.35,damping:.1});Matter.Composite.add(U.eng.world,c);U.hooks.push(c);tick()}})});
     if((U.stopL&&U.stopR)||!moved){if(U.t>20){U.phase='hold';U.t=0}}}
-  if(P==='hold'){if(++U.t>25){U.phase='lift'}}
-  if(P==='lift'){U.hy-=1.3;ufoPose();if(U.hy<=UFO.TOPY){U.hy=UFO.TOPY;U.aL+=.03;U.aR+=.03;ufoPose();U.phase='home';tick()}}// 上でアームが少しゆるむ（本物と同じ）
+  if(P==='hold'){if(++U.t>25){U.phase='lift';ufoThirdClaw()}}
+  if(P==='lift'){U.hy-=1.3;U.aL+=.0007;U.aR+=.0007;ufoPose();if(U.hy<=UFO.TOPY){U.hy=UFO.TOPY;U.aL+=.022;U.aR+=.022;if(U.third)U.third.stiffness*=.7;ufoPose();U.phase='shake';U.t=0;tick()}}
+  if(P==='shake'){U.t++;U.hx+=Math.sin(U.t*1.3)*1.2*(1-U.t/24);ufoPose();if(U.t>=24)U.phase='home'}// 上でアームが少しゆるむ（本物と同じ）
   if(P==='home'){U.hx-=1.4;ufoPose();if(U.hx<=UFO.HOMEX){U.hx=UFO.HOMEX;U.phase='open';U.t=0}}
-  if(P==='open'){if(U.hooks&&U.hooks.length){U.hooks.forEach(c=>Matter.Composite.remove(U.eng.world,c));U.hooks=[]}U.aL=Math.min(.55,U.aL+.02);U.aR=Math.min(.55,U.aR+.02);ufoPose();if(++U.t>90){ufoEndTry()}}
+  if(P==='open'){if(U.third){Matter.Composite.remove(U.eng.world,U.third);U.third=null}if(U.hooks&&U.hooks.length){U.hooks.forEach(c=>Matter.Composite.remove(U.eng.world,c));U.hooks=[]}U.aL=Math.min(.72,U.aL+.02);U.aR=Math.min(.72,U.aR+.02);ufoPose();if(++U.t>90){ufoEndTry()}}
   Engine.update(U.eng,1000/60);
+  if(U.third){const a=Matter.Constraint.pointAWorld(U.third),b2=Matter.Constraint.pointBWorld(U.third);if(Math.hypot(a.x-b2.x,a.y-b2.y)>U.third.length+8){Matter.Composite.remove(U.eng.world,U.third);U.third=null}}
   if(U.hooks)U.hooks=U.hooks.filter(c=>{const a=Matter.Constraint.pointAWorld(c),b=c.bodyB.position;if(Math.hypot(a.x-b.x,a.y-b.y)>16){Matter.Composite.remove(U.eng.world,c);return false}return true});
   // 取り出し口に落ちたら獲得
   for(const b of U.prizes.slice()){if(b.position.y>UFO.H+30||(b.position.x<UFO.CHUTE-4&&b.position.y>UFO.FLOOR-4)){
@@ -1674,7 +1688,7 @@ function ufoRelease(k){
   if(k==='x'&&U.phase==='mx'){U.phase='wz';$('ufoX').classList.remove('hold');ufoUI()}
   if(k==='z'&&U.phase==='mz'){$('ufoZ').classList.remove('hold');const l=Math.round(U.z*2);U.z=l/2;ufoSetLayer(l);U.stopL=U.stopR=false;U.phase='drop';tick();ufoUI()}
 }
-function ufoEndTry(){U.tries--;S.ufoTries=U.tries;save();U.hy=UFO.TOPY;U.z=0;ufoSetLayer(0);U.aL=U.aR=.55;ufoPose();
+function ufoEndTry(){U.tries--;S.ufoTries=U.tries;save();U.hy=UFO.TOPY;U.z=0;ufoSetLayer(0);U.aL=U.aR=.72;ufoPose();
   if(U.won.length===0)ufoMsg(pick(['おしい…！','ざんねん','もうちょっと！','うーん…']),1400);
   ufoRestock(false);U.phase=U.tries>0?'ready':'over';if(U.phase==='over')setTimeout(()=>ufoMsg('おしまい。またあそんでね',1800),1500);ufoUI()}
 function ufoShowWin(){const sn=U.won.shift();U.paused=true;const rare=sn[3]==='SR'||sn[3]==='SSR';
@@ -1700,12 +1714,13 @@ function ufoDraw(){
   const clawLayerZ=U.layer/2;let clawDrawn=false;
   const drawClaw=()=>{const z=(U.phase==='mz'||U.phase==='wz'||U.phase==='ready'||U.phase==='mx'||U.phase==='over'||U.phase==='off')?U.z:clawLayerZ;const s=zView(z).s;
     ctx.strokeStyle='#8a7f7a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(VX(U.hx,z),0);ctx.lineTo(VX(U.hx,z),VY(U.hy,z));ctx.stroke();
+    {const o=Math.max(0,(U.aL+U.aR)/2),L=90;ctx.strokeStyle='#8f93a3';ctx.lineWidth=5*s;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(VX(U.hx,z),VY(U.hy,z));ctx.lineTo(VX(U.hx,z),VY(U.hy+L*Math.cos(o*.6),z)-8*s*(1-o));ctx.stroke();ctx.lineWidth=1}
     [U.armL,U.armR].forEach(a=>a.parts.slice(1).forEach(pt=>{ctx.beginPath();pt.vertices.forEach((v,i)=>{const X=VX(v.x,z),Y=VY(v.y,z);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.closePath();ctx.fillStyle='#c9ccd6';ctx.fill();ctx.strokeStyle='#4a3f3a';ctx.lineWidth=1.5;ctx.stroke()}));
     ctx.fillStyle='#f3c46a';ctx.strokeStyle='#4a3f3a';ctx.beginPath();ctx.ellipse(VX(U.hx,z),VY(U.hy,z),16*s,9*s,0,0,Math.PI*2);ctx.fill();ctx.stroke()};
   all.forEach(b=>{const z=b._layer/2;
     if(!clawDrawn&&b._layer<U.layer&&!(U.phase==='mz'||U.phase==='wz')){drawClaw();clawDrawn=true}
     const s=zView(z).s;ctx.save();ctx.translate(VX(b.position.x,z),VY(b.position.y,z));ctx.rotate(b.angle);
-    const im=snackImage(b._snack),w=Math.max(b._w,b._h)*1.35*s;if(im.complete)ctx.drawImage(im,-w/2,-w/2,w,w);ctx.restore();
+    const im=snackImage(b._snack),w=Math.max(b._w,b._h)*1.3*s;if(im.complete)ctx.drawImage(im,-w/2,-w/2,w,w);ctx.restore();
     if(b._tag){const t=b._tag;ctx.strokeStyle='#e46a7f';ctx.lineWidth=2;const ax=VX(b.position.x+Math.sin(b.angle)*b._h/2,z),ay=VY(b.position.y-Math.cos(b.angle)*b._h/2,z);
       ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(VX(t.position.x,z),VY(t.position.y,z));ctx.stroke();ctx.beginPath();ctx.ellipse(VX(t.position.x,z),VY(t.position.y,z),8*s,4*s,t.angle,0,Math.PI*2);ctx.stroke()}});
   if(!clawDrawn)drawClaw();
