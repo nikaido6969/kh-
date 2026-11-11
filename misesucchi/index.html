@@ -343,6 +343,41 @@ h1 span{color:var(--focus)}
 .sm-art{width:150px;height:150px;margin:0 auto;animation:pop .4s}
 .sm-art svg{width:100%;height:100%}
 #smR.N{background:var(--line)}#smR.R{background:#bcd3f0}#smR.SR{background:#d9c4f2}#smR.SSR{background:linear-gradient(90deg,#f6dc93,#f6b3c7,#bcd3f0)}
+/* ===== ガチャ演出 ===== */
+#gOpen.rare{background:rgba(10,6,24,.88)}
+#gMsg,#smMsg{position:relative;min-height:30px;margin-bottom:14px;font-family:var(--head);font-size:20px;color:#fff;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.5);opacity:0;transition:opacity .3s}
+#gMsg.on,#smMsg.on{opacity:1}
+.bigcap.p-spin{animation:pspin 1s cubic-bezier(.4,0,.2,1)}
+@keyframes pspin{0%{transform:rotate(0) scale(.6)}70%{transform:rotate(720deg) scale(1.1)}100%{transform:rotate(720deg) scale(1)}}
+.bigcap.p-bounce{animation:pbounce 1s ease-out}
+@keyframes pbounce{0%{transform:translateY(-260px)}35%{transform:translateY(0)}55%{transform:translateY(-70px)}75%{transform:translateY(0)}88%{transform:translateY(-20px)}100%{transform:translateY(0)}}
+.bigcap.p-peek .ht{animation:ppeek 1s ease-in-out}
+@keyframes ppeek{0%,100%{transform:none}30%{transform:translateY(-14px) rotate(-8deg)}50%{transform:none}70%{transform:translateY(-10px) rotate(6deg)}}
+.bigcap.glow{filter:drop-shadow(0 0 18px #fff6a0) drop-shadow(0 0 36px #ffb3d9)}
+.bigcap.glow .ht{background:linear-gradient(90deg,#ff9fb0,#ffe27a,#9fe6c8,#a8c8ff,#d9a8ff,#ff9fb0)!important;background-size:300% 100%!important;animation:rainbow 1.2s linear infinite}
+@keyframes rainbow{to{background-position:300% 0}}
+.bigcap.s1{animation:rshake .14s linear infinite}
+.bigcap.s2{animation:rshake .07s linear infinite}
+@keyframes rshake{25%{transform:translate(-5px,2px) rotate(-6deg)}75%{transform:translate(5px,-2px) rotate(6deg)}}
+#flash{position:fixed;inset:0;background:#fff;z-index:30;opacity:0;pointer-events:none}
+#flash.go{animation:flash .9s ease-out}
+@keyframes flash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+#gOpen.rare.done .rays{background:repeating-conic-gradient(rgba(255,226,122,.55) 0 8deg,rgba(255,159,176,.35) 8deg 16deg,transparent 16deg 24deg);animation-duration:3s}
+#gOpen.rare.done .prize{transform:scale(1.55)}
+#gOpen.rare.done .ginfo .rr{animation:rrpop .6s ease-out .5s both;font-size:30px}
+@keyframes rrpop{0%{transform:scale(3);opacity:0}100%{transform:scale(1);opacity:1}}
+.outCap.tease .cap{box-shadow:0 0 18px 6px #fff6a0,0 4px 10px rgba(0,0,0,.2)}
+.sm.jump{animation:smjump .5s ease-in-out 2}
+@keyframes smjump{50%{transform:translateY(-16px) scale(1.04,.96)}}
+.sm.rare{box-shadow:0 0 0 4px #fff6a0,0 0 30px 10px #ffb3d9;animation:smrare .12s linear infinite}
+@keyframes smrare{25%{transform:rotate(-2deg)}75%{transform:rotate(2deg)}}
+.sm.rare .sm-win svg{animation:blink .25s steps(2) infinite}
+.sm.roul .sm-win svg{animation:blink .4s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.sm-out.spin{animation:smdrop .7s ease-out forwards,pspin 1s ease-in-out .7s}
+#smRes.rare .mbox{box-shadow:0 0 0 4px #ffe27a,0 0 40px 12px #ffb3d9}
+#smRes.rare #smR{font-size:24px;animation:rrpop .6s ease-out both}
+#smMsg{color:var(--ink);text-shadow:none;font-size:16px;margin:8px 0 0}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -533,6 +568,7 @@ details.fold[open]>summary{margin-bottom:10px}
         <div class="sm" id="sm"><div class="sm-top">OYATSU</div><div class="sm-win" id="smWin"></div><div class="sm-slot"></div><div class="sm-out" id="smOut"></div></div>
         <button class="btn sm-btn" id="smGo">まわす</button>
       </div>
+      <div id="smMsg"></div>
       <div class="sec" style="margin-top:14px"><span class="sh"><i class="ic" data-ic="note"></i>おやつずかん<em class="en">zukan</em></span><small id="smCount"></small></div>
       <div class="sgrid" id="smGrid"></div>
     </div>
@@ -616,7 +652,8 @@ details.fold[open]>summary{margin-bottom:10px}
 <div class="modal" id="smRes"><div class="mbox"><div class="sm-art" id="smArt"></div><span class="rr" id="smR" style="display:inline-block;font-weight:800;padding:3px 14px;border-radius:99px;margin-top:6px"></span><h2 id="smName"></h2><p id="smDesc"></p><button class="btn" id="smOk">たべる！</button></div></div>
 <div class="modal" id="dlg"><div class="mbox"><p id="dlgP" style="color:var(--ink);font-size:15px"></p><textarea id="dlgT" class="tin" style="width:100%;height:110px;display:none;margin-bottom:10px"></textarea><div style="display:flex;gap:8px"><button class="btn alt" id="dlgNo" style="flex:1;padding:12px">やめる</button><button class="btn" id="dlgYes" style="flex:1;padding:12px">OK</button></div></div></div>
 <div class="modal" id="sheet"><div class="mbox"><div id="shImg" style="width:130px;height:130px;margin:0 auto 6px"></div><input id="shName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね"><h2 id="shT"></h2><p id="shP" style="margin:4px 0 8px"></p><button class="btn" id="shMain">⭐ メインキャラにする</button><button class="btn alt" id="shParty">🏠 画面に出す</button><button class="chip" id="shX" style="margin-top:12px">とじる</button></div></div>
-<div id="gOpen"><div class="rays"></div><div class="bigcap" id="bigcap"><div class="prize" id="prize"></div><div class="ht" id="bigT"></div><div class="hb"></div></div><div class="ginfo"><span class="rr" id="gR">N</span><p id="gTxt"></p><input id="gName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね（あとでも変えられるよ）"><button class="btn" id="gClose">キャラに追加する</button></div></div>
+<div id="flash"></div>
+<div id="gOpen"><div class="rays"></div><div id="gMsg"></div><div class="bigcap" id="bigcap"><div class="prize" id="prize"></div><div class="ht" id="bigT"></div><div class="hb"></div></div><div class="ginfo"><span class="rr" id="gR">N</span><p id="gTxt"></p><input id="gName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね（あとでも変えられるよ）"><button class="btn" id="gClose">キャラに追加する</button></div></div>
 <input type="file" accept="image/*" id="upl" hidden><input type="file" accept="image/*" id="camIn" hidden>
 
 <script>
@@ -1214,7 +1251,7 @@ function dispense(){
   gBusy=true;S.tickets--;save();$('gTk').textContent=S.tickets;
   pending=pickPrize();pending.c=pick(CAPC);
   const caps=document.getElementById('caps');caps.classList.add('shake');
-  setTimeout(()=>{caps.classList.remove('shake');$('outT').style.background=pending.c;const o=$('outCap');o.classList.remove('on');void o.offsetWidth;o.classList.add('on');$('gHint').textContent='カプセルが出たよ！タップしてあけよう 👆';tick();setTimeout(tick,120)},760);
+  setTimeout(()=>{caps.classList.remove('shake');$('outT').style.background=pending.c;const o=$('outCap');o.classList.remove('on','tease');void o.offsetWidth;o.classList.add('on');if((pending.r==='SR'||pending.r==='SSR')&&Math.random()<.5)o.classList.add('tease');$('gHint').textContent='カプセルが出たよ！タップしてあけよう 👆';tick();setTimeout(tick,120)},760);
 }
 $('outCap').onclick=()=>{
   if(!pending)return;const p=pending;
@@ -1223,12 +1260,23 @@ $('outCap').onclick=()=>{
   $('gName').value=p.id?nameOf('p'+p.id):'';$('gR').textContent=p.r;$('gR').className='rr '+p.r;
   const isNew=p.id?!S.got[p.id]:!S.st[p.em];
   $('gTxt').innerHTML=(isNew?'🆕 はじめてゲット！':'ゲット！')+(p.r==='SSR'?'<br>✨ 超レア！ ✨':'');
-  const g=$('gOpen');g.classList.remove('done');g.classList.add('on');$('outCap').classList.remove('on');
-  const bc=$('bigcap');bc.classList.remove('shk');void bc.offsetWidth;bc.classList.add('shk');
-  setTimeout(()=>{g.classList.add('done');if(sndKey()!=='off')chime(p.r==='SSR'||p.r==='SR'?'fanfare':'pico');confetti(p.r==='SSR'?120:p.r==='SR'?60:25)},1050);
+  const g=$('gOpen'),bc=$('bigcap'),rare=p.r==='SR'||p.r==='SSR';
+  g.classList.remove('done','rare');g.classList.add('on');$('outCap').classList.remove('on','tease');$('gMsg').className='';$('gMsg').textContent='';
+  bc.className='bigcap';void bc.offsetWidth;
+  const reveal=()=>{bc.className='bigcap'+(rare?' glow':'');g.classList.add('done');$('gMsg').className='';
+    if(sndKey()!=='off')chime(rare?'fanfare':'pico');confetti(p.r==='SSR'?160:p.r==='SR'?80:25);if(p.r==='SSR')setTimeout(()=>confetti(120),700)};
+  if(!rare){const pat=pick(['shk','p-spin','p-bounce','p-peek']);bc.classList.add(pat);setTimeout(reveal,1050)}
+  else{// レア：もったいぶる演出
+    g.classList.add('rare');const msg=t=>{$('gMsg').textContent=t;$('gMsg').className='on'};
+    const steps=p.r==='SSR'?[[0,'あれ…？','shk'],[1000,'カプセルが…光ってる…!?','glow'],[2100,'まさか…','glow s1'],[3200,'き、き、きた…!!','glow s2'],[4300,'']]
+                           :[[0,'ん…？','shk'],[1000,'なにか光ってる…!?','glow'],[2100,'これは…!','glow s1'],[3000,'']];
+    steps.forEach(([t,m,c])=>setTimeout(()=>{if(m)msg(m);if(c){bc.className='bigcap '+c}tick();if(c&&c.includes('s2'))tick()},t));
+    const end=steps[steps.length-1][0];
+    setTimeout(()=>{const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')},end-150);
+    setTimeout(reveal,end+150)}
   if(p.id)S.got[p.id]=(S.got[p.id]||0)+1;else S.st[p.em]=(S.st[p.em]||0)+1;save();
 };
-$('gClose').onclick=()=>{$('gOpen').classList.remove('on','done');
+$('gClose').onclick=()=>{$('gOpen').classList.remove('on','done','rare');$('bigcap').className='bigcap';
   if(pending){const k=pending.id?'p'+pending.id:'e:'+pending.em;if(pending.id)setName(k,$('gName').value);if(!pending.id&&!(S.ems||[]).includes(k))(S.ems=S.ems||[]).push(k);
     if(!S.onboarded){S.chara=k;S.onboarded=true;setTimeout(()=>{modal('⭐',nameOf(k)?`「${esc(nameOf(k))}」がメインキャラに！`:'メインキャラが決まったよ！','このキャラといっしょに🍅をはじめよう！<br>25分ごとにガチャがまわせて、なかまがふえるよ');onboardGo='timer'},300)}
     else if(k!==S.chara&&!(S.party||[]).includes(k)){if((S.party||[]).length<4){(S.party=S.party||[]).push(k);toast('🏠 なかまが画面に追加されたよ！')}else toast('キャラに追加したよ（タイマー画面の「わたしのキャラ」で入れかえてね）')}
@@ -1533,13 +1581,21 @@ $('smGo').onclick=()=>{
   if(smBusy)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
   smBusy=true;S.tickets--;save();unlockAudio();
   const tot=SNACKS.reduce((a,x)=>a+SW[x[3]],0);let r=Math.random()*tot,pick2=SNACKS[0];for(const x of SNACKS){r-=SW[x[3]];if(r<0){pick2=x;break}}
-  smLast=pick2;const sm=$('sm');sm.classList.remove('shake');void sm.offsetWidth;sm.classList.add('shake');
-  setTimeout(()=>{const o=$('smOut');o.innerHTML=snackSVG(pick2[4],pick2[5]);o.classList.remove('drop');void o.offsetWidth;o.classList.add('drop')},800);
-  setTimeout(()=>{const isNew=!(S.snacks||{})[pick2[0]];(S.snacks=S.snacks||{})[pick2[0]]=(S.snacks[pick2[0]]||0)+1;save();
+  smLast=pick2;const sm=$('sm'),rare=pick2[3]==='SR'||pick2[3]==='SSR';sm.className='sm';void sm.offsetWidth;
+  const smMsg=t=>{$('smMsg').textContent=t;$('smMsg').className=t?'on':''};
+  let dropAt=800,showAt=1600;
+  if(!rare){const pat=pick(['shake','jump','roul']);sm.classList.add(pat);if(pat==='roul'){dropAt=1300;showAt=2100}}
+  else{sm.classList.add('roul');smMsg('…ん？');
+    const seq=pick2[3]==='SSR'?[[900,'自販機がふるえてる…!?','rare'],[2000,'ま、まさか…!!','rare'],[3100,'']]:[[900,'なにか光った…!?','rare'],[2100,'']];
+    seq.forEach(([t,m,c])=>setTimeout(()=>{smMsg(m);if(c)sm.className='sm '+c;tick()},t));
+    dropAt=seq[seq.length-1][0];showAt=dropAt+900;
+    setTimeout(()=>{const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')},showAt-200)}
+  setTimeout(()=>{const o=$('smOut');o.innerHTML=snackSVG(pick2[4],pick2[5]);o.className='sm-out';void o.offsetWidth;o.classList.add(rare||Math.random()<.4?'spin':'drop')},dropAt);
+  setTimeout(()=>{sm.className='sm';smMsg('');$('smRes').classList.toggle('rare',rare);const isNew=!(S.snacks||{})[pick2[0]];(S.snacks=S.snacks||{})[pick2[0]]=(S.snacks[pick2[0]]||0)+1;save();
     $('smArt').innerHTML=snackSVG(pick2[4],pick2[5]);$('smR').textContent=pick2[3];$('smR').className='rr '+pick2[3];
     $('smName').textContent=(isNew?'🆕 ':'')+pick2[1];$('smDesc').textContent=pick2[2];$('smRes').classList.add('on');
     if(sndKey()!=='off')chime(pick2[3]==='SSR'||pick2[3]==='SR'?'fanfare':'pico');confetti(pick2[3]==='SSR'?100:pick2[3]==='SR'?50:20);
-    drawSnack();$('gTk').textContent=S.tickets;draw()},1600);
+    drawSnack();$('gTk').textContent=S.tickets;draw()},showAt);
 };
 $('smOk').onclick=()=>{$('smRes').classList.remove('on');smBusy=false;
   if(smLast&&S.onboarded){const n=nameOf(S.chara);toast(`${n?n+"が":""}「${smLast[1]}」をたべた！${pick(['おいしい！','…ふしぎな味','もう1こ！','元気でた！','ちょっとこわい'])}`)}};
