@@ -640,8 +640,7 @@ details.fold[open]>summary{margin-bottom:10px}
         <div class="cab-feet"><i></i><i></i></div>
       </div>
       <div id="brokenCtl" style="display:none;margin-top:10px;text-align:center"><div class="stsel" style="justify-content:center"><button class="chip" data-g="hand">🖐 手でとる</button><button class="chip" data-g="stick">🥢 棒でとる</button></div>
-        <p class="muted" style="margin:6px 0 0">ガラスが割れている！ 穴の中の景品を<b>長押しでそーっと</b>とろう（サッとさわると指を切るよ）。棒ならなぞって離すとはさめる。<br><span id="brokenTime"></span></p></div>
-      <p class="muted" style="margin:6px 0 0">①を長押しで右へ、②を長押しで奥へ。手をはなすと止まるよ（やり直しはできない）。景品のまん中をねらうか、タグに爪を引っかけよう！<br>📱スマホをゆらすと中身が動くよ。🤫ガラスを30回連打すると…？</p>
+        <p class="muted" style="margin:6px 0 0"><span id="brokenTime"></span></p></div>
       <div class="sec" style="margin-top:14px"><span class="sh"><i class="ic" data-ic="note"></i>おやつずかん<em class="en">zukan</em></span><small id="smCount"></small></div>
       <div class="sgrid" id="smGrid"></div>
     </div>
@@ -1827,7 +1826,7 @@ function ufoDraw(){
 function ufoLoop(){ufoRAF=0;if(!U||!$('p-reward').classList.contains('on'))return;try{if(!U.paused)ufoStep();ufoDraw();ufoUI()}catch(e){ufoMsg('エラー：'+(e&&e.message||e));return}ufoRAF=requestAnimationFrame(ufoLoop)}
 function ufoOpen(){checkRepair();setTimeout(drawBroken,50);let tries=0;const go=()=>{let ok=false;try{ok=ufoInit()}catch(e){U=null;ufoMsg('エラー：'+(e&&e.message||e));return}if(ok){$('ufoMsg').className='ufo-msg';if(U.phase==='off')U.phase=U.tries>0?'ready':'over';if(!ufoRAF)ufoRAF=requestAnimationFrame(ufoLoop)}else if(++tries<20)setTimeout(go,250);else ufoMsg('読みこめませんでした（部品が見つかりません）。ページを開き直してください')};go()}
 $('ufoStart').onclick=()=>{requestMotion();if(!U)return;if(U.tries>0)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
-  S.tickets--;U.tries=3;S.ufoTries=3;save();unlockAudio();U.phase='ready';ufoMsg('スタート！ ①でよこへ',1300);$('gTk').textContent=S.tickets;draw();ufoUI()};
+  S.tickets--;U.tries=3;S.ufoTries=3;save();unlockAudio();U.phase='ready';ufoMsg('スタート！',1000);$('gTk').textContent=S.tickets;draw();ufoUI()};
 
 // ===== 裏ワザ：ガラスを叩く ／ スマホをゆらす =====
 const GL={hits:0,last:0,stage:0,cracks:[],shards:[],at:null};
@@ -1862,7 +1861,7 @@ function glassBreak(sp){
   const poly=[];for(let t=0;t<Math.PI*2;t+=.45){const R=42+Math.random()*30;poly.push([Math.round(sp.x+Math.cos(t)*R*1.15),Math.round(sp.y+Math.sin(t)*R)])}
   S.glass=S.glass||{holes:[],blood:[]};S.glass.holes.push({poly,at:Date.now(),x:sp.x,y:sp.y,cracks:(sp.cracks||[]).slice(-14)});
   sp.hits=0;sp.stage=0;sp.broken=true;S.glassSpots=S.glassSpots.filter(q=>q!==sp);save();
-  ufoMsg('ガシャーン!! ガラスが割れた！',1600);setTimeout(()=>ufoMsg('割れた穴から手でとれる…そーっとね',2200),1700);drawBroken();
+  ufoMsg('ガシャーン!! ガラスが割れた！',1600);drawBroken();
 }
 // ===== 割れたガラス：手でとる／棒でとる／かたむけてとる =====
 let grabMode='hand',gDown=null,stick=null;
@@ -1891,13 +1890,13 @@ function brokenMove(x,y){if(stick&&!stick.t){stick.x=x;stick.y=y}if(gDown&&Math.
 function brokenUp(x,y){
   if(stick&&!stick.t){stick.t=1;const sx=stick.x,sy=stick.y;
     setTimeout(()=>{const b=inHole(sx,sy)?worldHit(sx,sy):null;
-      if(!b)ufoMsg(inHole(sx,sy)?'なにもはさめなかった…':'棒がガラスに当たった！ 穴の中をねらってね',1200);
+      if(!b)ufoMsg(inHole(sx,sy)?'なにもはさめなかった…':'棒がガラスに当たった！',1200);
       else if((b._snack[6]==='c'&&Math.random()<.3))ufoMsg('つるっ…すべって落ちた！',1200);
       else takePrize(b,'🥢 はさんでゲット！');setTimeout(()=>stick=null,500)},450);return}
   if(!gDown)return;const dur=Date.now()-gDown.t,mv=gDown.moved;gDown=null;
   if(!inHole(x,y)){glassKnockOnly();return}
   if(dur<250||mv){bloodSpurt(x,y);return}// 速いタップ・動かした → 指を切る
-  if(dur<700){ufoMsg('もっと そーっと…（長押し）',1000);return}
+  if(dur<700){ufoMsg('…',800);return}
   const b=worldHit(x,y);if(b)takePrize(b,'🖐 そーっと…ゲット！');else ufoMsg('つかめなかった…',900)}
 function glassKnockOnly(){knockSound();shakeMachine(.15)}
 const cvXY=e=>{const r=$('ufoCv').getBoundingClientRect();return [(e.clientX-r.left)/r.width*340,(e.clientY-r.top)/r.height*380]};
@@ -1913,13 +1912,13 @@ window.addEventListener('deviceorientation',e=>{if(!U||!isBroken()||U.paused||!$
 let motionAsked=false,lastAcc=null,lastShake=0;
 function requestMotion(){if(motionAsked)return;motionAsked=true;
   try{if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function')DeviceOrientationEvent.requestPermission().catch(()=>{})}catch(e){}
-  try{if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function'){DeviceMotionEvent.requestPermission().then(r=>{if(r!=='granted'&&/iPhone|iPad/.test(navigator.userAgent))toast('ゆらす機能は「許可」すると使えるよ')}).catch(()=>{})}}catch(e){}}
+  try{if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function'){DeviceMotionEvent.requestPermission().then(r=>{if(r!=='granted'&&/iPhone|iPad/.test(navigator.userAgent))toast('「許可」すると、もっと楽しめるよ')}).catch(()=>{})}}catch(e){}}
 function listenMotion(){window.addEventListener('devicemotion',e=>{const a=e.accelerationIncludingGravity||e.acceleration;if(!a||a.x==null)return;
   if(lastAcc){const d=Math.abs(a.x-lastAcc.x)+Math.abs(a.y-lastAcc.y)+Math.abs(a.z-lastAcc.z);const now=Date.now();
     if(d>14&&now-lastShake>220&&U&&!U.paused&&$('p-reward').classList.contains('on')){lastShake=now;shakeMachine(Math.min(3,d/14));if(Math.random()<.3)ufoMsg('ゆさゆさ…！',500)}}
   lastAcc={x:a.x,y:a.y,z:a.z}})}
 $('ufoCv').addEventListener('pointerdown',glassTap);
-$('brokenCtl').onclick=e=>{const g=e.target.dataset.g;if(!g)return;grabMode=g;drawBroken();ufoMsg(g==='stick'?'🥢 なぞって、はなすとはさむ':'🖐 長押しでそーっと',900)};
+$('brokenCtl').onclick=e=>{const g=e.target.dataset.g;if(!g)return;grabMode=g;drawBroken()};
 listenMotion();
 const holdBtn=(id,k,ph,next)=>{const b=$(id);
   b.addEventListener('pointerdown',e=>{e.preventDefault();if(!U||U.phase!==ph)return;b.classList.add('hold');U.phase=next;b.setPointerCapture&&b.setPointerCapture(e.pointerId)});
