@@ -426,6 +426,8 @@ h1 span{color:var(--focus)}
 .cab-door{width:70%;flex:1;border:1.5px solid #b3b8c5;border-radius:4px;background:linear-gradient(#f7f8fb,#e3e6ed)}
 .cab-feet{display:flex;justify-content:space-between;padding:0 22px;margin-top:-6px}
 .cab-feet i{display:block;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#9aa0b0,#3d3340 70%);border:2px solid #2b2430}
+.cab-shake{animation:cabshake .35s ease}
+@keyframes cabshake{20%{transform:translate(-4px,1px) rotate(-.6deg)}40%{transform:translate(4px,-1px) rotate(.6deg)}60%{transform:translate(-3px,0)}80%{transform:translate(2px,0)}}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -624,7 +626,7 @@ details.fold[open]>summary{margin-bottom:10px}
         <div class="cab-body"><div class="cab-out"><span>とりだし口</span><div id="cabPrize"></div></div><div class="cab-mid"><i></i><i></i><div class="cab-door"></div></div><div class="cab-out"><span>PRIZE</span><div class="cab-coin">🪙</div></div></div>
         <div class="cab-feet"><i></i><i></i></div>
       </div>
-      <p class="muted" style="margin:6px 0 0">①を長押しで右へ、②を長押しで奥へ。手をはなすと止まるよ（やり直しはできない）。景品のまん中をねらうか、タグに爪を引っかけよう！</p>
+      <p class="muted" style="margin:6px 0 0">①を長押しで右へ、②を長押しで奥へ。手をはなすと止まるよ（やり直しはできない）。景品のまん中をねらうか、タグに爪を引っかけよう！<br>📱スマホをゆらすと中身が動くよ。🤫ガラスを30回連打すると…？</p>
       <div class="sec" style="margin-top:14px"><span class="sh"><i class="ic" data-ic="note"></i>おやつずかん<em class="en">zukan</em></span><small id="smCount"></small></div>
       <div class="sgrid" id="smGrid"></div>
     </div>
@@ -1777,13 +1779,61 @@ function ufoDraw(){
   ctx.fillStyle='#3d3340';ctx.fillRect(rx,ry,rw*UFO.CHUTE/340,rh);
   U.prizes.forEach(b=>{ctx.fillStyle=b._snack[3]==='SSR'?'#e8b84a':b._snack[3]==='SR'?'#9a6acf':'#e48f8a';ctx.beginPath();ctx.arc(rx+rw*b.position.x/340,ry+rh-6-b._layer*14,2.6,0,7);ctx.fill()});
   const rz=U.phase==='mz'||U.phase==='wz'||U.phase==='ready'||U.phase==='mx'?U.z:U.layer/2;ctx.strokeStyle='#4a6fd6';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx+rw*U.hx/340,ry+rh-6-rz*28,4,0,7);ctx.stroke();
+  // ヒビとガラスの破片
+  if(GL.cracks.length){ctx.lineCap='round';GL.cracks.forEach(c=>{ctx.strokeStyle='rgba(60,60,80,.55)';ctx.lineWidth=c.w+1.2;ctx.beginPath();c.pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=c.w;ctx.stroke()});ctx.lineWidth=1}
+  if(GL.shards.length){GL.shards.forEach(sh=>{sh.x+=sh.vx;sh.y+=sh.vy;sh.vy+=.5;sh.r+=sh.vr;ctx.save();ctx.translate(sh.x,sh.y);ctx.rotate(sh.r);ctx.beginPath();sh.p.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
+    ctx.fillStyle='rgba(225,240,255,.55)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke();ctx.restore()});GL.shards=GL.shards.filter(sh=>sh.y<460)}
   // ガラスの反射
   ctx.fillStyle='rgba(255,255,255,.18)';ctx.beginPath();ctx.moveTo(250,0);ctx.lineTo(300,0);ctx.lineTo(180,380);ctx.lineTo(130,380);ctx.fill();
 }
 function ufoLoop(){ufoRAF=0;if(!U||!$('p-reward').classList.contains('on'))return;try{if(!U.paused)ufoStep();ufoDraw();ufoUI()}catch(e){ufoMsg('エラー：'+(e&&e.message||e));return}ufoRAF=requestAnimationFrame(ufoLoop)}
 function ufoOpen(){let tries=0;const go=()=>{let ok=false;try{ok=ufoInit()}catch(e){U=null;ufoMsg('エラー：'+(e&&e.message||e));return}if(ok){$('ufoMsg').className='ufo-msg';if(U.phase==='off')U.phase=U.tries>0?'ready':'over';if(!ufoRAF)ufoRAF=requestAnimationFrame(ufoLoop)}else if(++tries<20)setTimeout(go,250);else ufoMsg('読みこめませんでした（部品が見つかりません）。ページを開き直してください')};go()}
-$('ufoStart').onclick=()=>{if(!U)return;if(U.tries>0)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
+$('ufoStart').onclick=()=>{requestMotion();if(!U)return;if(U.tries>0)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
   S.tickets--;U.tries=3;S.ufoTries=3;save();unlockAudio();U.phase='ready';ufoMsg('スタート！ ①でよこへ',1300);$('gTk').textContent=S.tickets;draw();ufoUI()};
+
+// ===== 裏ワザ：ガラスを叩く ／ スマホをゆらす =====
+const GL={hits:0,last:0,stage:0,cracks:[],shards:[],at:null};
+function crackSound(big){if(sndKey()==='off')return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,len=big?.6:.18,buf=ac.createBuffer(1,ac.sampleRate*len,ac.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,big?2:4);const src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='highpass';f.frequency.value=big?1200:2500;g.gain.value=big?.6:.35;src.buffer=buf;src.connect(f);f.connect(g);g.connect(ac.destination);src.start(n)}catch(e){}}
+function knockSound(){if(sndKey()==='off')return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.setValueAtTime(420,n);o.frequency.exponentialRampToValueAtTime(160,n+.08);g.gain.setValueAtTime(.25,n);g.gain.exponentialRampToValueAtTime(.001,n+.1);o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+.12)}catch(e){}}
+function addCracks(x,y,n,len){for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2;let px=x,py=y;const pts=[[px,py]];const L=len*(.6+Math.random()*.6);
+  for(let d=0;d<L;d+=8+Math.random()*10){const aa=a+(Math.random()-.5)*.6;px+=Math.cos(aa)*12;py+=Math.sin(aa)*12;pts.push([px,py])}GL.cracks.push({pts,w:.8+Math.random()*1})}
+  if(GL.stage>=2)for(let r=1;r<=2;r++){const R=18*r+Math.random()*8,pts=[];for(let t=0;t<=Math.PI*2+.01;t+=.5)pts.push([x+Math.cos(t)*R*(.85+Math.random()*.3),y+Math.sin(t)*R*(.85+Math.random()*.3)]);GL.cracks.push({pts,w:.7})}}
+function shakeMachine(power){if(!U)return;const {Body}=Matter;
+  U.prizes.forEach(b=>{const m=b.mass;Body.applyForce(b,b.position,{x:(Math.random()-.5)*.01*m*power,y:-(.004+Math.random()*.008)*m*power})});
+  const c=document.querySelector('.cab');if(c){c.classList.remove('cab-shake');void c.offsetWidth;c.classList.add('cab-shake')}}
+function glassTap(e){
+  if(!U||U.paused)return;requestMotion();unlockAudio();
+  const r=$('ufoCv').getBoundingClientRect(),x=(e.clientX-r.left)/r.width*340,y=(e.clientY-r.top)/r.height*380;
+  const now=Date.now();if(now-GL.last>2000){GL.hits=0;GL.stage=0;GL.cracks=[];GL.at=null}GL.last=now;GL.hits++;
+  knockSound();shakeMachine(.15);if(!GL.at)GL.at=[x,y];
+  const st=Math.floor(GL.hits/10);let cracked=false;
+  if(st>GL.stage&&st<3){cracked=true;GL.stage=st;addCracks(GL.at[0],GL.at[1],st===1?5:8,st===1?60:120);crackSound(false);ufoMsg(st===1?'ピキッ…！ ヒビが入った':'ミシミシ…！ もう少しで割れそう',1200)}
+  if(GL.hits>=30){glassBreak()}
+  else if(!cracked&&GL.hits%5===0)ufoMsg(`コンコン… ${GL.hits}回`,600);
+}
+function glassBreak(){
+  crackSound(true);const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
+  GL.shards=Array.from({length:28},()=>{const cx=20+Math.random()*300,cy=20+Math.random()*340,sz=12+Math.random()*26;return {x:cx,y:cy,vx:(Math.random()-.5)*6,vy:-2-Math.random()*4,r:0,vr:(Math.random()-.5)*.3,
+    p:[[0,-sz],[sz*.8,sz*.4],[-sz*.7,sz*.6]].map(([a,b])=>[a*(.7+Math.random()*.6),b*(.7+Math.random()*.6)])}});
+  GL.cracks=[];GL.hits=0;GL.stage=0;GL.at=null;ufoMsg('ガシャーン!! ガラスが割れた！',1600);
+  // 手前のいちばん上の景品が飛び出してくる
+  const front=U.prizes.filter(b=>b._layer===0).sort((a,b)=>a.position.y-b.position.y)[0]||U.prizes[0];
+  if(front){Matter.Composite.remove(U.eng.world,front);if(front._tag){Matter.Composite.remove(U.eng.world,[front._tag,front._tagC]);U.tags=U.tags.filter(t=>t!==front._tag)}U.prizes=U.prizes.filter(x=>x!==front);
+    setTimeout(()=>{U.won.push(front._snack);ufoRestock(false)},900)}
+  confetti(60);
+}
+// スマホをゆらすと中身が動く（iPhoneは最初に許可が必要）
+let motionAsked=false,lastAcc=null,lastShake=0;
+function requestMotion(){if(motionAsked)return;motionAsked=true;
+  try{if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function'){DeviceMotionEvent.requestPermission().then(r=>{if(r!=='granted'&&/iPhone|iPad/.test(navigator.userAgent))toast('ゆらす機能は「許可」すると使えるよ')}).catch(()=>{})}}catch(e){}}
+function listenMotion(){window.addEventListener('devicemotion',e=>{const a=e.accelerationIncludingGravity||e.acceleration;if(!a||a.x==null)return;
+  if(lastAcc){const d=Math.abs(a.x-lastAcc.x)+Math.abs(a.y-lastAcc.y)+Math.abs(a.z-lastAcc.z);const now=Date.now();
+    if(d>14&&now-lastShake>220&&U&&!U.paused&&$('p-reward').classList.contains('on')){lastShake=now;shakeMachine(Math.min(3,d/14));if(Math.random()<.3)ufoMsg('ゆさゆさ…！',500)}}
+  lastAcc={x:a.x,y:a.y,z:a.z}})}
+$('ufoCv').addEventListener('pointerdown',glassTap);
+listenMotion();
 const holdBtn=(id,k,ph,next)=>{const b=$(id);
   b.addEventListener('pointerdown',e=>{e.preventDefault();if(!U||U.phase!==ph)return;b.classList.add('hold');U.phase=next;b.setPointerCapture&&b.setPointerCapture(e.pointerId)});
   ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,()=>{if(U&&U.phase===next)ufoRelease(k)}))};
