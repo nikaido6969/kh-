@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#f6f1e7">
 <title>ミセスッち 勉強タイマー</title>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Hachi+Maru+Pop&family=Yomogi&family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@500;700&family=Yusei+Magic&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 <style>
 :root{--bg:#f6f1e7;--card:#fffdf8;--ink:#3b3a33;--sub:#8a8574;--line:#e9e1cf;--focus:#e46a5a;--focus2:#f39a7b;--rest:#5fae7a;--rest2:#9fd3a8;--gold:#e8b84a;--shadow:0 6px 20px rgba(120,100,60,.12)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -378,6 +379,19 @@ h1 span{color:var(--focus)}
 #smRes.rare .mbox{box-shadow:0 0 0 4px #ffe27a,0 0 40px 12px #ffb3d9}
 #smRes.rare #smR{font-size:24px;animation:rrpop .6s ease-out both}
 #smMsg{color:var(--ink);text-shadow:none;font-size:16px;margin:8px 0 0}
+.ufo-box{position:relative;width:100%;max-width:340px;margin:0 auto;border:2.5px solid var(--ink);border-radius:22px;overflow:hidden;box-shadow:4px 5px 0 var(--line);background:#fdf6f2}
+.ufo-box canvas{display:block;width:100%;height:auto;touch-action:none}
+.ufo-tries{position:absolute;right:10px;top:8px;font-family:var(--en);font-size:20px;color:var(--ink);background:rgba(255,255,255,.85);border-radius:10px;padding:0 8px}
+.ufo-msg{position:absolute;left:0;right:0;top:42%;text-align:center;font-family:var(--head);font-size:22px;color:var(--ink);text-shadow:0 0 6px #fff,0 0 12px #fff;pointer-events:none;opacity:0;transition:opacity .3s}
+.ufo-msg.on{opacity:1}
+.ufo-ctl{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px}
+.ufo-b{width:74px;height:74px;border-radius:50%;border:2.5px solid var(--ink);background:#7fb3e6;color:#fff;font:inherit;font-size:24px;box-shadow:0 5px 0 var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;touch-action:none;user-select:none;-webkit-user-select:none}
+.ufo-b:nth-child(2){background:#f0a7a0}
+.ufo-b b{font-family:var(--en);font-size:14px}.ufo-b small{font-size:11px;font-family:var(--font)}
+.ufo-b:disabled{opacity:.35;box-shadow:0 2px 0 var(--ink)}
+.ufo-b.hold{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.ufo-start:disabled{opacity:.4}
+.ufo-start{padding:12px 14px;font-size:14px;line-height:1.3;background:var(--focus);color:#fff;border:2px solid var(--ink);box-shadow:3px 4px 0 var(--ink)}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -563,12 +577,14 @@ details.fold[open]>summary{margin-bottom:10px}
       <p class="ghint" id="gHint">ハンドルを指でぐるっと1回まわしてね ↻</p>
     </div>
     <div class="card" id="snackCard">
-      <div class="sec"><span class="sh"><i class="ic" data-ic="sparkle"></i>おやつミニガチャ<em class="en">snack</em></span><small>🪙1まいで1回</small></div>
-      <div class="sm-wrap">
-        <div class="sm" id="sm"><div class="sm-top">OYATSU</div><div class="sm-win" id="smWin"></div><div class="sm-slot"></div><div class="sm-out" id="smOut"></div></div>
-        <button class="btn sm-btn" id="smGo">まわす</button>
+      <div class="sec"><span class="sh"><i class="ic" data-ic="sparkle"></i>おやつUFOキャッチャー<em class="en">claw</em></span><small>🪙1まいで3回</small></div>
+      <div class="ufo-box"><canvas id="ufoCv" width="340" height="380"></canvas><div class="ufo-tries" id="ufoTries"></div><div class="ufo-msg" id="ufoMsg"></div></div>
+      <div class="ufo-ctl">
+        <button class="ufo-b" id="ufoX" disabled><b>1</b>▶<small>よこ</small></button>
+        <button class="ufo-b" id="ufoZ" disabled><b>2</b>▲<small>おく</small></button>
+        <button class="btn ufo-start" id="ufoStart">🪙1で<br>スタート</button>
       </div>
-      <div id="smMsg"></div>
+      <p class="muted" style="margin:6px 0 0">①を長押しで右へ、②を長押しで奥へ。手をはなすと止まるよ（やり直しはできない）。景品のまん中をねらうか、タグに爪を引っかけよう！</p>
       <div class="sec" style="margin-top:14px"><span class="sh"><i class="ic" data-ic="note"></i>おやつずかん<em class="en">zukan</em></span><small id="smCount"></small></div>
       <div class="sgrid" id="smGrid"></div>
     </div>
@@ -1572,32 +1588,140 @@ function snackSVG(type,c){
 }
 function drawSnack(){
   if(!$('smGrid'))return;S.snacks=S.snacks||{};
-  $('smWin').innerHTML=SNACKS.slice(0,12).map(x=>snackSVG(x[4],x[5])).join('');
   $('smCount').textContent=`${SNACKS.filter(x=>S.snacks[x[0]]).length} / ${SNACKS.length}`;
   $('smGrid').innerHTML=SNACKS.map(x=>{const n=S.snacks[x[0]]||0;return `<div class="sn ${x[3]} ${n?'':'lock'}" data-s="${x[0]}">${snackSVG(x[4],x[5])}${n?`<b>×${n}</b>`:''}</div>`}).join('');
 }
 let smBusy=false,smLast=null;
-$('smGo').onclick=()=>{
-  if(smBusy)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
-  smBusy=true;S.tickets--;save();unlockAudio();
-  const tot=SNACKS.reduce((a,x)=>a+SW[x[3]],0);let r=Math.random()*tot,pick2=SNACKS[0];for(const x of SNACKS){r-=SW[x[3]];if(r<0){pick2=x;break}}
-  smLast=pick2;const sm=$('sm'),rare=pick2[3]==='SR'||pick2[3]==='SSR';sm.className='sm';void sm.offsetWidth;
-  const smMsg=t=>{$('smMsg').textContent=t;$('smMsg').className=t?'on':''};
-  let dropAt=800,showAt=1600;
-  if(!rare){const pat=pick(['shake','jump','roul']);sm.classList.add(pat);if(pat==='roul'){dropAt=1300;showAt=2100}}
-  else{sm.classList.add('roul');smMsg('…ん？');
-    const seq=pick2[3]==='SSR'?[[900,'自販機がふるえてる…!?','rare'],[2000,'ま、まさか…!!','rare'],[3100,'']]:[[900,'なにか光った…!?','rare'],[2100,'']];
-    seq.forEach(([t,m,c])=>setTimeout(()=>{smMsg(m);if(c)sm.className='sm '+c;tick()},t));
-    dropAt=seq[seq.length-1][0];showAt=dropAt+900;
-    setTimeout(()=>{const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')},showAt-200)}
-  setTimeout(()=>{const o=$('smOut');o.innerHTML=snackSVG(pick2[4],pick2[5]);o.className='sm-out';void o.offsetWidth;o.classList.add(rare||Math.random()<.4?'spin':'drop')},dropAt);
-  setTimeout(()=>{sm.className='sm';smMsg('');$('smRes').classList.toggle('rare',rare);const isNew=!(S.snacks||{})[pick2[0]];(S.snacks=S.snacks||{})[pick2[0]]=(S.snacks[pick2[0]]||0)+1;save();
-    $('smArt').innerHTML=snackSVG(pick2[4],pick2[5]);$('smR').textContent=pick2[3];$('smR').className='rr '+pick2[3];
-    $('smName').textContent=(isNew?'🆕 ':'')+pick2[1];$('smDesc').textContent=pick2[2];$('smRes').classList.add('on');
-    if(sndKey()!=='off')chime(pick2[3]==='SSR'||pick2[3]==='SR'?'fanfare':'pico');confetti(pick2[3]==='SSR'?100:pick2[3]==='SR'?50:20);
-    drawSnack();$('gTk').textContent=S.tickets;draw()},showAt);
-};
-$('smOk').onclick=()=>{$('smRes').classList.remove('on');smBusy=false;
+// ===== ミニUFOキャッチャー（物理演算） =====
+const UFO={W:340,H:380,FLOOR:340,CHUTE:80,TOPY:46,HOMEX:40};
+let U=null,ufoRAF=0;
+const zView=z=>({s:1-.17*z,dy:-30*z});
+const VX=(x,z)=>170+(x-170)*zView(z).s, VY=(y,z)=>UFO.FLOOR+(y-UFO.FLOOR)*zView(z).s+zView(z).dy;
+const snackImg={};
+function snackImage(x){if(!snackImg[x[0]]){const im=new Image();im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(snackSVG(x[4],x[5]).replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" '));snackImg[x[0]]=im}return snackImg[x[0]]}
+const SHAPE={bar:'r',longbar:'r',stick:'r',bottle:'r',dango:'r',slime:'c',cookie:'c',donut:'c',senbei:'c',apple:'c',candy:'c',macaron:'c'};
+const CAT={W:1,L:[2,4,8],C:[16,32,64]};
+function ufoPickSnack(){const tot=SNACKS.reduce((a,x)=>a+SW[x[3]],0);let r=Math.random()*tot;for(const x of SNACKS){r-=SW[x[3]];if(r<0)return x}return SNACKS[0]}
+function ufoAddPrize(x,y,layer,sn){
+  const {Bodies,Body,Composite,Constraint}=Matter;
+  const opt={friction:.7,frictionStatic:1.1,frictionAir:.012,restitution:.02,density:.0016,collisionFilter:{category:CAT.L[layer],mask:CAT.W|CAT.L[layer]|CAT.C[layer]}};
+  const sh=SHAPE[sn[4]]||'b';
+  const b=sh==='c'?Bodies.circle(x,y,19,opt):sh==='r'?Bodies.rectangle(x,y,24,50,{...opt,chamfer:{radius:8}}):Bodies.rectangle(x,y,40,34,{...opt,chamfer:{radius:9}});
+  Body.setAngle(b,(Math.random()-.5)*.6);b._snack=sn;b._layer=layer;b._w=sh==='r'?24:sh==='c'?38:40;b._h=sh==='r'?50:sh==='c'?38:34;
+  Composite.add(U.eng.world,b);U.prizes.push(b);
+  if(Math.random()<.35){// タグ（ここに爪を引っかけられる）
+    const tag=Bodies.rectangle(x,y-b._h/2-9,16,6,{...opt,density:.0008,chamfer:{radius:2}});tag._tagOf=b;
+    const c=Constraint.create({bodyA:b,pointA:{x:0,y:-b._h/2+3},bodyB:tag,pointB:{x:0,y:3},length:7,stiffness:.6,damping:.1});
+    Composite.add(U.eng.world,[tag,c]);b._tag=tag;b._tagC=c;U.tags.push(tag)}
+}
+function ufoArm(side){const {Bodies,Body}=Matter;const bar=Bodies.rectangle(0,38,6,76);const tip=Bodies.rectangle(-side*9,76,20,6);
+  const b=Body.create({parts:[bar,tip],isStatic:true,friction:1,frictionStatic:2});b._off={x:b.position.x,y:b.position.y};b._side=side;return b}
+function ufoSetLayer(l){U.layer=l;[U.armL,U.armR].forEach(a=>a.parts.forEach(p=>{p.collisionFilter={category:CAT.C[l],mask:CAT.L[l],group:0}}))}
+function ufoPose(){const {Body}=Matter;[[U.armL,-1,U.aL],[U.armR,1,U.aR]].forEach(([a,s,open])=>{const th=-s*open,px=U.hx+s*9,py=U.hy;const o=a._off;
+  const pos={x:px+o.x*Math.cos(th)-o.y*Math.sin(th),y:py+o.x*Math.sin(th)+o.y*Math.cos(th)};Body.setAngle(a,th,true);Body.setPosition(a,pos,true)})}
+function ufoHits(arm,thr,tipOnly){const pr=U.prizes.concat(U.tags).filter(b=>(b._layer??b._tagOf._layer)===U.layer);
+  const parts=tipOnly?[arm.parts[2]]:arm.parts.slice(1);return parts.some(pt=>Matter.Query.collides(pt,pr).some(c=>c.depth>thr))}
+function ufoInit(){
+  if(U)return true;if(!window.Matter){$('ufoMsg').textContent='読みこみ中…';$('ufoMsg').className='ufo-msg on';return false}
+  const {Engine,Bodies,Composite}=Matter;const eng=Engine.create();eng.gravity.y=1;eng.positionIterations=10;eng.velocityIterations=8;
+  U={eng,prizes:[],tags:[],hx:UFO.HOMEX,hy:UFO.TOPY,z:0,layer:0,aL:.55,aR:.55,phase:'off',tries:S.ufoTries||0,t:0,paused:false,won:[]};
+  const wall=(x,y,w,h)=>Bodies.rectangle(x,y,w,h,{isStatic:true,friction:.8,collisionFilter:{category:CAT.W,mask:0xffff}});
+  Composite.add(eng.world,[wall((UFO.CHUTE+UFO.W)/2+12,UFO.FLOOR+20,UFO.W-UFO.CHUTE+24,40),wall(UFO.CHUTE+4,UFO.FLOOR-21,8,42),wall(-10,UFO.H/2,20,UFO.H*2),wall(UFO.W+10,UFO.H/2,20,UFO.H*2)]);
+  U.armL=ufoArm(-1);U.armR=ufoArm(1);Composite.add(eng.world,[U.armL,U.armR]);ufoSetLayer(0);ufoPose();
+  ufoRestock(true);
+  for(let i=0;i<240;i++)Engine.update(eng,1000/60);// 景品を落ち着かせる
+  return true;
+}
+function ufoRestock(first){// 3列×4こ をバランスよく
+  const cnt=[0,0,0];U.prizes.forEach(b=>cnt[b._layer]++);
+  for(let l=0;l<3;l++)while(cnt[l]<4){const xs=[122,176,230,284];const used=U.prizes.filter(b=>b._layer===l).map(b=>b.position.x);
+    const x=xs.find(v=>!used.some(u=>Math.abs(u-v)<30))??(110+Math.random()*190);ufoAddPrize(x+(Math.random()-.5)*14,first?260-l*6:120,l,ufoPickSnack());cnt[l]++}
+}
+function ufoMsg(t,ms){const m=$('ufoMsg');m.textContent=t;m.className='ufo-msg on';clearTimeout(m._t);if(ms)m._t=setTimeout(()=>m.className='ufo-msg',ms)}
+function ufoUI(){$('ufoTries').textContent=U?`のこり ${U.tries} 回`:'';$('ufoX').disabled=!(U&&U.phase==='ready');$('ufoZ').disabled=!(U&&U.phase==='wz');$('ufoStart').disabled=!!(U&&U.tries>0)}
+function ufoStep(){
+  const {Engine,Composite}=Matter;const P=U.phase;
+  if(P==='mx'){U.hx=Math.min(UFO.W-22,U.hx+1.6);if(U.hx>=UFO.W-22)ufoRelease('x')}
+  if(P==='mz'){U.z=Math.min(1,U.z+.012);if(U.z>=1)ufoRelease('z')}
+  if(P==='drop'){U.hy+=1.5;ufoPose();if(U.hy>=UFO.FLOOR-82||ufoHits(U.armL,1.5,true)||ufoHits(U.armR,1.5,true)){U.phase='close';U.t=0}}
+  if(P==='close'){U.t++;let moved=false;
+    if(!U.stopL){U.aL-=.012;ufoPose();if(ufoHits(U.armL,4.5)){U.aL+=.012;U.stopL=true}else moved=true}
+    if(!U.stopR){U.aR-=.012;ufoPose();if(ufoHits(U.armR,4.5)){U.aR+=.012;U.stopR=true}else moved=true}
+    if(U.aL<-.12)U.stopL=true;if(U.aR<-.12)U.stopR=true;ufoPose();
+    // タグの輪に爪の先が入ったら、ひっかかる
+    U.hooks=U.hooks||[];[U.armL,U.armR].forEach(a=>{const tp=a.parts[2].position;U.tags.forEach(t=>{if(t._tagOf._layer!==U.layer||U.hooks.some(h=>h.bodyB===t))return;
+      const dx=tp.x-t.position.x,dy=tp.y-t.position.y;if(Math.abs(dx)<11&&dy>-2&&dy<12){const c=Matter.Constraint.create({bodyA:a,pointA:{x:tp.x-a.position.x,y:tp.y-a.position.y},bodyB:t,length:3,stiffness:.35,damping:.1});Matter.Composite.add(U.eng.world,c);U.hooks.push(c);tick()}})});
+    if((U.stopL&&U.stopR)||!moved){if(U.t>20){U.phase='hold';U.t=0}}}
+  if(P==='hold'){if(++U.t>25){U.phase='lift'}}
+  if(P==='lift'){U.hy-=1.3;ufoPose();if(U.hy<=UFO.TOPY){U.hy=UFO.TOPY;U.aL+=.03;U.aR+=.03;ufoPose();U.phase='home';tick()}}// 上でアームが少しゆるむ（本物と同じ）
+  if(P==='home'){U.hx-=1.4;ufoPose();if(U.hx<=UFO.HOMEX){U.hx=UFO.HOMEX;U.phase='open';U.t=0}}
+  if(P==='open'){if(U.hooks&&U.hooks.length){U.hooks.forEach(c=>Matter.Composite.remove(U.eng.world,c));U.hooks=[]}U.aL=Math.min(.55,U.aL+.02);U.aR=Math.min(.55,U.aR+.02);ufoPose();if(++U.t>90){ufoEndTry()}}
+  Engine.update(U.eng,1000/60);
+  if(U.hooks)U.hooks=U.hooks.filter(c=>{const a=Matter.Constraint.pointAWorld(c),b=c.bodyB.position;if(Math.hypot(a.x-b.x,a.y-b.y)>16){Matter.Composite.remove(U.eng.world,c);return false}return true});
+  // 取り出し口に落ちたら獲得
+  for(const b of U.prizes.slice()){if(b.position.y>UFO.H+30||(b.position.x<UFO.CHUTE-4&&b.position.y>UFO.FLOOR-4)){
+    Composite.remove(U.eng.world,b);if(b._tag){Composite.remove(U.eng.world,[b._tag,b._tagC]);U.tags=U.tags.filter(t=>t!==b._tag)}
+    U.prizes=U.prizes.filter(x=>x!==b);U.won.push(b._snack)}}
+  if(U.won.length&&!U.paused)ufoShowWin();
+}
+function ufoRelease(k){
+  if(k==='x'&&U.phase==='mx'){U.phase='wz';$('ufoX').classList.remove('hold');ufoUI()}
+  if(k==='z'&&U.phase==='mz'){$('ufoZ').classList.remove('hold');const l=Math.round(U.z*2);U.z=l/2;ufoSetLayer(l);U.stopL=U.stopR=false;U.phase='drop';tick();ufoUI()}
+}
+function ufoEndTry(){U.tries--;S.ufoTries=U.tries;save();U.hy=UFO.TOPY;U.z=0;ufoSetLayer(0);U.aL=U.aR=.55;ufoPose();
+  if(U.won.length===0)ufoMsg(pick(['おしい…！','ざんねん','もうちょっと！','うーん…']),1400);
+  ufoRestock(false);U.phase=U.tries>0?'ready':'over';if(U.phase==='over')setTimeout(()=>ufoMsg('おしまい。またあそんでね',1800),1500);ufoUI()}
+function ufoShowWin(){const sn=U.won.shift();U.paused=true;const rare=sn[3]==='SR'||sn[3]==='SSR';
+  const isNew=!(S.snacks||{})[sn[0]];(S.snacks=S.snacks||{})[sn[0]]=(S.snacks[sn[0]]||0)+1;save();
+  if(rare){const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
+  $('smRes').classList.toggle('rare',rare);$('smArt').innerHTML=snackSVG(sn[4],sn[5]);$('smR').textContent=sn[3];$('smR').className='rr '+sn[3];
+  $('smName').textContent='🎉 ゲット！ '+(isNew?'🆕 ':'')+sn[1];$('smDesc').textContent=sn[2];$('smRes').classList.add('on');smLast=sn;
+  if(sndKey()!=='off')chime(rare?'fanfare':'chime');confetti(rare?120:50);drawSnack()}
+function ufoDraw(){
+  const cv=$('ufoCv'),ctx=cv.getContext('2d'),dpr=Math.min(2,window.devicePixelRatio||1);
+  if(cv.width!==340*dpr){cv.width=340*dpr;cv.height=380*dpr}ctx.setTransform(dpr,0,0,dpr,0,0);
+  const g=ctx.createLinearGradient(0,0,0,380);g.addColorStop(0,'#fde7ee');g.addColorStop(1,'#f6eee4');ctx.fillStyle=g;ctx.fillRect(0,0,340,380);
+  ctx.strokeStyle='rgba(74,63,58,.25)';ctx.lineWidth=1;for(let i=0;i<9;i++){ctx.beginPath();ctx.moveTo(20+i*40,0);ctx.lineTo(20+i*40,10);ctx.stroke()}
+  // 床（奥→手前）
+  [1,.5,0].forEach(z=>{ctx.fillStyle=z===1?'#e9dcef':z===.5?'#efe2ec':'#f6e6ea';const y=VY(UFO.FLOOR,z);ctx.fillRect(VX(UFO.CHUTE,z),y,VX(UFO.W,z)-VX(UFO.CHUTE,z),380);ctx.strokeStyle='rgba(74,63,58,.3)';ctx.beginPath();ctx.moveTo(VX(UFO.CHUTE,z),y);ctx.lineTo(VX(UFO.W,z),y);ctx.stroke()});
+  // 取り出し口
+  ctx.fillStyle='#3d3340';ctx.fillRect(0,VY(UFO.FLOOR,1)-4,UFO.CHUTE,400);ctx.fillStyle='#fff';ctx.font='11px "Klee One",sans-serif';ctx.fillText('とりだし口',12,372);
+  ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillRect(UFO.CHUTE,UFO.FLOOR-42,8,42);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(UFO.CHUTE,UFO.FLOOR-42,8,42);
+  // クレーンの影（ねらいやすく）
+  const cz=U.phase==='mz'||U.phase==='wz'?U.z:U.layer/2;ctx.fillStyle='rgba(74,63,58,.13)';ctx.beginPath();ctx.ellipse(VX(U.hx,cz),VY(UFO.FLOOR-2,cz),24*zView(cz).s,6,0,0,Math.PI*2);ctx.fill();
+  // 景品（奥から）
+  const all=U.prizes.slice().sort((a,b)=>b._layer-a._layer);
+  const clawLayerZ=U.layer/2;let clawDrawn=false;
+  const drawClaw=()=>{const z=(U.phase==='mz'||U.phase==='wz'||U.phase==='ready'||U.phase==='mx'||U.phase==='over'||U.phase==='off')?U.z:clawLayerZ;const s=zView(z).s;
+    ctx.strokeStyle='#8a7f7a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(VX(U.hx,z),0);ctx.lineTo(VX(U.hx,z),VY(U.hy,z));ctx.stroke();
+    [U.armL,U.armR].forEach(a=>a.parts.slice(1).forEach(pt=>{ctx.beginPath();pt.vertices.forEach((v,i)=>{const X=VX(v.x,z),Y=VY(v.y,z);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.closePath();ctx.fillStyle='#c9ccd6';ctx.fill();ctx.strokeStyle='#4a3f3a';ctx.lineWidth=1.5;ctx.stroke()}));
+    ctx.fillStyle='#f3c46a';ctx.strokeStyle='#4a3f3a';ctx.beginPath();ctx.ellipse(VX(U.hx,z),VY(U.hy,z),16*s,9*s,0,0,Math.PI*2);ctx.fill();ctx.stroke()};
+  all.forEach(b=>{const z=b._layer/2;
+    if(!clawDrawn&&b._layer<U.layer&&!(U.phase==='mz'||U.phase==='wz')){drawClaw();clawDrawn=true}
+    const s=zView(z).s;ctx.save();ctx.translate(VX(b.position.x,z),VY(b.position.y,z));ctx.rotate(b.angle);
+    const im=snackImage(b._snack),w=Math.max(b._w,b._h)*1.35*s;if(im.complete)ctx.drawImage(im,-w/2,-w/2,w,w);ctx.restore();
+    if(b._tag){const t=b._tag;ctx.strokeStyle='#e46a7f';ctx.lineWidth=2;const ax=VX(b.position.x+Math.sin(b.angle)*b._h/2,z),ay=VY(b.position.y-Math.cos(b.angle)*b._h/2,z);
+      ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(VX(t.position.x,z),VY(t.position.y,z));ctx.stroke();ctx.beginPath();ctx.ellipse(VX(t.position.x,z),VY(t.position.y,z),8*s,4*s,t.angle,0,Math.PI*2);ctx.stroke()}});
+  if(!clawDrawn)drawClaw();
+  // 上のレール
+  ctx.fillStyle='#b9c3d6';ctx.fillRect(0,0,340,12);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(0,0,340,12);
+  // ミニレーダー（上から見た図）
+  const rx=10,ry=18,rw=78,rh=40;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(rx,ry,rw,rh);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(rx,ry,rw,rh);
+  ctx.fillStyle='#3d3340';ctx.fillRect(rx,ry,rw*UFO.CHUTE/340,rh);
+  U.prizes.forEach(b=>{ctx.fillStyle=b._snack[3]==='SSR'?'#e8b84a':b._snack[3]==='SR'?'#9a6acf':'#e48f8a';ctx.beginPath();ctx.arc(rx+rw*b.position.x/340,ry+rh-6-b._layer*14,2.6,0,7);ctx.fill()});
+  const rz=U.phase==='mz'||U.phase==='wz'||U.phase==='ready'||U.phase==='mx'?U.z:U.layer/2;ctx.strokeStyle='#4a6fd6';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx+rw*U.hx/340,ry+rh-6-rz*28,4,0,7);ctx.stroke();
+  // ガラスの反射
+  ctx.fillStyle='rgba(255,255,255,.18)';ctx.beginPath();ctx.moveTo(250,0);ctx.lineTo(300,0);ctx.lineTo(180,380);ctx.lineTo(130,380);ctx.fill();
+}
+function ufoLoop(){ufoRAF=0;if(!U||!$('p-reward').classList.contains('on'))return;if(!U.paused)ufoStep();ufoDraw();ufoUI();ufoRAF=requestAnimationFrame(ufoLoop)}
+function ufoOpen(){let tries=0;const go=()=>{if(ufoInit()){$('ufoMsg').className='ufo-msg';if(U.phase==='off')U.phase=U.tries>0?'ready':'over';if(!ufoRAF)ufoRAF=requestAnimationFrame(ufoLoop)}else if(++tries<40)setTimeout(go,250);else ufoMsg('UFOキャッチャーを読みこめませんでした')};go()}
+$('ufoStart').onclick=()=>{if(!U)return;if(U.tries>0)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
+  S.tickets--;U.tries=3;S.ufoTries=3;save();unlockAudio();U.phase='ready';ufoMsg('スタート！ ①でよこへ',1300);$('gTk').textContent=S.tickets;draw();ufoUI()};
+const holdBtn=(id,k,ph,next)=>{const b=$(id);
+  b.addEventListener('pointerdown',e=>{e.preventDefault();if(!U||U.phase!==ph)return;b.classList.add('hold');U.phase=next;b.setPointerCapture&&b.setPointerCapture(e.pointerId)});
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,()=>{if(U&&U.phase===next)ufoRelease(k)}))};
+holdBtn('ufoX','x','ready','mx');holdBtn('ufoZ','z','wz','mz');
+$('smOk').onclick=()=>{$('smRes').classList.remove('on');smBusy=false;if(U)U.paused=false;
   if(smLast&&S.onboarded){const n=nameOf(S.chara);toast(`${n?n+"が":""}「${smLast[1]}」をたべた！${pick(['おいしい！','…ふしぎな味','もう1こ！','元気でた！','ちょっとこわい'])}`)}};
 $('smGrid').onclick=e=>{const el=e.target.closest('.sn');if(!el)return;const x=SNACKS.find(x=>x[0]===el.dataset.s);if(!(S.snacks||{})[x[0]]){toast('まだ出ていないおやつだよ');return}
   $('smArt').innerHTML=snackSVG(x[4],x[5]);$('smR').textContent=x[3];$('smR').className='rr '+x[3];$('smName').textContent=x[1];$('smDesc').textContent=x[2];smBusy=true;smLast=null;$('smRes').classList.add('on')};
@@ -1620,7 +1744,7 @@ document.querySelectorAll('.mode b').forEach(b=>b.onclick=async()=>{if(S.run&&!a
 function go(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
-  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha();drawSnack()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
+  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha();drawSnack();ufoOpen()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
   window.scrollTo({top:0});
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
