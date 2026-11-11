@@ -387,7 +387,7 @@ h1 span{color:var(--focus)}
 #smMsg{color:var(--ink);text-shadow:none;font-size:16px;margin:8px 0 0}
 .ufo-box{position:relative;width:100%;max-width:340px;margin:0 auto;border:2.5px solid var(--ink);border-radius:22px;overflow:hidden;box-shadow:4px 5px 0 var(--line);background:#fdf6f2}
 .ufo-box canvas{display:block;width:100%;height:auto;touch-action:none}
-.ufo-tries{position:absolute;right:14px;top:15%;font-family:var(--en);font-size:20px;color:var(--ink);background:rgba(255,255,255,.85);border-radius:10px;padding:0 8px}
+.ufo-tries{position:absolute;right:14px;top:26%;font-family:var(--en);font-size:20px;color:var(--ink);background:rgba(255,255,255,.85);border-radius:10px;padding:0 8px}
 .ufo-msg{position:absolute;left:0;right:0;top:42%;text-align:center;font-family:var(--head);font-size:22px;color:var(--ink);text-shadow:0 0 6px #fff,0 0 12px #fff;pointer-events:none;opacity:0;transition:opacity .3s}
 .ufo-msg.on{opacity:1}
 .ufo-ctl{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px}
@@ -398,6 +398,34 @@ h1 span{color:var(--focus)}
 .ufo-b.hold{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
 .ufo-start:disabled{opacity:.4}
 .ufo-start{padding:12px 14px;font-size:14px;line-height:1.3;background:var(--focus);color:#fff;border:2px solid var(--ink);box-shadow:3px 4px 0 var(--ink)}
+.cab{max-width:350px;margin:0 auto;position:relative;filter:drop-shadow(0 10px 14px rgba(60,40,50,.18))}
+.cab-head{position:relative;height:58px;border-radius:16px 16px 4px 4px;background:linear-gradient(#f6f7fb,#dfe2ea);padding:6px 8px;border:1.5px solid #9aa0b0}
+.cab-head::before,.cab-head::after{content:'';position:absolute;top:6px;bottom:-4px;width:12px;border-radius:6px;background:repeating-linear-gradient(#e0457f 0 4px,#b8205a 4px 8px,#fff 8px 9px)}
+.cab-head::before{left:-8px}.cab-head::after{right:-8px}
+.cab-title{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:center;font:italic 800 25px/1 "Caveat","Zen Maru Gothic",sans-serif;letter-spacing:.04em;color:#fff;text-shadow:0 2px 0 #7a1240,0 0 10px rgba(255,255,255,.6);
+  background:repeating-linear-gradient(#d23a76 0 3px,#a91b54 3px 6px);box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),inset 0 -8px 14px rgba(0,0,0,.25)}
+.cab-title sup{font-size:14px;margin-left:4px;color:#ffe27a}
+.cab-glass{position:relative;padding:0 8px;background:linear-gradient(90deg,#c9cdd8,#f6f7fb 8%,#f6f7fb 92%,#c9cdd8);border-left:1.5px solid #9aa0b0;border-right:1.5px solid #9aa0b0}
+.cab-glass .ufo-box{border:2px solid #b7bcc9;border-radius:6px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.6);max-width:none}
+.cab-base{height:26px;margin:0 -2px;background:repeating-linear-gradient(#de4a83 0 3px,#b52260 3px 6px);border:1.5px solid #8e1f4f;border-radius:3px;box-shadow:inset 0 2px 4px rgba(255,255,255,.4)}
+.cab-panel{margin:0 -6px;padding:10px 10px 6px;background:linear-gradient(#ffffff,#e4e7ee);border:1.5px solid #9aa0b0;border-radius:4px 4px 12px 12px;box-shadow:0 4px 0 #c5c9d4}
+.cab-ctl{display:flex;justify-content:center;align-items:center;gap:14px}
+.cab-label{margin:8px auto 0;width:78%;text-align:center;font:italic 700 14px "Caveat",sans-serif;color:#fff;background:linear-gradient(#8a8f9e,#5f6474);border-radius:4px;padding:2px 0;letter-spacing:.08em}
+.cab .ufo-b{width:62px;height:62px;font-size:20px;box-shadow:0 5px 0 #3d3340,inset 0 -6px 10px rgba(0,0,0,.18),inset 0 4px 8px rgba(255,255,255,.5)}
+.cab .ufo-start{width:80px;height:62px;border-radius:14px;border:2px solid #3d3340;font:inherit;font-size:12px;white-space:nowrap;line-height:1.3;color:#fff;background:linear-gradient(#f07aa3,#d23a76);box-shadow:0 5px 0 #3d3340}
+.cab .ufo-start:disabled{opacity:.45}
+.cab-body{margin:10px 2px 0;height:150px;border-radius:6px 6px 16px 16px;background:linear-gradient(90deg,#d9dce4,#ffffff 20%,#f4f5f8 80%,#cfd3dc);border:1.5px solid #9aa0b0;display:flex;align-items:center;justify-content:space-between;padding:0 12px;gap:8px}
+.cab-out{width:96px;height:104px;border-radius:6px;background:linear-gradient(135deg,rgba(210,214,224,.95),rgba(170,176,190,.9));border:2px solid #9aa0b0;box-shadow:inset 0 0 0 4px rgba(255,255,255,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.cab-out span{font:700 15px "Zen Maru Gothic",sans-serif;color:rgba(255,255,255,.9);text-shadow:0 1px 2px rgba(0,0,0,.25);letter-spacing:.06em}
+.cab-out::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 6px,rgba(255,255,255,.18) 6px 7px)}
+#cabPrize{width:56px;height:56px}#cabPrize svg{width:100%;height:100%}
+#cabPrize.pop{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+.cab-coin{font-size:22px;margin-top:4px}
+.cab-mid{flex:1;height:120px;display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:12px}
+.cab-mid i{display:block;width:24px;height:8px;border-radius:4px;background:#3d3340}
+.cab-door{width:70%;flex:1;border:1.5px solid #b3b8c5;border-radius:4px;background:linear-gradient(#f7f8fb,#e3e6ed)}
+.cab-feet{display:flex;justify-content:space-between;padding:0 22px;margin-top:-6px}
+.cab-feet i{display:block;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#9aa0b0,#3d3340 70%);border:2px solid #2b2430}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -584,11 +612,17 @@ details.fold[open]>summary{margin-bottom:10px}
     </div>
     <div class="card" id="snackCard">
       <div class="sec"><span class="sh"><i class="ic" data-ic="sparkle"></i>おやつUFOキャッチャー<em class="en">claw</em></span><small>🪙1まいで3回</small></div>
-      <div class="ufo-box"><canvas id="ufoCv" width="340" height="380"></canvas><div class="ufo-tries" id="ufoTries"></div><div class="ufo-msg" id="ufoMsg"></div></div>
-      <div class="ufo-ctl">
-        <button class="ufo-b" id="ufoX" disabled><b>1</b>▶<small>よこ</small></button>
-        <button class="ufo-b" id="ufoZ" disabled><b>2</b>▲<small>おく</small></button>
-        <button class="btn ufo-start" id="ufoStart">🪙1で<br>スタート</button>
+      <div class="cab">
+        <div class="cab-head"><div class="cab-title">OYATSU CATCHER<sup>DX</sup></div></div>
+        <div class="cab-glass"><div class="ufo-box"><canvas id="ufoCv" width="340" height="380"></canvas><div class="ufo-tries" id="ufoTries"></div><div class="ufo-msg" id="ufoMsg"></div></div></div>
+        <div class="cab-base"></div>
+        <div class="cab-panel"><div class="cab-ctl">
+          <button class="ufo-b" id="ufoX" disabled><b>1</b>▶<small>よこ</small></button>
+          <button class="ufo-b" id="ufoZ" disabled><b>2</b>▲<small>おく</small></button>
+          <button class="ufo-start" id="ufoStart">🪙1で<br>スタート</button>
+        </div><div class="cab-label">OYATSU CATCHER</div></div>
+        <div class="cab-body"><div class="cab-out"><span>とりだし口</span><div id="cabPrize"></div></div><div class="cab-mid"><i></i><i></i><div class="cab-door"></div></div><div class="cab-out"><span>PRIZE</span><div class="cab-coin">🪙</div></div></div>
+        <div class="cab-feet"><i></i><i></i></div>
       </div>
       <p class="muted" style="margin:6px 0 0">①を長押しで右へ、②を長押しで奥へ。手をはなすと止まるよ（やり直しはできない）。景品のまん中をねらうか、タグに爪を引っかけよう！</p>
       <div class="sec" style="margin-top:14px"><span class="sh"><i class="ic" data-ic="note"></i>おやつずかん<em class="en">zukan</em></span><small id="smCount"></small></div>
@@ -1561,6 +1595,8 @@ const SNACKS=[
  ['painomi','パイの実','64層のパイにチョコがたっぷり','SR','painomi','#e3b067','c'],
  ['pure','ピュレグミ','すっぱい粉つきのハートのグミ','R','pure','#ef6d87','c'],
  ['apollo','アポロ','いちごとチョコの2色の山','N','apollo','#f2a0b5','c'],
+ ['ireba_baa','おばあちゃんの入れ歯','ちょっと口紅がついている。カポッとはずれる（超レア）','SSR','ireba_baa','#f2a3ad','b'],
+ ['ireba_jii','おじいちゃんの入れ歯','金歯が1本キラリ。カタカタしゃべる（超レア）','SSR','ireba_jii','#f2a3ad','b'],
 ];
 const SW={N:12,R:6,SR:2.2,SSR:.8};
 function snackSVG(t,c){
@@ -1595,6 +1631,8 @@ function snackSVG(t,c){
   painomi:`<defs>${lg('a','#f6d39a','#d39a4c',1)}</defs>${shadow}<path d="M50 18l30 16v32L50 84 20 66V34z" fill="${U('a')}" ${K}/>${[0,1,2,3,4,5].map(i=>`<path d="M${24+i} ${38+i*5}l26 ${-14+i*0}" stroke="#e8b46a" stroke-width="0"/>`).join('')}${[40,48,56,64].map(y=>`<path d="M22 ${y}q28 6 56 0" stroke="#b9823e" stroke-width="1.3" fill="none"/>`).join('')}<path d="M44 34q6-6 12 0" stroke="#5a3426" stroke-width="5" fill="none"/>${hl(38,30,8,3)}`,
   pure:`<defs>${rg('a','#ffb3c1','#e2496a')}</defs>${shadow}<path d="M50 86C28 70 12 58 14 38c2-16 22-22 36-6c14-16 34-10 36 6c2 20-14 32-36 48z" fill="${U('a')}" ${K}/>${Array.from({length:22},(_,i)=>`<circle cx="${24+(i*13)%52}" cy="${32+Math.floor(i/6)*12}" r="1.3" fill="#fff" opacity=".9"/>`).join('')}${hl(32,36,7,4)}`,
   apollo:`<defs>${lg('a','#ffb7c8','#e9718f',1)}${lg('b','#7b4a36','#3e2219',1)}</defs>${shadow}<path d="M50 10q14 18 26 50H24q12-32 26-50z" fill="${U('a')}" ${K}/><path d="M24 60h52l-4 24H28z" fill="${U('b')}" ${K}/>${[30,40,50,60,70].map(x=>`<path d="M${x} 60v24" stroke="#2a160f" stroke-width="1.2"/>`).join('')}${hl(44,30,4,10,15)}`,
+  ireba_baa:`<defs>${lg('g','#f7b3bd','#d96b7d',1)}${lg('t','#ffffff','#e9e4da',1)}</defs>${shadow}<path d="M12 50q38-34 76 0q2 22-10 30q-28 12-56 0q-12-8-10-30z" fill="${U('g')}" ${K}/>${[18,28,38,50,62,72,82].map((x,i)=>`<path d="M${x-5} ${i===0||i===6?52:46}q5-${i===3?14:11} 10 0v8q-5 4-10 0z" fill="${U('t')}" stroke="#7a6a64" stroke-width="1.2"/>`).join('')}${[24,36,50,64,76].map((x,i)=>`<path d="M${x-5} 66q5 ${i===2?12:9} 10 0" fill="${U('t')}" stroke="#7a6a64" stroke-width="1.2"/>`).join('')}<path d="M44 40q6-4 12 0" stroke="#e2496a" stroke-width="2.5" fill="none" opacity=".8"/>${hl(30,48,8,2.5,-10)}<text x="72" y="30" font-size="14">💋</text>`,
+  ireba_jii:`<defs>${lg('g','#f2a0aa','#c95a6c',1)}${lg('t','#fffdf6','#e2dccb',1)}${lg('au','#ffe27a','#d49a2a',1)}</defs>${shadow}<path d="M12 50q38-34 76 0q2 22-10 30q-28 12-56 0q-12-8-10-30z" fill="${U('g')}" ${K}/>${[18,28,38,50,62,72,82].map((x,i)=>i===4?'':`<path d="M${x-5} ${i===0||i===6?52:46}q5-11 10 0v8q-5 4-10 0z" fill="${i===2?U('au'):U('t')}" stroke="#7a6a64" stroke-width="1.2"/>`).join('')}${[24,36,50,64,76].map(x=>`<path d="M${x-5} 66q5 9 10 0" fill="${U('t')}" stroke="#7a6a64" stroke-width="1.2"/>`).join('')}<path d="M34 34l4-6M40 33l3-7" stroke="#ffe27a" stroke-width="2" stroke-linecap="round"/>${hl(30,48,8,2.5,-10)}`,
   };
   return `<svg viewBox="0 0 100 100">${A[t]||A.chips}</svg>`;
 }
@@ -1605,7 +1643,7 @@ function drawSnack(){
 }
 let smBusy=false,smLast=null;
 // ===== ミニUFOキャッチャー（物理演算） =====
-const UFO={W:340,H:380,FLOOR:340,CHUTE:80,TOPY:62,HOMEX:40};
+const UFO={W:340,H:380,FLOOR:340,CHUTE:80,TOPY:40,HOMEX:40};
 let U=null,ufoRAF=0;
 const zView=z=>({s:1-.17*z,dy:-30*z});
 const VX=(x,z)=>170+(x-170)*zView(z).s, VY=(y,z)=>UFO.FLOOR+(y-UFO.FLOOR)*zView(z).s+zView(z).dy;
@@ -1699,6 +1737,7 @@ function ufoShowWin(){const sn=U.won.shift();U.paused=true;const rare=sn[3]==='S
   const isNew=!(S.snacks||{})[sn[0]];(S.snacks=S.snacks||{})[sn[0]]=(S.snacks[sn[0]]||0)+1;save();
   if(rare){const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
   $('smRes').classList.toggle('rare',rare);$('smArt').innerHTML=snackSVG(sn[4],sn[5]);$('smR').textContent=sn[3];$('smR').className='rr '+sn[3];
+  {const cp=$('cabPrize');cp.innerHTML=snackSVG(sn[4],sn[5]);cp.classList.remove('pop');void cp.offsetWidth;cp.classList.add('pop')}
   $('smName').textContent='🎉 ゲット！ '+(isNew?'🆕 ':'')+sn[1];$('smDesc').textContent=sn[2];$('smRes').classList.add('on');smLast=sn;
   if(sndKey()!=='off')chime(rare?'fanfare':'chime');confetti(rare?120:50);drawSnack()}
 function ufoDraw(){
@@ -1732,19 +1771,12 @@ function ufoDraw(){
       ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(VX(t.position.x,z),VY(t.position.y,z));ctx.stroke();ctx.beginPath();ctx.ellipse(VX(t.position.x,z),VY(t.position.y,z),8*s,4*s,t.angle,0,Math.PI*2);ctx.stroke()}});
   if(!clawDrawn)drawClaw();
   // 上のレール
-  // 看板（ピンクのストライプ）
-  const hg=ctx.createLinearGradient(0,0,0,40);hg.addColorStop(0,'#c2386e');hg.addColorStop(1,'#8e1f4f');ctx.fillStyle=hg;ctx.fillRect(0,0,340,40);
-  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;for(let y=5;y<40;y+=5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(340,y);ctx.stroke()}
-  ctx.fillStyle='#fff';ctx.font='bold 21px "Caveat","Klee One",sans-serif';ctx.textAlign='center';ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=4;ctx.fillText('OYATSU CATCHER',170,28);ctx.shadowBlur=0;ctx.textAlign='left';
-  ctx.fillStyle='#e9eef6';ctx.fillRect(0,40,340,8);ctx.strokeStyle='#9aa3b5';ctx.strokeRect(0,40,340,8);
-  // 左右の柱
-  [[0,8],[332,8]].forEach(([x,w])=>{const pg=ctx.createLinearGradient(x,0,x+w,0);pg.addColorStop(0,'#f6f7fb');pg.addColorStop(1,'#c9cdd8');ctx.fillStyle=pg;ctx.fillRect(x,40,w,340)});
+  ctx.fillStyle='#e9eef6';ctx.fillRect(0,0,340,10);ctx.strokeStyle='#9aa3b5';ctx.strokeRect(0,0,340,10);
   // ミニレーダー（上から見た図）
-  const rx=252,ry=92,rw=78,rh=40;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(rx,ry,rw,rh);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(rx,ry,rw,rh);
+  const rx=252,ry=46,rw=78,rh=40;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(rx,ry,rw,rh);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(rx,ry,rw,rh);
   ctx.fillStyle='#3d3340';ctx.fillRect(rx,ry,rw*UFO.CHUTE/340,rh);
   U.prizes.forEach(b=>{ctx.fillStyle=b._snack[3]==='SSR'?'#e8b84a':b._snack[3]==='SR'?'#9a6acf':'#e48f8a';ctx.beginPath();ctx.arc(rx+rw*b.position.x/340,ry+rh-6-b._layer*14,2.6,0,7);ctx.fill()});
   const rz=U.phase==='mz'||U.phase==='wz'||U.phase==='ready'||U.phase==='mx'?U.z:U.layer/2;ctx.strokeStyle='#4a6fd6';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx+rw*U.hx/340,ry+rh-6-rz*28,4,0,7);ctx.stroke();
-  {const bg=ctx.createLinearGradient(0,360,0,380);bg.addColorStop(0,'#d24a7f');bg.addColorStop(1,'#9c2457');ctx.fillStyle=bg;ctx.fillRect(UFO.CHUTE,362,260,18);ctx.strokeStyle='rgba(255,255,255,.35)';for(let y=366;y<380;y+=4){ctx.beginPath();ctx.moveTo(UFO.CHUTE,y);ctx.lineTo(340,y);ctx.stroke()}}
   // ガラスの反射
   ctx.fillStyle='rgba(255,255,255,.18)';ctx.beginPath();ctx.moveTo(250,0);ctx.lineTo(300,0);ctx.lineTo(180,380);ctx.lineTo(130,380);ctx.fill();
 }
