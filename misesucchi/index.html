@@ -322,6 +322,27 @@ h1 span{color:var(--focus)}
 .nmin{display:block;width:100%;max-width:260px;margin:0 auto 12px;text-align:center;font-family:var(--head);font-size:18px}
 .pz .nm,.cb .nm{position:absolute;left:0;right:0;bottom:-16px;font-size:10px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);font-family:var(--font)}
 .pgrid{row-gap:20px}.cpick{padding-bottom:16px}
+.sm-wrap{display:flex;align-items:center;justify-content:center;gap:18px}
+.sm{position:relative;width:150px;height:190px;background:var(--focus2);border:2px solid var(--ink);border-radius:26px 22px 18px 18px;box-shadow:4px 5px 0 var(--line)}
+.sm.shake{animation:smshake .1s linear 8}
+@keyframes smshake{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+.sm-top{position:absolute;left:12px;right:12px;top:10px;text-align:center;font-family:var(--en);font-size:22px;color:var(--ink);background:var(--card);border:1.5px solid var(--ink);border-radius:12px}
+.sm-win{position:absolute;left:14px;right:14px;top:48px;height:78px;background:rgba(255,255,255,.75);border:1.5px solid var(--ink);border-radius:14px;overflow:hidden;display:flex;flex-wrap:wrap;gap:2px;align-content:flex-end;justify-content:center;padding:4px}
+.sm-win svg{width:26px;height:26px}
+.sm-slot{position:absolute;left:50%;bottom:16px;width:56px;height:26px;margin-left:-28px;background:#4a3f3a;border-radius:10px}
+.sm-out{position:absolute;left:50%;bottom:20px;width:34px;height:34px;margin-left:-17px;opacity:0}
+.sm-out.drop{animation:smdrop .7s ease-out forwards}
+@keyframes smdrop{0%{transform:translateY(-60px);opacity:0}60%{opacity:1}100%{transform:translateY(0);opacity:1}}
+.sm-btn{padding:14px 22px;font-size:17px;background:var(--focus);color:#fff;border:2px solid var(--ink);box-shadow:3px 4px 0 var(--ink)}
+.sgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sn{aspect-ratio:1;background:var(--card);border:1.5px solid var(--inkA);border-radius:var(--hand);display:flex;align-items:center;justify-content:center;position:relative;padding:4px}
+.sn svg{width:100%;height:100%}
+.sn.lock svg{filter:brightness(0) opacity(.15)}
+.sn b{position:absolute;right:3px;bottom:1px;font-size:9px;color:var(--sub);font-family:var(--font)}
+.sn.SSR{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}.sn.SR{border-color:#9a6acf}
+.sm-art{width:150px;height:150px;margin:0 auto;animation:pop .4s}
+.sm-art svg{width:100%;height:100%}
+#smR.N{background:var(--line)}#smR.R{background:#bcd3f0}#smR.SR{background:#d9c4f2}#smR.SSR{background:linear-gradient(90deg,#f6dc93,#f6b3c7,#bcd3f0)}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -506,6 +527,15 @@ details.fold[open]>summary{margin-bottom:10px}
       <div class="gm" id="gm"><div id="gmSvg"></div><div class="knobHit" id="knob"></div><div class="outCap" id="outCap"><div class="wob"><div class="cap"><div class="t" id="outT"></div><div class="b"></div><div class="ln"></div></div></div></div></div>
       <p class="ghint" id="gHint">ハンドルを指でぐるっと1回まわしてね ↻</p>
     </div>
+    <div class="card" id="snackCard">
+      <div class="sec"><span class="sh"><i class="ic" data-ic="sparkle"></i>おやつミニガチャ<em class="en">snack</em></span><small>🪙1まいで1回</small></div>
+      <div class="sm-wrap">
+        <div class="sm" id="sm"><div class="sm-top">OYATSU</div><div class="sm-win" id="smWin"></div><div class="sm-slot"></div><div class="sm-out" id="smOut"></div></div>
+        <button class="btn sm-btn" id="smGo">まわす</button>
+      </div>
+      <div class="sec" style="margin-top:14px"><span class="sh"><i class="ic" data-ic="note"></i>おやつずかん<em class="en">zukan</em></span><small id="smCount"></small></div>
+      <div class="sgrid" id="smGrid"></div>
+    </div>
     <div class="card">
       <div class="sec"><span class="sh"><i class="ic" data-ic="heart"></i>グッズコレクション<em class="en">collection</em></span> <small id="pCount"></small></div>
       <div class="pgrid" id="pGrid"></div>
@@ -583,6 +613,7 @@ details.fold[open]>summary{margin-bottom:10px}
 </nav>
 <div class="modal" id="modal"><div class="mbox"><div class="ic" id="mIc"></div><h2 id="mT"></h2><p id="mP"></p><button class="btn" id="mOk">OK</button></div></div>
 <div class="toast" id="toast"></div>
+<div class="modal" id="smRes"><div class="mbox"><div class="sm-art" id="smArt"></div><span class="rr" id="smR" style="display:inline-block;font-weight:800;padding:3px 14px;border-radius:99px;margin-top:6px"></span><h2 id="smName"></h2><p id="smDesc"></p><button class="btn" id="smOk">たべる！</button></div></div>
 <div class="modal" id="dlg"><div class="mbox"><p id="dlgP" style="color:var(--ink);font-size:15px"></p><textarea id="dlgT" class="tin" style="width:100%;height:110px;display:none;margin-bottom:10px"></textarea><div style="display:flex;gap:8px"><button class="btn alt" id="dlgNo" style="flex:1;padding:12px">やめる</button><button class="btn" id="dlgYes" style="flex:1;padding:12px">OK</button></div></div></div>
 <div class="modal" id="sheet"><div class="mbox"><div id="shImg" style="width:130px;height:130px;margin:0 auto 6px"></div><input id="shName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね"><h2 id="shT"></h2><p id="shP" style="margin:4px 0 8px"></p><button class="btn" id="shMain">⭐ メインキャラにする</button><button class="btn alt" id="shParty">🏠 画面に出す</button><button class="chip" id="shX" style="margin-top:12px">とじる</button></div></div>
 <div id="gOpen"><div class="rays"></div><div class="bigcap" id="bigcap"><div class="prize" id="prize"></div><div class="ht" id="bigT"></div><div class="hb"></div></div><div class="ginfo"><span class="rr" id="gR">N</span><p id="gTxt"></p><input id="gName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね（あとでも変えられるよ）"><button class="btn" id="gClose">キャラに追加する</button></div></div>
@@ -1431,6 +1462,89 @@ $('msAdd').onclick=()=>{const v=$('msIn').value.trim();if(!v)return;if(subjList(
 $('mySubj').onclick=async e=>{const i=e.target.dataset.ms;if(i===undefined)return;if(!(await ask('この教科をけす？（きろくは残ります）')))return;S.mySubj.splice(+i,1);save();drawLook();drawSubj()};
 $('mcAdd').onclick=()=>{const v=$('mcIn').value.trim();if(!v)return;(S.cheers=S.cheers||[]).push(v);$('mcIn').value='';save();applyLook();drawLook();say(v)};
 $('myCheer').onclick=e=>{const i=e.target.dataset.mc;if(i===undefined)return;S.cheers.splice(+i,1);save();applyLook();drawLook()};
+
+// ===== おやつミニガチャ =====
+const SNACKS=[
+ ['azuki','歯が折れるあずきバァ','かたすぎる棒アイス。かじると歯の方が負ける','R','bar','#8a5a4a'],
+ ['umaibo','うまい坊','さくさくの坊主頭スナック。頭をなでると音がする','N','stick','#f3c46a'],
+ ['omunie','おむにえさん','むらさき色のスライム。たまに目が合う（超レア）','SSR','slime','#a07ad6'],
+ ['hair30','髪の毛30本','どこから来たのか分からない…（ホラー）','R','hair','#3b3330'],
+ ['ichou','胃腸グミ','胃腸のやわらかさを再現。ぷるぷるが止まらない','N','gummy','#f2a3a8'],
+ ['shukudai','宿題が終わるクッキー','食べても宿題は終わらない','N','cookie','#d9a560'],
+ ['getsuyou','月曜日味のポテチ','ひとくちごとにちょっと気分が重くなる','N','bag','#7fa6d6'],
+ ['sensei','先生の目線ガム','かんでいると、どこからか見られている気がする','R','gum','#9fd3c0'],
+ ['keshikasu','消しゴムかすマカロン','ほんのり鉛筆の香り','N','macaron','#cfd6dd'],
+ ['neguse','寝ぐせプリン','ゆらすと上の髪がピンと立つ','N','pudding','#f3d38a'],
+ ['zenya','テスト前夜ドーナツ','あせりの味。穴から未来が見える','R','donut','#e79a8a'],
+ ['muju','無重力わたあめ','手をはなすと空へ飛んでいく','R','cloud','#f6c3d6'],
+ ['kouchou','校長先生の話チョコ','なかなか終わらない長さ','N','longbar','#7a5440'],
+ ['nidone','二度寝マシュマロ','食べると5分だけねむくなる','N','marsh','#fff3f0'],
+ ['kushami','くしゃみラムネ','はっくしょん味。しゅわっとはじける','N','bottle','#a9d6f0'],
+ ['taiikukan','体育館のにおいグミ','なつかしい床の香り','R','gummy','#d9b78a'],
+ ['akaten','赤点せんべい','パリッと割れる心の音','N','senbei','#e2735f'],
+ ['sekigae','席替えポップコーン','となりがだれになるか分からない','N','popcorn','#f6e2a8'],
+ ['wasuremono','わすれものアメ','給食袋に入っていた。ちょっと酸っぱい','N','candy','#b7e08a'],
+ ['denchi','電池切れエクレア','食べるとやる気が1%だけ回復','R','eclair','#a7765a'],
+ ['anki','ひみつの暗記パン','食べても覚えられない（でもおいしい）','SR','bread','#f1d3a0'],
+ ['dangomushi','ダンゴムシだんご','まるまる三兄弟','N','dango','#b9a7c9'],
+ ['uchujin','宇宙人のおすそわけ','未確認の甘さ。ぴかぴか光る','SR','ufo','#8fd0b0'],
+ ['kinniku','筋肉プロテインバー','重すぎて持ち上げられない','R','bar','#c9a46a'],
+ ['kinringo','金色のりんご飴','伝説のおやつ。食べると運気MAX','SSR','apple','#f1c75a'],
+];
+const SW={N:12,R:6,SR:2.2,SSR:.8};
+function snackSVG(type,c){
+  const k='stroke="#4a3f3a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+  const face='<circle cx="42" cy="52" r="2.6" fill="#4a3f3a"/><circle cx="58" cy="52" r="2.6" fill="#4a3f3a"/><path d="M46 58q4 4 8 0" fill="none" '+k+'/>';
+  const T={
+   bar:`<rect x="34" y="14" width="32" height="54" rx="12" fill="${c}" ${k}/><path d="M50 68v20" ${k}/><path d="M40 26l6 4M54 34l6 4" stroke="#fff" stroke-width="2" opacity=".5"/>`,
+   longbar:`<rect x="38" y="6" width="24" height="86" rx="10" fill="${c}" ${k}/><path d="M38 30h24M38 54h24" stroke="#4a3f3a" stroke-width="1.6"/>`,
+   stick:`<rect x="38" y="18" width="24" height="66" rx="12" fill="${c}" ${k}/><circle cx="50" cy="20" r="14" fill="#f6dcb4" ${k}/><path d="M44 18h.1M56 18h.1" ${k}/><path d="M46 24q4 3 8 0" fill="none" ${k}/>`,
+   slime:`<path d="M18 80q-4-30 18-46q14-20 28 0q22 16 18 46z" fill="${c}" ${k}/><circle cx="40" cy="56" r="5" fill="#fff"/><circle cx="60" cy="56" r="5" fill="#fff"/><circle cx="41" cy="57" r="2.4" fill="#4a3f3a"/><circle cx="61" cy="57" r="2.4" fill="#4a3f3a"/><path d="M28 44q4-6 8-6" stroke="#fff" stroke-width="3" fill="none" opacity=".6"/>`,
+   hair:Array.from({length:12},(_,i)=>`<path d="M${22+i*5} 86q${(i%3-1)*16} -30 ${(i%2?10:-10)} -64" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round"/>`).join('')+`<circle cx="72" cy="30" r="3" fill="#c94a64"/>`,
+   gummy:`<path d="M30 30q20-18 40 0v34q-20 18-40 0z" fill="${c}" ${k} opacity=".95"/>${face}`,
+   cookie:`<circle cx="50" cy="52" r="32" fill="${c}" ${k}/><circle cx="38" cy="42" r="4" fill="#6b4a3a"/><circle cx="60" cy="46" r="3.5" fill="#6b4a3a"/><circle cx="50" cy="64" r="4" fill="#6b4a3a"/>`,
+   bag:`<path d="M24 22h52l-4 64H28z" fill="${c}" ${k}/><path d="M24 22l4-8h44l4 8" fill="#fff" ${k}/><circle cx="50" cy="54" r="12" fill="#f6dc93" ${k}/>`,
+   gum:`<rect x="20" y="36" width="60" height="28" rx="6" fill="${c}" ${k}/><circle cx="40" cy="50" r="5" fill="#fff" ${k}/><circle cx="60" cy="50" r="5" fill="#fff" ${k}/><circle cx="41" cy="50" r="2" fill="#4a3f3a"/><circle cx="61" cy="50" r="2" fill="#4a3f3a"/>`,
+   macaron:`<ellipse cx="50" cy="40" rx="30" ry="14" fill="${c}" ${k}/><rect x="22" y="44" width="56" height="8" fill="#fff" ${k}/><ellipse cx="50" cy="62" rx="30" ry="14" fill="${c}" ${k}/>`,
+   pudding:`<path d="M28 82l8-46h28l8 46z" fill="${c}" ${k}/><path d="M36 36q14-8 28 0" fill="#8a5a3a" ${k}/><path d="M50 30v-16M46 18l4-4 4 4" ${k}/>`,
+   donut:`<circle cx="50" cy="50" r="32" fill="${c}" ${k}/><circle cx="50" cy="50" r="11" fill="#fffdfa" ${k}/><path d="M30 38l4 2M66 34l-2 4M70 60l-4 0M34 66l4-2" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`,
+   cloud:`<path d="M24 60q-10-14 6-22q2-16 20-12q12-12 24 2q16 0 12 18q10 14-8 18H30q-10 0-6-4z" fill="${c}" ${k}/><path d="M50 74v18" ${k}/>`,
+   marsh:`<rect x="28" y="30" width="44" height="40" rx="16" fill="${c}" ${k}/><path d="M40 50q3-3 6 0M54 50q3-3 6 0" fill="none" ${k}/><text x="66" y="30" font-size="14" fill="#4a3f3a">z</text>`,
+   bottle:`<path d="M42 14h16v14q12 8 12 22v34H30V50q0-14 12-22z" fill="${c}" ${k}/><circle cx="50" cy="38" r="6" fill="#fff" ${k}/>`,
+   senbei:`<circle cx="50" cy="50" r="32" fill="${c}" ${k}/><path d="M50 18l-6 18 10 10-8 14 4 22" fill="none" ${k}/>`,
+   popcorn:`<path d="M28 44h44l-6 44H34z" fill="#fff" ${k}/><path d="M36 44v44M50 44v44M64 44v44" stroke="#e2735f" stroke-width="5"/><circle cx="38" cy="38" r="9" fill="${c}" ${k}/><circle cx="52" cy="32" r="10" fill="${c}" ${k}/><circle cx="64" cy="40" r="8" fill="${c}" ${k}/>`,
+   candy:`<circle cx="50" cy="50" r="18" fill="${c}" ${k}/><path d="M32 50l-14-10v20zM68 50l14-10v20z" fill="${c}" ${k}/>`,
+   eclair:`<rect x="16" y="40" width="68" height="22" rx="11" fill="#f3d38a" ${k}/><path d="M18 46q32-8 64 0v-2q-32-10-64 0z" fill="${c}" ${k}/><rect x="40" y="66" width="20" height="10" rx="2" fill="#eee" ${k}/><path d="M44 71h6" stroke="#e2735f" stroke-width="3"/>`,
+   bread:`<path d="M20 60q0-30 30-30t30 30v16H20z" fill="${c}" ${k}/><path d="M34 46l6 10M50 42v12M66 46l-6 10" ${k}/>`,
+   dango:`<path d="M50 6v90" stroke="#b58a5a" stroke-width="4"/><circle cx="50" cy="26" r="14" fill="#f6c3d6" ${k}/><circle cx="50" cy="50" r="14" fill="${c}" ${k}/><circle cx="50" cy="74" r="14" fill="#c9e3b4" ${k}/>`,
+   ufo:`<ellipse cx="50" cy="56" rx="38" ry="12" fill="${c}" ${k}/><path d="M32 52q2-22 18-22t18 22" fill="#dff3ff" ${k}/><circle cx="34" cy="58" r="3" fill="#fff6a0"/><circle cx="50" cy="62" r="3" fill="#fff6a0"/><circle cx="66" cy="58" r="3" fill="#fff6a0"/>`,
+   apple:`<circle cx="50" cy="56" r="28" fill="${c}" ${k}/><path d="M50 28v-12" ${k}/><path d="M50 22q10-10 20-4q-10 10-20 4z" fill="#8fbf6a" ${k}/><path d="M36 46q4-6 10-6" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/><path d="M50 84v12" ${k}/>`,
+  };
+  return `<svg viewBox="0 0 100 100">${T[type]||T.candy}</svg>`;
+}
+function drawSnack(){
+  if(!$('smGrid'))return;S.snacks=S.snacks||{};
+  $('smWin').innerHTML=SNACKS.slice(0,12).map(x=>snackSVG(x[4],x[5])).join('');
+  $('smCount').textContent=`${SNACKS.filter(x=>S.snacks[x[0]]).length} / ${SNACKS.length}`;
+  $('smGrid').innerHTML=SNACKS.map(x=>{const n=S.snacks[x[0]]||0;return `<div class="sn ${x[3]} ${n?'':'lock'}" data-s="${x[0]}">${snackSVG(x[4],x[5])}${n?`<b>×${n}</b>`:''}</div>`}).join('');
+}
+let smBusy=false,smLast=null;
+$('smGo').onclick=()=>{
+  if(smBusy)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
+  smBusy=true;S.tickets--;save();unlockAudio();
+  const tot=SNACKS.reduce((a,x)=>a+SW[x[3]],0);let r=Math.random()*tot,pick2=SNACKS[0];for(const x of SNACKS){r-=SW[x[3]];if(r<0){pick2=x;break}}
+  smLast=pick2;const sm=$('sm');sm.classList.remove('shake');void sm.offsetWidth;sm.classList.add('shake');
+  setTimeout(()=>{const o=$('smOut');o.innerHTML=snackSVG(pick2[4],pick2[5]);o.classList.remove('drop');void o.offsetWidth;o.classList.add('drop')},800);
+  setTimeout(()=>{const isNew=!(S.snacks||{})[pick2[0]];(S.snacks=S.snacks||{})[pick2[0]]=(S.snacks[pick2[0]]||0)+1;save();
+    $('smArt').innerHTML=snackSVG(pick2[4],pick2[5]);$('smR').textContent=pick2[3];$('smR').className='rr '+pick2[3];
+    $('smName').textContent=(isNew?'🆕 ':'')+pick2[1];$('smDesc').textContent=pick2[2];$('smRes').classList.add('on');
+    if(sndKey()!=='off')chime(pick2[3]==='SSR'||pick2[3]==='SR'?'fanfare':'pico');confetti(pick2[3]==='SSR'?100:pick2[3]==='SR'?50:20);
+    drawSnack();$('gTk').textContent=S.tickets;draw()},1600);
+};
+$('smOk').onclick=()=>{$('smRes').classList.remove('on');smBusy=false;
+  if(smLast&&S.onboarded){const n=nameOf(S.chara);toast(`${n?n+"が":""}「${smLast[1]}」をたべた！${pick(['おいしい！','…ふしぎな味','もう1こ！','元気でた！','ちょっとこわい'])}`)}};
+$('smGrid').onclick=e=>{const el=e.target.closest('.sn');if(!el)return;const x=SNACKS.find(x=>x[0]===el.dataset.s);if(!(S.snacks||{})[x[0]]){toast('まだ出ていないおやつだよ');return}
+  $('smArt').innerHTML=snackSVG(x[4],x[5]);$('smR').textContent=x[3];$('smR').className='rr '+x[3];$('smName').textContent=x[1];$('smDesc').textContent=x[2];smBusy=true;smLast=null;$('smRes').classList.add('on')};
 // ===== 演出 =====
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
@@ -1450,7 +1564,7 @@ document.querySelectorAll('.mode b').forEach(b=>b.onclick=async()=>{if(S.run&&!a
 function go(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
-  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
+  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha();drawSnack()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
   window.scrollTo({top:0});
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
