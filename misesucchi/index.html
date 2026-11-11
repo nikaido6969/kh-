@@ -1807,15 +1807,15 @@ function ufoDraw(){
   U.prizes.forEach(b=>{ctx.fillStyle=b._snack[3]==='SSR'?'#e8b84a':b._snack[3]==='SR'?'#9a6acf':'#e48f8a';ctx.beginPath();ctx.arc(rx+rw*b.position.x/340,ry+rh-6-b._layer*14,2.6,0,7);ctx.fill()});
   const rz=U.phase==='mz'||U.phase==='wz'||U.phase==='ready'||U.phase==='mx'?U.z:U.layer/2;ctx.strokeStyle='#4a6fd6';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx+rw*U.hx/340,ry+rh-6-rz*28,4,0,7);ctx.stroke();
   // ヒビとガラスの破片
-  if(GL.cracks.length){ctx.lineCap='round';GL.cracks.forEach(c=>{ctx.strokeStyle='rgba(60,60,80,.55)';ctx.lineWidth=c.w+1.2;ctx.beginPath();c.pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=c.w;ctx.stroke()});ctx.lineWidth=1}
+  {const spots=(S.glassSpots||[]);ctx.lineCap='round';spots.forEach(sp=>(sp.cracks||[]).forEach(c=>{ctx.strokeStyle='rgba(60,60,80,.55)';ctx.lineWidth=c.w+1.2;ctx.beginPath();c.pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.95)';ctx.lineWidth=c.w;ctx.stroke()}));ctx.lineWidth=1}
   if(GL.shards.length){GL.shards.forEach(sh=>{sh.x+=sh.vx;sh.y+=sh.vy;sh.vy+=.5;sh.r+=sh.vr;ctx.save();ctx.translate(sh.x,sh.y);ctx.rotate(sh.r);ctx.beginPath();sh.p.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
     ctx.fillStyle='rgba(225,240,255,.55)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.9)';ctx.stroke();ctx.restore()});GL.shards=GL.shards.filter(sh=>sh.y<460)}
-  if(isBroken()){const G=S.glass,h=G.hole;
+  if(isBroken()){const G=S.glass;G.holes.forEach(H=>{const h=H.poly;
+    (H.cracks||[]).forEach(c=>{ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=c.w;ctx.beginPath();c.pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()});
     ctx.save();ctx.beginPath();h.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.strokeStyle='rgba(60,60,80,.6)';ctx.lineWidth=3;ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
     ctx.fillStyle='rgba(255,255,255,.08)';ctx.fill();ctx.restore();
-    (G.cracks||[]).forEach(c=>{ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=c.w;ctx.beginPath();c.pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()});
-    h.forEach((p,i)=>{if(i%2)return;ctx.fillStyle='rgba(225,240,255,.7)';ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(p[0]+(Math.sin(i)*10),p[1]+8);ctx.lineTo(p[0]+(Math.cos(i)*8),p[1]-6);ctx.fill()});
+    h.forEach((p,i)=>{if(i%2)return;ctx.fillStyle='rgba(225,240,255,.7)';ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(p[0]+(Math.sin(i)*10),p[1]+8);ctx.lineTo(p[0]+(Math.cos(i)*8),p[1]-6);ctx.fill()});});
     // 血
     G.blood.forEach(([x,y,r,drip])=>{ctx.fillStyle='rgba(176,16,32,.85)';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();if(drip){ctx.fillRect(x-r*.25,y,r*.5,r*2.6);ctx.beginPath();ctx.arc(x,y+r*2.6,r*.35,0,7);ctx.fill()}});
     if(GL.spurt){const sp=GL.spurt;sp.t++;for(let i=0;i<10;i++){const a=-Math.PI/2+(i-5)*.25,d=sp.t*6;ctx.fillStyle='rgba(200,20,40,.9)';ctx.beginPath();ctx.arc(sp.x+Math.cos(a)*d,sp.y+Math.sin(a)*d+sp.t*sp.t*.25,4,0,7);ctx.fill()}if(sp.t>26)GL.spurt=null}
@@ -1834,44 +1834,50 @@ const GL={hits:0,last:0,stage:0,cracks:[],shards:[],at:null};
 function crackSound(big){if(sndKey()==='off')return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,len=big?.6:.18,buf=ac.createBuffer(1,ac.sampleRate*len,ac.sampleRate),d=buf.getChannelData(0);
   for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,big?2:4);const src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='highpass';f.frequency.value=big?1200:2500;g.gain.value=big?.6:.35;src.buffer=buf;src.connect(f);f.connect(g);g.connect(ac.destination);src.start(n)}catch(e){}}
 function knockSound(){if(sndKey()==='off')return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.setValueAtTime(420,n);o.frequency.exponentialRampToValueAtTime(160,n+.08);g.gain.setValueAtTime(.25,n);g.gain.exponentialRampToValueAtTime(.001,n+.1);o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+.12)}catch(e){}}
-function addCracks(x,y,n,len){for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2;let px=x,py=y;const pts=[[px,py]];const L=len*(.6+Math.random()*.6);
-  for(let d=0;d<L;d+=8+Math.random()*10){const aa=a+(Math.random()-.5)*.6;px+=Math.cos(aa)*12;py+=Math.sin(aa)*12;pts.push([px,py])}GL.cracks.push({pts,w:.8+Math.random()*1})}
-  if(GL.stage>=2)for(let r=1;r<=2;r++){const R=18*r+Math.random()*8,pts=[];for(let t=0;t<=Math.PI*2+.01;t+=.5)pts.push([x+Math.cos(t)*R*(.85+Math.random()*.3),y+Math.sin(t)*R*(.85+Math.random()*.3)]);GL.cracks.push({pts,w:.7})}}
+function addCracks(sp,n,len){const x=sp.x,y=sp.y;sp.cracks=sp.cracks||[];for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2;let px=x,py=y;const pts=[[Math.round(px),Math.round(py)]];const L=len*(.6+Math.random()*.6);
+  for(let d=0;d<L;d+=8+Math.random()*10){const aa=a+(Math.random()-.5)*.6;px+=Math.cos(aa)*12;py+=Math.sin(aa)*12;pts.push([Math.round(px),Math.round(py)])}sp.cracks.push({pts,w:+(.8+Math.random()).toFixed(1)})}
+  if(sp.stage>=2)for(let r=1;r<=2;r++){const R=18*r+Math.random()*8,pts=[];for(let t=0;t<=Math.PI*2+.01;t+=.5)pts.push([Math.round(x+Math.cos(t)*R*(.85+Math.random()*.3)),Math.round(y+Math.sin(t)*R*(.85+Math.random()*.3))]);sp.cracks.push({pts,w:.7})}}
 function shakeMachine(power){if(!U)return;const {Body}=Matter;
   U.prizes.forEach(b=>{const m=b.mass;Body.applyForce(b,b.position,{x:(Math.random()-.5)*.01*m*power,y:-(.004+Math.random()*.008)*m*power})});
   const c=document.querySelector('.cab');if(c){c.classList.remove('cab-shake');void c.offsetWidth;c.classList.add('cab-shake')}}
 function glassTap(e){
   if(!U||U.paused)return;requestMotion();unlockAudio();
   const r=$('ufoCv').getBoundingClientRect(),x=(e.clientX-r.left)/r.width*340,y=(e.clientY-r.top)/r.height*380;
-  if(isBroken()){e.preventDefault();brokenDown(e,x,y);return}
-  const now=Date.now();if(now-GL.last>2000){GL.hits=0;GL.stage=0;GL.cracks=[];GL.at=null}GL.last=now;GL.hits++;
-  knockSound();shakeMachine(.15);if(!GL.at)GL.at=[x,y];
-  const st=Math.floor(GL.hits/10);let cracked=false;
-  if(st>GL.stage&&st<3){cracked=true;GL.stage=st;addCracks(GL.at[0],GL.at[1],st===1?5:8,st===1?60:120);crackSound(false);ufoMsg(st===1?'ピキッ…！ ヒビが入った':'ミシミシ…！ もう少しで割れそう',1200)}
-  if(GL.hits>=30){glassBreak()}
-  else if(!cracked&&GL.hits%5===0)ufoMsg(`コンコン… ${GL.hits}回`,600);
+  if(isBroken()&&(grabMode==='stick'||inHole(x,y))){e.preventDefault();brokenDown(e,x,y);return}
+  // 叩いた場所ごとに回数を積み上げる（リセットしない）
+  S.glassSpots=S.glassSpots||[];let sp=S.glassSpots.find(q=>Math.hypot(q.x-x,q.y-y)<42);
+  if(!sp){sp={x:Math.round(x),y:Math.round(y),hits:0,stage:0,cracks:[]};S.glassSpots.push(sp)}
+  sp.hits++;knockSound();shakeMachine(.15);
+  const st=Math.min(2,Math.floor(sp.hits/10));
+  if(sp.hits>=30){glassBreak(sp)}
+  else if(st>sp.stage){sp.stage=st;addCracks(sp,st===1?5:8,st===1?60:120);crackSound(false);ufoMsg(st===1?'ピキッ…！ ヒビが入った':'ミシミシ…！',1100)}
+  else if(sp.hits%5===0)ufoMsg(`コンコン… ${sp.hits}回`,600);
+  save();
 }
-function glassBreak(){
+function glassBreak(sp){
   crackSound(true);const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
-  GL.shards=Array.from({length:28},()=>{const cx=20+Math.random()*300,cy=20+Math.random()*340,sz=12+Math.random()*26;return {x:cx,y:cy,vx:(Math.random()-.5)*6,vy:-2-Math.random()*4,r:0,vr:(Math.random()-.5)*.3,
+  GL.shards=Array.from({length:22},()=>{const cx=sp.x+(Math.random()-.5)*120,cy=sp.y+(Math.random()-.5)*120,sz=10+Math.random()*24;return {x:cx,y:cy,vx:(Math.random()-.5)*6,vy:-2-Math.random()*4,r:0,vr:(Math.random()-.5)*.3,
     p:[[0,-sz],[sz*.8,sz*.4],[-sz*.7,sz*.6]].map(([a,b])=>[a*(.7+Math.random()*.6),b*(.7+Math.random()*.6)])}});
-  // 割れたまま（24時間たつまで直らない）
-  const [cx,cy]=GL.at||[170,190];const hole=[];for(let t=0;t<Math.PI*2;t+=.45){const R=46+Math.random()*34;hole.push([cx+Math.cos(t)*R*1.15,cy+Math.sin(t)*R])}
-  S.glass={at:Date.now(),hole,cracks:GL.cracks.slice(-40),blood:[]};save();
-  GL.hits=0;GL.stage=0;GL.at=null;ufoMsg('ガシャーン!! ガラスが割れた！',1600);
-  setTimeout(()=>ufoMsg('割れた穴から手でとれる…そーっとね',2200),1700);drawBroken();
+  // この場所に穴（24時間たつまで直らない）
+  const poly=[];for(let t=0;t<Math.PI*2;t+=.45){const R=42+Math.random()*30;poly.push([Math.round(sp.x+Math.cos(t)*R*1.15),Math.round(sp.y+Math.sin(t)*R)])}
+  S.glass=S.glass||{holes:[],blood:[]};S.glass.holes.push({poly,at:Date.now(),x:sp.x,y:sp.y,cracks:(sp.cracks||[]).slice(-14)});
+  sp.hits=0;sp.stage=0;sp.broken=true;S.glassSpots=S.glassSpots.filter(q=>q!==sp);save();
+  ufoMsg('ガシャーン!! ガラスが割れた！',1600);setTimeout(()=>ufoMsg('割れた穴から手でとれる…そーっとね',2200),1700);drawBroken();
 }
 // ===== 割れたガラス：手でとる／棒でとる／かたむけてとる =====
 let grabMode='hand',gDown=null,stick=null;
-const isBroken=()=>!!(S.glass&&S.glass.at);
-function checkRepair(){if(isBroken()&&Date.now()-S.glass.at>=864e5){S.glass=null;save();GL.cracks=[];ufoMsg('ガラスが直ったよ✨',1600);drawBroken()}}
+if(S.glass&&S.glass.at&&!S.glass.holes)S.glass={holes:[{poly:S.glass.hole,at:S.glass.at}],blood:S.glass.blood||[]};// 前の形式から移行
+const isBroken=()=>!!(S.glass&&S.glass.holes&&S.glass.holes.length);
+function checkRepair(){if(!isBroken())return;const n=S.glass.holes.length;S.glass.holes=S.glass.holes.filter(h=>Date.now()-h.at<864e5);
+  if(S.glass.holes.length<n){if(!S.glass.holes.length)S.glass=null;save();ufoMsg('ガラスが直ったよ✨',1600);drawBroken()}}
 function drawBroken(){const on=isBroken();$('brokenCtl').style.display=on?'':'none';
-  if(on){const left=Math.max(0,864e5-(Date.now()-S.glass.at));$('brokenTime').textContent=`直るまで あと${Math.floor(left/36e5)}時間${Math.floor(left%36e5/6e4)}分`;
+  if(on){const left=Math.max(0,864e5-(Date.now()-Math.min(...S.glass.holes.map(h=>h.at))));$('brokenTime').textContent=`直るまで あと${Math.floor(left/36e5)}時間${Math.floor(left%36e5/6e4)}分`;
     document.querySelectorAll('#brokenCtl .chip[data-g]').forEach(b=>b.classList.toggle('on',b.dataset.g===grabMode))}}
 function worldHit(sx,sy){// 画面の点 → いちばん手前の景品
   for(const l of [0,1,2]){const z=l/2,s=zView(z).s;const wx=170+(sx-170)/s,wy=UFO.FLOOR+(sy-zView(z).dy-UFO.FLOOR)/s;
     const hit=Matter.Query.point(U.prizes.filter(b=>b._layer===l),{x:wx,y:wy});if(hit.length)return hit[0]}return null}
-function inHole(x,y){const h=S.glass.hole;let c=false;for(let i=0,j=h.length-1;i<h.length;j=i++){if((h[i][1]>y)!==(h[j][1]>y)&&x<(h[j][0]-h[i][0])*(y-h[i][1])/(h[j][1]-h[i][1])+h[i][0])c=!c}return c}
+function inPoly(h,x,y){let c=false;for(let i=0,j=h.length-1;i<h.length;j=i++){if((h[i][1]>y)!==(h[j][1]>y)&&x<(h[j][0]-h[i][0])*(y-h[i][1])/(h[j][1]-h[i][1])+h[i][0])c=!c}return c}
+function inHole(x,y){return isBroken()&&S.glass.holes.some(H=>inPoly(H.poly,x,y))}
 function takePrize(b,how){Matter.Composite.remove(U.eng.world,b);if(b._tag){Matter.Composite.remove(U.eng.world,[b._tag,b._tagC]);U.tags=U.tags.filter(t=>t!==b._tag)}
   U.prizes=U.prizes.filter(x=>x!==b);ufoMsg(how,1200);setTimeout(()=>{U.won.push(b._snack);ufoRestock(false)},500)}
 function bloodSpurt(x,y){if(sndKey()!=='off')crackSound(false);ufoMsg('いったーい!! 指を切った🩸',1600);
