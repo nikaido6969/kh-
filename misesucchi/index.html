@@ -387,7 +387,7 @@ h1 span{color:var(--focus)}
 #smMsg{color:var(--ink);text-shadow:none;font-size:16px;margin:8px 0 0}
 .ufo-box{position:relative;width:100%;max-width:340px;margin:0 auto;border:2.5px solid var(--ink);border-radius:22px;overflow:hidden;box-shadow:4px 5px 0 var(--line);background:#fdf6f2}
 .ufo-box canvas{display:block;width:100%;height:auto;touch-action:none}
-.ufo-tries{position:absolute;right:10px;top:8px;font-family:var(--en);font-size:20px;color:var(--ink);background:rgba(255,255,255,.85);border-radius:10px;padding:0 8px}
+.ufo-tries{position:absolute;right:14px;top:15%;font-family:var(--en);font-size:20px;color:var(--ink);background:rgba(255,255,255,.85);border-radius:10px;padding:0 8px}
 .ufo-msg{position:absolute;left:0;right:0;top:42%;text-align:center;font-family:var(--head);font-size:22px;color:var(--ink);text-shadow:0 0 6px #fff,0 0 12px #fff;pointer-events:none;opacity:0;transition:opacity .3s}
 .ufo-msg.on{opacity:1}
 .ufo-ctl{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px}
@@ -1605,7 +1605,7 @@ function drawSnack(){
 }
 let smBusy=false,smLast=null;
 // ===== ミニUFOキャッチャー（物理演算） =====
-const UFO={W:340,H:380,FLOOR:340,CHUTE:80,TOPY:46,HOMEX:40};
+const UFO={W:340,H:380,FLOOR:340,CHUTE:80,TOPY:62,HOMEX:40};
 let U=null,ufoRAF=0;
 const zView=z=>({s:1-.17*z,dy:-30*z});
 const VX=(x,z)=>170+(x-170)*zView(z).s, VY=(y,z)=>UFO.FLOOR+(y-UFO.FLOOR)*zView(z).s+zView(z).dy;
@@ -1644,17 +1644,21 @@ function ufoInit(){
   const {Engine,Bodies,Composite}=Matter;const eng=Engine.create();eng.gravity.y=1;eng.positionIterations=10;eng.velocityIterations=8;
   U={eng,prizes:[],tags:[],hx:UFO.HOMEX,hy:UFO.TOPY,z:0,layer:0,aL:.72,aR:.72,phase:'off',tries:S.ufoTries||0,t:0,paused:false,won:[]};
   const wall=(x,y,w,h)=>Bodies.rectangle(x,y,w,h,{isStatic:true,friction:.8,collisionFilter:{category:CAT.W,mask:0xffff}});
-  Composite.add(eng.world,[wall((UFO.CHUTE+UFO.W)/2+12,UFO.FLOOR+20,UFO.W-UFO.CHUTE+24,40),wall(UFO.CHUTE+4,UFO.FLOOR-21,8,42),wall(-10,UFO.H/2,20,UFO.H*2),wall(UFO.W+10,UFO.H/2,20,UFO.H*2)]);
+  Composite.add(eng.world,[wall((UFO.CHUTE+UFO.W)/2+12,UFO.FLOOR+20,UFO.W-UFO.CHUTE+24,40),wall(UFO.CHUTE+4,UFO.FLOOR-40,8,80),wall(-10,UFO.H/2,20,UFO.H*2),wall(UFO.W+10,UFO.H/2,20,UFO.H*2)]);
   U.armL=ufoArm(-1);U.armR=ufoArm(1);Composite.add(eng.world,[U.armL,U.armR]);ufoSetLayer(0);ufoPose();
   ufoRestock(true);
-  for(let i=0;i<240;i++)Engine.update(eng,1000/60);// 景品を落ち着かせる
+  for(let r=0;r<3;r++){for(let i=0;i<200;i++)Engine.update(eng,1000/60);ufoCleanChute()}// 景品を落ち着かせる
   return true;
 }
-function ufoRestock(first){// 3列×4こ をバランスよく
-  const cnt=[0,0,0];U.prizes.forEach(b=>cnt[b._layer]++);
-  for(let l=0;l<3;l++)while(cnt[l]<3){const xs=[l===1?165:150,l===1?235:220,l===1?300:290];const used=U.prizes.filter(b=>b._layer===l).map(b=>b.position.x);
-    const x=xs.find(v=>!used.some(u=>Math.abs(u-v)<40))??(120+Math.random()*180);ufoAddPrize(x+(Math.random()-.5)*14,first?260-l*6:120,l,ufoPickSnack());cnt[l]++}
+function ufoRestock(first){// 3列×10こ をぎっしり山盛りに
+  const cnt=[0,0,0];U.prizes.forEach(b=>cnt[b._layer]++);let k=0;
+  for(let l=0;l<3;l++)while(cnt[l]<10){const i=cnt[l];const x=124+((i*47+l*23)%190)+(Math.random()-.5)*10;
+    ufoAddPrize(x,first?300-Math.floor(i/4)*48-l*4:90-Math.random()*30-(k++)*6,l,ufoPickSnack());cnt[l]++}
+  if(!first)for(let i=0;i<60;i++)Matter.Engine.update(U.eng,1000/60);
+  ufoCleanChute();
 }
+// 補充のときに取り出し口へ転がったものは、そっと戻す（獲得にしない）
+function ufoCleanChute(){U.prizes.forEach(b=>{if(b.position.x<UFO.CHUTE+10||b.position.y>UFO.H){Matter.Body.setPosition(b,{x:220+Math.random()*80,y:60});Matter.Body.setVelocity(b,{x:0,y:0});if(b._tag)Matter.Body.setPosition(b._tag,{x:b.position.x,y:40})}})}
 function ufoMsg(t,ms){const m=$('ufoMsg');m.textContent=t;m.className='ufo-msg on';clearTimeout(m._t);if(ms)m._t=setTimeout(()=>m.className='ufo-msg',ms)}
 function ufoUI(){$('ufoTries').textContent=U?`のこり ${U.tries} 回`:'';$('ufoX').disabled=!(U&&U.phase==='ready');$('ufoZ').disabled=!(U&&U.phase==='wz');$('ufoStart').disabled=!!(U&&U.tries>0)}
 function ufoStep(){
@@ -1706,7 +1710,7 @@ function ufoDraw(){
   [1,.5,0].forEach(z=>{ctx.fillStyle=z===1?'#e9dcef':z===.5?'#efe2ec':'#f6e6ea';const y=VY(UFO.FLOOR,z);ctx.fillRect(VX(UFO.CHUTE,z),y,VX(UFO.W,z)-VX(UFO.CHUTE,z),380);ctx.strokeStyle='rgba(74,63,58,.3)';ctx.beginPath();ctx.moveTo(VX(UFO.CHUTE,z),y);ctx.lineTo(VX(UFO.W,z),y);ctx.stroke()});
   // 取り出し口
   ctx.fillStyle='#3d3340';ctx.fillRect(0,VY(UFO.FLOOR,1)-4,UFO.CHUTE,400);ctx.fillStyle='#fff';ctx.font='11px "Klee One",sans-serif';ctx.fillText('とりだし口',12,372);
-  ctx.fillStyle='rgba(255,255,255,.55)';ctx.fillRect(UFO.CHUTE,UFO.FLOOR-42,8,42);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(UFO.CHUTE,UFO.FLOOR-42,8,42);
+  ctx.fillStyle='rgba(220,235,255,.55)';ctx.fillRect(UFO.CHUTE,UFO.FLOOR-80,8,80);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(UFO.CHUTE,UFO.FLOOR-80,8,80);
   // クレーンの影（ねらいやすく）
   const cz=U.phase==='mz'||U.phase==='wz'?U.z:U.layer/2;ctx.fillStyle='rgba(74,63,58,.13)';ctx.beginPath();ctx.ellipse(VX(U.hx,cz),VY(UFO.FLOOR-2,cz),24*zView(cz).s,6,0,0,Math.PI*2);ctx.fill();
   // 景品（奥から）
@@ -1716,7 +1720,10 @@ function ufoDraw(){
     ctx.strokeStyle='#8a7f7a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(VX(U.hx,z),0);ctx.lineTo(VX(U.hx,z),VY(U.hy,z));ctx.stroke();
     {const o=Math.max(0,(U.aL+U.aR)/2),L=90;ctx.strokeStyle='#8f93a3';ctx.lineWidth=5*s;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(VX(U.hx,z),VY(U.hy,z));ctx.lineTo(VX(U.hx,z),VY(U.hy+L*Math.cos(o*.6),z)-8*s*(1-o));ctx.stroke();ctx.lineWidth=1}
     [U.armL,U.armR].forEach(a=>a.parts.slice(1).forEach(pt=>{ctx.beginPath();pt.vertices.forEach((v,i)=>{const X=VX(v.x,z),Y=VY(v.y,z);i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)});ctx.closePath();ctx.fillStyle='#c9ccd6';ctx.fill();ctx.strokeStyle='#4a3f3a';ctx.lineWidth=1.5;ctx.stroke()}));
-    ctx.fillStyle='#f3c46a';ctx.strokeStyle='#4a3f3a';ctx.beginPath();ctx.ellipse(VX(U.hx,z),VY(U.hy,z),16*s,9*s,0,0,Math.PI*2);ctx.fill();ctx.stroke()};
+    {const X=VX(U.hx,z),Y=VY(U.hy,z);// UFOの頭（白いドーム）
+      ctx.fillStyle='#f4f5f9';ctx.strokeStyle='#4a3f3a';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(X,Y-4*s,24*s,12*s,0,Math.PI,0);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#d6dae4';ctx.beginPath();ctx.ellipse(X,Y,28*s,7*s,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#5b6274';ctx.beginPath();ctx.ellipse(X+8*s,Y-9*s,9*s,5*s,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(X+6*s,Y-11*s,3*s,1.5*s,0,0,Math.PI*2);ctx.fill()}};
   all.forEach(b=>{const z=b._layer/2;
     if(!clawDrawn&&b._layer<U.layer&&!(U.phase==='mz'||U.phase==='wz')){drawClaw();clawDrawn=true}
     const s=zView(z).s;ctx.save();ctx.translate(VX(b.position.x,z),VY(b.position.y,z));ctx.rotate(b.angle);
@@ -1725,12 +1732,19 @@ function ufoDraw(){
       ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(VX(t.position.x,z),VY(t.position.y,z));ctx.stroke();ctx.beginPath();ctx.ellipse(VX(t.position.x,z),VY(t.position.y,z),8*s,4*s,t.angle,0,Math.PI*2);ctx.stroke()}});
   if(!clawDrawn)drawClaw();
   // 上のレール
-  ctx.fillStyle='#b9c3d6';ctx.fillRect(0,0,340,12);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(0,0,340,12);
+  // 看板（ピンクのストライプ）
+  const hg=ctx.createLinearGradient(0,0,0,40);hg.addColorStop(0,'#c2386e');hg.addColorStop(1,'#8e1f4f');ctx.fillStyle=hg;ctx.fillRect(0,0,340,40);
+  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;for(let y=5;y<40;y+=5){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(340,y);ctx.stroke()}
+  ctx.fillStyle='#fff';ctx.font='bold 21px "Caveat","Klee One",sans-serif';ctx.textAlign='center';ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=4;ctx.fillText('OYATSU CATCHER',170,28);ctx.shadowBlur=0;ctx.textAlign='left';
+  ctx.fillStyle='#e9eef6';ctx.fillRect(0,40,340,8);ctx.strokeStyle='#9aa3b5';ctx.strokeRect(0,40,340,8);
+  // 左右の柱
+  [[0,8],[332,8]].forEach(([x,w])=>{const pg=ctx.createLinearGradient(x,0,x+w,0);pg.addColorStop(0,'#f6f7fb');pg.addColorStop(1,'#c9cdd8');ctx.fillStyle=pg;ctx.fillRect(x,40,w,340)});
   // ミニレーダー（上から見た図）
-  const rx=10,ry=18,rw=78,rh=40;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(rx,ry,rw,rh);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(rx,ry,rw,rh);
+  const rx=252,ry=92,rw=78,rh=40;ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(rx,ry,rw,rh);ctx.strokeStyle='#4a3f3a';ctx.strokeRect(rx,ry,rw,rh);
   ctx.fillStyle='#3d3340';ctx.fillRect(rx,ry,rw*UFO.CHUTE/340,rh);
   U.prizes.forEach(b=>{ctx.fillStyle=b._snack[3]==='SSR'?'#e8b84a':b._snack[3]==='SR'?'#9a6acf':'#e48f8a';ctx.beginPath();ctx.arc(rx+rw*b.position.x/340,ry+rh-6-b._layer*14,2.6,0,7);ctx.fill()});
   const rz=U.phase==='mz'||U.phase==='wz'||U.phase==='ready'||U.phase==='mx'?U.z:U.layer/2;ctx.strokeStyle='#4a6fd6';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx+rw*U.hx/340,ry+rh-6-rz*28,4,0,7);ctx.stroke();
+  {const bg=ctx.createLinearGradient(0,360,0,380);bg.addColorStop(0,'#d24a7f');bg.addColorStop(1,'#9c2457');ctx.fillStyle=bg;ctx.fillRect(UFO.CHUTE,362,260,18);ctx.strokeStyle='rgba(255,255,255,.35)';for(let y=366;y<380;y+=4){ctx.beginPath();ctx.moveTo(UFO.CHUTE,y);ctx.lineTo(340,y);ctx.stroke()}}
   // ガラスの反射
   ctx.fillStyle='rgba(255,255,255,.18)';ctx.beginPath();ctx.moveTo(250,0);ctx.lineTo(300,0);ctx.lineTo(180,380);ctx.lineTo(130,380);ctx.fill();
 }
