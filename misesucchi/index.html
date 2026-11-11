@@ -428,6 +428,19 @@ h1 span{color:var(--focus)}
 .cab-feet i{display:block;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#9aa0b0,#3d3340 70%);border:2px solid #2b2430}
 .cab-shake{animation:cabshake .35s ease}
 @keyframes cabshake{20%{transform:translate(-4px,1px) rotate(-.6deg)}40%{transform:translate(4px,-1px) rotate(.6deg)}60%{transform:translate(-3px,0)}80%{transform:translate(2px,0)}}
+.pawn-mark{display:inline-flex;align-items:center;justify-content:center;width:1.5em;height:1.5em;border-radius:50%;border:2px solid #2f4a7a;color:#2f4a7a;font-family:"Yusei Magic",serif;font-size:.85em;background:#fff}
+.pawn-mark.big{width:44px;height:44px;font-size:24px}
+.pawn-head{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;font-family:var(--head);color:#2f4a7a;letter-spacing:.3em}
+#pawn .mbox{background:linear-gradient(#fffaf0,#f6ecd8);border-color:#7a5a3a}
+.pw-img{width:120px;height:120px;margin:0 auto;display:flex;align-items:center;justify-content:center}
+.pw-img img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.2))}
+.wheel-wrap{position:relative;width:220px;height:220px;margin:6px auto 12px;display:none}
+.wheel-wrap.on{display:block}
+.wheel{width:100%;height:100%;border-radius:50%;border:4px solid #3b2f2c;box-shadow:0 6px 0 #c9b38f,inset 0 0 0 4px #fff;transition:transform 4.2s cubic-bezier(.12,.6,.1,1);position:relative}
+.wheel span{position:absolute;left:50%;top:50%;transform-origin:0 0;font:800 17px "Caveat","Zen Maru Gothic",sans-serif;color:#3b2f2c;text-shadow:0 1px 0 #fff}
+.wheel-pin{position:absolute;left:50%;top:-14px;transform:translateX(-50%);font-size:26px;color:#c94a64;z-index:2;text-shadow:0 2px 0 #fff}
+.pz .val{position:absolute;left:3px;bottom:2px;font-size:10px;font-weight:800;color:#7a5a3a}
+#pwBtns .btn{width:100%;margin-top:8px}
 /* nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,248,.95);backdrop-filter:blur(10px);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--line);z-index:5}
 nav button{background:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px;padding:2px 10px}
@@ -637,6 +650,11 @@ details.fold[open]>summary{margin-bottom:10px}
       <p class="muted" id="pNote">「＋」からグッズの写真を追加できるよ。へんしゅう中は、タップでレア度をかえられるよ。</p>
       <input type="file" accept="image/*" id="pIn" multiple hidden>
     </div>
+    <div class="card" id="pawnCard">
+      <div class="sec"><span class="sh"><span class="pawn-mark">質</span>質屋<em class="en">pawn shop</em></span><small>レア🪙5・ふつう🪙1</small></div>
+      <p class="muted" style="margin:0 0 10px">ダブったグッズを売ってコインにしよう。ルーレットで勝負すると、倍率が変わるよ！</p>
+      <div class="pgrid" id="pawnGrid"></div>
+    </div>
     <div class="card">
       <div class="lvbox"><div class="big" id="lvIc">🌱</div><div style="flex:1"><h3 id="lvName">Lv.1</h3><p id="lvNext"></p><div class="xbar"><i id="lvBar"></i></div></div></div>
     </div>
@@ -707,6 +725,13 @@ details.fold[open]>summary{margin-bottom:10px}
 </nav>
 <div class="modal" id="modal"><div class="mbox"><div class="ic" id="mIc"></div><h2 id="mT"></h2><p id="mP"></p><button class="btn" id="mOk">OK</button></div></div>
 <div class="toast" id="toast"></div>
+<div class="modal" id="pawn"><div class="mbox">
+  <div class="pawn-head"><span class="pawn-mark big">質</span><b>しちや</b></div>
+  <div id="pwImg" class="pw-img"></div><h2 id="pwName"></h2><p id="pwInfo"></p>
+  <div class="wheel-wrap" id="wheelWrap"><div class="wheel-pin">▼</div><div class="wheel" id="wheel"></div></div>
+  <div id="pwBtns"><button class="btn" id="pwSell">そのまま売る</button><button class="btn alt" id="pwSpin">🎡 ルーレットで勝負</button><button class="chip" id="pwX" style="margin-top:10px">やめる</button></div>
+  <button class="btn" id="pwDone" style="display:none">OK</button>
+</div></div>
 <div class="modal" id="smRes"><div class="mbox"><div class="sm-art" id="smArt"></div><span class="rr" id="smR" style="display:inline-block;font-weight:800;padding:3px 14px;border-radius:99px;margin-top:6px"></span><h2 id="smName"></h2><p id="smDesc"></p><button class="btn" id="smOk">たべる！</button></div></div>
 <div class="modal" id="dlg"><div class="mbox"><p id="dlgP" style="color:var(--ink);font-size:15px"></p><textarea id="dlgT" class="tin" style="width:100%;height:110px;display:none;margin-bottom:10px"></textarea><div style="display:flex;gap:8px"><button class="btn alt" id="dlgNo" style="flex:1;padding:12px">やめる</button><button class="btn" id="dlgYes" style="flex:1;padding:12px">OK</button></div></div></div>
 <div class="modal" id="sheet"><div class="mbox"><div id="shImg" style="width:130px;height:130px;margin:0 auto 6px"></div><input id="shName" class="tin nmin" maxlength="12" placeholder="なまえをつけてね"><h2 id="shT"></h2><p id="shP" style="margin:4px 0 8px"></p><button class="btn" id="shMain">⭐ メインキャラにする</button><button class="btn alt" id="shParty">🏠 画面に出す</button><button class="chip" id="shX" style="margin-top:12px">とじる</button></div></div>
@@ -1842,6 +1867,41 @@ $('smOk').onclick=()=>{$('smRes').classList.remove('on');smBusy=false;if(U)U.pau
   if(smLast&&S.onboarded){const n=nameOf(S.chara);toast(`${n?n+"が":""}「${smLast[1]}」をたべた！${pick(['おいしい！','…ふしぎな味','もう1こ！','元気でた！','ちょっとこわい'])}`)}};
 $('smGrid').onclick=e=>{const el=e.target.closest('.sn');if(!el)return;const x=SNACKS.find(x=>x[0]===el.dataset.s);if(!(S.snacks||{})[x[0]]){toast('まだ出ていないおやつだよ');return}
   $('smArt').innerHTML=snackSVG(x[4],x[5]);$('smR').textContent=x[3];$('smR').className='rr '+x[3];$('smName').textContent=x[1];$('smDesc').textContent=x[2];smBusy=true;smLast=null;$('smRes').classList.add('on')};
+
+// ===== 質屋 =====
+const PAWN_SEG=[['×0',0,15,'#d9d4cc'],['×0.5',.5,20,'#f6dcb4'],['×1',1,25,'#c9e3b4'],['×2',2,25,'#bcd3f0'],['×3',3,10,'#e3c4f2'],['×5',5,5,'#ffe27a']];
+const pawnBase=x=>x.r==='SR'||x.r==='SSR'?5:1;
+let pawnItem=null,pawnRot=0;
+function drawPawn(){if(!$('pawnGrid'))return;
+  const own=PRIZES.filter(x=>S.got[x.id]);
+  $('pawnGrid').innerHTML=own.length?own.map(x=>`<div class="pz" data-id="${x.id}"><img src="${x.d}" alt=""><span class="rb ${x.r}">${x.r}</span><span class="ct">×${S.got[x.id]}</span><span class="val">🪙${pawnBase(x)}</span></div>`).join(''):'<p class="muted">まだグッズがないよ。ガチャで集めよう！</p>';
+}
+$('pawnGrid').onclick=e=>{const z=e.target.closest('.pz');if(!z)return;const x=PRIZES.find(p=>String(p.id)===z.dataset.id);if(!x)return;
+  const last=S.got[x.id]===1,isMain=S.chara==='p'+x.id;
+  if(isMain&&last){toast('メインキャラは売れないよ（2つ以上あれば売れる）');return}
+  pawnItem=x;$('pwImg').innerHTML=`<img src="${CUT[x.id]||x.d}" alt="">`;$('pwName').textContent=nameOf('p'+x.id)||'このグッズ';
+  $('pwInfo').innerHTML=`レア度 <b>${x.r}</b>・もっている数 ×${S.got[x.id]}<br>買取価格 <b>🪙${pawnBase(x)}まい</b>${last?'<br><small>※最後の1つなので、売るとコレクションからいなくなるよ</small>':''}`;
+  $('wheelWrap').classList.remove('on');$('pwBtns').style.display='';$('pwDone').style.display='none';$('pawn').classList.add('on')};
+function pawnFinish(mult){const x=pawnItem;if(!x)return;const base=pawnBase(x),coins=Math.floor(base*mult);
+  S.got[x.id]--;if(S.got[x.id]<=0){delete S.got[x.id];S.party=(S.party||[]).filter(k=>k!=='p'+x.id)}
+  S.tickets=(S.tickets||0)+coins;save();
+  $('pwInfo').innerHTML=mult===1&&!$('wheelWrap').classList.contains('on')?`まいど！ <b>🪙${coins}まい</b> で買い取ったよ`:`倍率 <b>×${mult}</b> ！ → <b>🪙${coins}まい</b>${mult>=3?' 🎉 大当たり！':mult===0?' …ざんねん！':''}`;
+  if(mult>=2)confetti(mult>=5?120:50);if(sndKey()!=='off')chime(mult>=3?'fanfare':mult===0?'off':'pico');
+  $('pwBtns').style.display='none';$('pwDone').style.display='';pawnItem=null;drawPawn();drawGacha();refreshChars();$('gTk').textContent=S.tickets;draw()}
+$('pwSell').onclick=()=>pawnFinish(1);
+$('pwX').onclick=()=>{$('pawn').classList.remove('on');pawnItem=null};
+$('pwDone').onclick=()=>$('pawn').classList.remove('on');
+$('pwSpin').onclick=()=>{if(!pawnItem)return;unlockAudio();
+  const tot=PAWN_SEG.reduce((a,x)=>a+x[2],0);let r=Math.random()*tot,idx=0;for(let i=0;i<PAWN_SEG.length;i++){r-=PAWN_SEG[i][2];if(r<0){idx=i;break}}
+  // ルーレット（見た目は同じ幅で6つ）
+  const n=PAWN_SEG.length,deg=360/n,w=$('wheel');
+  w.style.background=`conic-gradient(${PAWN_SEG.map((sg,i)=>`${sg[3]} ${i*deg}deg ${(i+1)*deg}deg`).join(',')})`;
+  w.innerHTML=PAWN_SEG.map((sg,i)=>`<span style="transform:rotate(${i*deg+deg/2-90}deg) translate(62px,-10px)">${sg[0]}</span>`).join('');
+  $('wheelWrap').classList.add('on');$('pwBtns').style.display='none';
+  const target=360-(idx*deg+deg/2)+(Math.random()-.5)*deg*.6;pawnRot+=360*6+((target-pawnRot%360)+360)%360;
+  w.style.transition='none';void w.offsetWidth;w.style.transition='';requestAnimationFrame(()=>{w.style.transform=`rotate(${pawnRot}deg)`});
+  let t=0;const tk=setInterval(()=>{tick();if(++t>22)clearInterval(tk)},170);
+  setTimeout(()=>pawnFinish(PAWN_SEG[idx][1]),4400)};
 // ===== 演出 =====
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
@@ -1861,7 +1921,7 @@ document.querySelectorAll('.mode b').forEach(b=>b.onclick=async()=>{if(S.run&&!a
 function go(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
-  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha();drawSnack();ufoOpen()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
+  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha();drawSnack();drawPawn();ufoOpen()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
   window.scrollTo({top:0});
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
