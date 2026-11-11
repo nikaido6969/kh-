@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#f6efe4">
+<title>くねくねカート</title>
+<style>
+:root{--bg:#f6efe4;--card:rgba(255,255,255,.86);--ink:#2a2622;--sub:#8a7f72;--acc:#ff4f7a;--acc2:#ffb020;--line:rgba(60,40,20,.12)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block}
+button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:max(16px,env(safe-area-inset-top)) 16px 16px;overflow-y:auto;z-index:20;animation:fade .35s ease}
+.screen.on{display:flex}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.panel{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:24px;padding:20px;box-shadow:0 10px 40px rgba(80,50,20,.12);width:min(560px,100%)}
+h1.logo{font-size:clamp(40px,9vw,84px);margin:6vh 0 4px;letter-spacing:-.02em;line-height:1;font-weight:900;background:linear-gradient(90deg,#ff4f7a,#ffb020,#38c8a8,#5a7aff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 rgba(0,0,0,.08));text-align:center}
+.tag{color:var(--sub);margin:0 0 3vh;font-size:14px;text-align:center}
+.menu{display:grid;gap:10px;width:min(420px,100%)}
+.btn{display:flex;align-items:center;gap:12px;padding:15px 18px;border-radius:18px;background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 18px rgba(80,50,20,.08);font-weight:700;font-size:17px;transition:transform .15s,box-shadow .15s;text-align:left}
+.btn:hover,.btn:active{transform:translateY(-2px) scale(1.01);box-shadow:0 8px 24px rgba(80,50,20,.16)}
+.btn .ic{font-size:24px;width:32px;text-align:center}
+.btn small{display:block;font-weight:400;color:var(--sub);font-size:12px}
+.btn.pri{background:linear-gradient(135deg,#ff4f7a,#ff8a4a);color:#fff}
+.btn.pri small{color:rgba(255,255,255,.85)}
+.row2{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.back{position:fixed;left:14px;top:max(14px,env(safe-area-inset-top));z-index:25;background:var(--card);border-radius:999px;padding:9px 16px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+h2{margin:44px 0 14px;font-size:24px;text-align:center}
+.ccs{display:grid;gap:12px;width:min(420px,100%)}
+.ccs .btn{font-size:22px;justify-content:center;flex-direction:column;gap:2px}
+#s-char{align-items:flex-end}
+#s-char .wrap{width:min(560px,100%);display:flex;flex-direction:column;gap:10px;margin-top:40px}
+#charGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.cc{background:var(--card);border-radius:14px;padding:4px 2px 6px;display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:700;border:2px solid transparent;transition:transform .12s}
+.cc img{width:100%;aspect-ratio:1;object-fit:contain}
+.cc.sel{border-color:var(--acc);transform:scale(1.05);background:#fff}
+#charInfo h3{margin:0 0 2px}
+#charInfo p{margin:0 0 8px;color:var(--sub);font-size:13px}
+.bar{display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0}
+.bar label{width:60px;color:var(--sub)}
+.bar i{flex:1;height:8px;background:var(--line);border-radius:9px;overflow:hidden}
+.bar b{display:block;height:100%;background:linear-gradient(90deg,#ffb020,#ff4f7a);border-radius:9px}
+@media (max-aspect-ratio:1/1){#s-char{align-items:center;justify-content:flex-end}#s-char .wrap{margin-top:0}}
+#courseList{width:min(900px,100%);display:grid;gap:14px;padding-bottom:30px}
+.cup h4{margin:4px 0 8px}
+.crow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:640px){.crow{grid-template-columns:repeat(2,1fr)}#charGrid{grid-template-columns:repeat(6,1fr)}}
+.course{background:var(--card);border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;box-shadow:0 4px 14px rgba(80,50,20,.07);transition:transform .15s}
+.course:hover{transform:translateY(-3px)}
+.course img{width:80%;aspect-ratio:1}
+.course small{color:var(--sub);font-size:11px;line-height:1.35}
+.course em{font-style:normal;font-size:11px;color:var(--acc);font-weight:700}
+.cupbtn{display:flex;gap:16px;align-items:center;background:var(--card);border-radius:22px;padding:18px;width:100%;text-align:left;box-shadow:0 4px 14px rgba(80,50,20,.08);transition:transform .15s}
+.cupbtn:hover{transform:translateY(-3px)}
+.cupic{font-size:46px}
+.cupbtn h3{margin:0}.cupbtn p{margin:4px 0 0;color:var(--sub);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:5px 6px;text-align:left;border-bottom:1px solid var(--line)}
+td img{width:34px;height:34px;vertical-align:middle}
+tr.me{background:linear-gradient(90deg,rgba(255,79,122,.18),transparent);font-weight:700}
+.est{color:var(--sub);font-size:12px}
+#resTitle{text-align:center;margin:0 0 10px}
+.help{font-size:14px;line-height:1.7}
+.help kbd{background:#fff;border:1px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:1px 7px;font-family:inherit;font-size:12px}
+.help td{vertical-align:top}
+input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#fff;width:100%}
+.netbox{display:grid;gap:10px}
+#netPlayers{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+#netPlayers li{display:flex;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:4px 10px}
+#netPlayers img{width:36px;height:36px}
+#netPlayers em{font-style:normal;font-size:11px;background:var(--acc2);color:#fff;border-radius:8px;padding:1px 6px}
+#netPlayers em.me{background:var(--acc)}
+#netStatus{color:var(--sub);font-size:13px;text-align:center;min-height:1.4em}
+.code{font-size:34px;font-weight:900;letter-spacing:.15em;text-align:center}
+#loading{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:40;font-weight:900;font-size:22px}
+#loading.on{display:flex}
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;display:none;z-index:10;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35),0 0 8px rgba(0,0,0,.25)}
+#hpos{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:16px;font-size:72px;font-weight:900;font-style:italic;line-height:1}
+#hpos small{font-size:28px}
+#hpos.r1{color:#ffd23a}#hpos.r2{color:#e8eef6}#hpos.r3{color:#ffb07a}
+#hlap{position:absolute;left:max(16px,env(safe-area-inset-left));top:max(14px,env(safe-area-inset-top));font-size:24px;font-weight:900;font-style:italic}
+#htime{position:absolute;left:max(16px,env(safe-area-inset-left));top:calc(max(14px,env(safe-area-inset-top)) + 30px);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+#hitem{position:absolute;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);width:78px;height:78px;border-radius:22px;background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-size:44px}
+#hitemn{position:absolute;right:-4px;bottom:-6px;font-size:18px;font-weight:900}
+#hspeed{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:94px;font-size:22px;font-weight:900;font-style:italic}
+#hspeed small{font-size:12px;margin-left:3px}
+#hmap{position:absolute;left:max(10px,env(safe-area-inset-left));bottom:10px;width:150px;height:150px;opacity:.95}
+#hmsg{position:absolute;left:0;right:0;top:32%;text-align:center;font-size:clamp(48px,12vw,120px);font-weight:900;font-style:italic;opacity:0;transform:scale(.6);transition:opacity .15s,transform .25s cubic-bezier(.2,1.6,.4,1)}
+#hmsg.show{opacity:1;transform:scale(1)}
+#hmsg.small{font-size:clamp(26px,6vw,48px)}
+#hmsg.final{color:#ff5a5a}
+#hmsg.go{color:#ffd23a}
+#hflow{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:124px;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:900;font-style:italic}
+#hflow i{display:block;width:92px;height:9px;border-radius:9px;background:rgba(0,0,0,.28);overflow:hidden}
+#hflow b{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,#5ad8ff,#7dff8a,#ffe04a,#ff5a8a)}
+#hflow.max{animation:fl .4s infinite alternate}@keyframes fl{to{filter:brightness(1.6)}}
+#hmtw{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:160px;height:8px;border-radius:9px;background:rgba(0,0,0,.2);overflow:hidden}
+#hmt{height:100%;width:0;border-radius:9px;box-shadow:0 0 10px currentColor}
+#hink{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at 30% 40%,#111 0 12%,transparent 13%),radial-gradient(circle at 65% 55%,#111 0 16%,transparent 17%),radial-gradient(circle at 45% 75%,#111 0 10%,transparent 11%),radial-gradient(circle at 80% 25%,#111 0 9%,transparent 10%)}
+#hflash{position:absolute;inset:0;background:#fff;opacity:0}
+#hlines{position:absolute;inset:0;opacity:0;transition:opacity .2s;background:repeating-conic-gradient(from 0deg at 50% 55%,rgba(255,255,255,.18) 0 1.2deg,transparent 1.2deg 9deg);-webkit-mask:radial-gradient(circle at 50% 55%,transparent 32%,#000 70%);mask:radial-gradient(circle at 50% 55%,transparent 32%,#000 70%)}
+#htoasts{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;width:min(92vw,520px)}
+.toast{background:rgba(20,16,30,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 14px;border-radius:999px;font-weight:800;font-size:15px;animation:tin .25s cubic-bezier(.2,1.5,.4,1)}
+@keyframes tin{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+#hgas{position:absolute;inset:0;background:radial-gradient(circle,transparent 30%,rgba(90,200,40,.7));opacity:0;transition:opacity .4s}
+#hhorror{position:absolute;inset:0;opacity:0;transition:opacity .8s;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 20%,rgba(0,0,0,.92) 80%)}
+#hhorror.on{opacity:1;animation:flick 2.3s infinite}
+@keyframes flick{0%,100%{opacity:1}47%{opacity:.85}48%{opacity:.4}49%{opacity:1}80%{opacity:.9}81%{opacity:.6}}
+#hblind{position:absolute;inset:0;opacity:0;transition:opacity .3s;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#hblind.on{opacity:1}
+#hblind i{display:none;font-style:normal;color:#222;text-shadow:none;font-size:clamp(20px,5vw,40px);font-weight:900;writing-mode:vertical-rl;line-height:1.6;padding:6vh}
+#hblind.paper{background:repeating-linear-gradient(90deg,#efe9da 0 60px,#e4dcc8 60px 62px)}
+#hblind.paper i{display:block}
+#hblind.blanket{background:repeating-linear-gradient(45deg,#5a8ad8 0 40px,#4a7ac8 40px 80px)}
+#hblind.flash{background:radial-gradient(circle,#fff 40%,rgba(255,255,255,.7))}
+#hblind.ghost{background:radial-gradient(circle,rgba(220,230,255,.85),rgba(20,20,40,.95))}
+#hbanner{position:absolute;left:0;right:0;top:18%;text-align:center;opacity:0;transform:scale(1.3);transition:all .3s}
+#hbanner.on{opacity:1;transform:none}
+#hbanner b{display:block;font-size:clamp(30px,7vw,64px);color:#ff3a3a;font-weight:900;letter-spacing:.05em;text-shadow:0 0 18px #000,0 3px 0 #000}
+#hbanner span{display:inline-block;margin-top:6px;font-size:clamp(15px,3.4vw,22px);font-weight:800;background:rgba(0,0,0,.55);padding:4px 14px;border-radius:12px}
+#cv{transition:filter .3s}
+#btnPause{position:fixed;right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));z-index:15;display:none;background:rgba(255,255,255,.3);color:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;font-weight:900}
+/* タッチ */
+#touch{position:fixed;inset:0;pointer-events:none;z-index:12;display:none}
+#touch button{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.6);color:#fff;font-weight:900;font-size:22px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);touch-action:none}
+#touch button.on{background:rgba(255,255,255,.55)}
+#tzL,#tzR{position:absolute;top:0;bottom:0;width:50%;transition:background .1s}
+#tzL{left:0}#tzR{right:0}
+#tzL.on{background:linear-gradient(90deg,rgba(255,255,255,.18),transparent 60%)}
+#tzR.on{background:linear-gradient(270deg,rgba(255,255,255,.18),transparent 60%)}
+#thint{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;padding:10px 16px;border-radius:16px;font-size:14px;line-height:1.6;text-align:center;transition:opacity .6s;pointer-events:none;width:max-content;max-width:90vw}
+#hitem{pointer-events:auto}
+@media (min-aspect-ratio:1/1){#s-title{align-items:flex-start;padding-left:7vw}#s-title .logo,#s-title .tag{text-align:left}#s-title>div[style]{height:3vh!important}}
+#s-pause,#s-results{justify-content:center;background:rgba(246,239,228,.4)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud">
+  <div id="hlines"></div>
+  <div id="hlap">LAP 1/3</div><div id="htime">0:00.000</div>
+  <div id="hitem"><span id="hitemi"></span><span id="hitemn"></span></div>
+  <div id="hspeed"></div><div id="hpos"></div>
+  <canvas id="hmap" width="170" height="170"></canvas>
+  <div id="hmtw"><div id="hmt"></div></div>
+  <div id="hflow"><span>ノリノリ</span><i><b id="hflowb"></b></i></div>
+  <div id="hgas"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
+  <div id="hmsg"></div><div id="hink"></div><div id="hflash"></div><div id="hbanner"></div><div id="htoasts"></div>
+</div>
+<button id="btnPause">Ⅱ</button>
+<div id="touch">
+  <div id="tzL"></div><div id="tzR"></div>
+  <div id="thint">画面の<b>左</b>を押すと左、<b>右</b>を押すと右<br>押しっぱなしでドリフト／左右同時でブレーキ<br>上のアイテム枠をタップで使う</div>
+</div>
+<div id="loading">コース生成中…</div>
+
+<!-- タイトル -->
+<div class="screen" id="s-title">
+  <h1 class="logo">くねくね<br>カート</h1>
+  <p class="tag">18人の変なやつらと、12の空想コース・8つのバトルステージで暴れろ</p>
+  <div style="height:min(30vh,240px)"></div>
+  <div class="menu">
+    <button class="btn pri" data-mode="gp"><span class="ic">🏆</span><span>グランプリ<small>4コース連戦・ポイントで総合優勝を狙え</small></span></button>
+    <button class="btn" data-mode="vs"><span class="ic">🏁</span><span>VSレース<small>好きなコースで1レース</small></span></button>
+    <button class="btn pri" data-mode="battle" style="background:linear-gradient(135deg,#3aa8ff,#9a5aff)"><span class="ic">🎈</span><span>風船バトル<small>風船10個を守りきれ！8ステージ・ありえない武器</small></span></button>
+    <button class="btn" data-mode="tt"><span class="ic">⏱️</span><span>タイムアタック<small>ひとりで最速タイムに挑戦</small></span></button>
+    <button class="btn" data-mode="online"><span class="ic">🌐</span><span>友達対戦<small>部屋コードでオンライン対戦（最大8人）</small></span></button>
+    <div class="row2"><button class="btn" id="btnHelp"><span class="ic">🎮</span>操作方法</button><button class="btn" id="btnSet"><span class="ic">⚙️</span>設定</button></div>
+  </div>
+</div>
+
+<div class="screen" id="s-cc">
+  <button class="back" data-back="s-title">← もどる</button>
+  <h2>排気量をえらぶ</h2>
+  <div class="ccs">
+    <button class="btn" data-cc="100">100cc<small>のんびり（それでも速い）</small></button>
+    <button class="btn pri" data-cc="150">150cc<small>標準。ノーミスで走るほど速くなる</small></button>
+    <button class="btn" data-cc="200">200cc<small>狂気。ブレーキを覚えよう</small></button>
+  </div>
+</div>
+
+<div class="screen" id="s-char">
+  <button class="back" data-back="s-title">← もどる</button>
+  <div class="wrap">
+    <div class="panel"><div id="charInfo"></div></div>
+    <div class="panel" style="padding:10px"><div id="charGrid"></div></div>
+    <button class="btn pri" id="btnChar" style="justify-content:center">このキャラで決定 →</button>
+  </div>
+</div>
+
+<div class="screen" id="s-course">
+  <button class="back" data-back="s-char">← もどる</button>
+  <h2 id="courseTitle">コースをえらぶ</h2>
+  <div id="courseList"></div>
+</div>
+
+<div class="screen" id="s-results">
+  <div class="panel">
+    <h2 id="resTitle" style="margin-top:0"></h2>
+    <p id="resPrize" style="text-align:center;font-weight:800;color:var(--acc);margin:0 0 8px"></p>
+    <table><thead><tr id="resHead"></tr></thead><tbody id="resBody"></tbody></table>
+    <div class="row2" style="margin-top:14px">
+      <button class="btn pri" id="resNext">次へ</button><button class="btn" id="resRetry">もう一度</button><button class="btn" id="resQuit">タイトル</button>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-pause">
+  <div class="menu">
+    <h2 style="margin:0 0 10px">ポーズ</h2>
+    <button class="btn pri" id="pResume" style="justify-content:center">つづける</button>
+    <button class="btn" id="pRetry" style="justify-content:center">やりなおす</button>
+    <button class="btn" id="pQuit" style="justify-content:center">やめる</button>
+  </div>
+</div>
+
+<div class="screen" id="s-help">
+  <button class="back" data-back="s-title">← もどる</button>
+  <h2>操作方法</h2>
+  <div class="panel help">
+    <table>
+      <tr><th></th><th>キーボード</th><th>コントローラー</th></tr>
+      <tr><td>アクセル</td><td><kbd>↑</kbd> / <kbd>W</kbd> / <kbd>X</kbd></td><td>A</td></tr>
+      <tr><td>ブレーキ・バック</td><td><kbd>↓</kbd> / <kbd>S</kbd> / <kbd>Z</kbd></td><td>B</td></tr>
+      <tr><td>ハンドル</td><td><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd></td><td>スティック / 十字</td></tr>
+      <tr><td>ジャンプ・ドリフト</td><td><kbd>Space</kbd> / <kbd>Shift</kbd></td><td>R / ZR</td></tr>
+      <tr><td>アイテム</td><td><kbd>E</kbd> / <kbd>Q</kbd></td><td>L / ZL</td></tr>
+      <tr><td>後ろを見る</td><td><kbd>C</kbd></td><td>X</td></tr>
+      <tr><td>ポーズ</td><td><kbd>Esc</kbd> / <kbd>P</kbd></td><td></td></tr>
+    </table>
+    <p>🔥 <b>ミニターボ</b>：曲がりながらドリフトボタン長押し → 火花が <span style="color:#2aa8ff">青</span>→<span style="color:#ff9a20">オレンジ</span>→<span style="color:#b050ff">紫</span> で離すと加速。<br>
+    ⚡ <b>ノリノリ加速</b>：ぶつからずに走り続けるほどゲージが溜まり最高速が伸びる。ぶつかると減る。<br>
+    💨 <b>スリップストリーム</b>：相手の真後ろに1秒つくと加速。<br>
+    🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
+    🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
+    🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
+    📱 スマホ：画面の左半分／右半分を押してハンドル。押しっぱなしで自動ドリフト（ミニターボ）、左右同時でブレーキ、上のアイテム枠をタップで使用（アクセルは自動）。</p>
+    <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
+    <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>
+    <p><b>乱入者</b>：ときどき画面が暗くなり、じじい・ばばあ・お化け18種が乱入。邪魔する者、応援する者、仲間になる者も…</p>
+    <p><b>勝利賞品</b>：1位になるとスペシャルおもろアイテム（🦷👑🍬🪭🏠）をゲット。次の試合に持ち込める。</p>
+  </div>
+</div>
+
+<div class="screen" id="s-set">
+  <button class="back" data-back="s-title">← もどる</button>
+  <h2>設定</h2>
+  <div class="menu"><button class="btn" id="optAuto" style="justify-content:center">オートアクセル</button></div>
+</div>
+
+<div class="screen" id="s-online">
+  <button class="back" data-back="title">← もどる</button>
+  <h2>友達対戦</h2>
+  <div class="panel netbox">
+    <div id="netEntry" class="netbox">
+      <input id="netName" maxlength="10" placeholder="ニックネーム">
+      <button class="btn pri" id="netHost" style="justify-content:center">🏠 部屋を作る</button>
+      <div style="display:flex;gap:8px"><input id="netCode" maxlength="5" placeholder="部屋コード（5文字）" style="text-transform:uppercase"><button class="btn" id="netJoin">参加</button></div>
+    </div>
+    <div id="netLobby" class="netbox" style="display:none">
+      <div class="code" id="netCodeShow"></div>
+      <button class="btn" id="netCopy" style="justify-content:center;font-size:14px">📋 コードをコピー</button>
+      <ul id="netPlayers"></ul>
+      <div id="netHostOpts" class="netbox">
+        <select id="netCourse"></select>
+        <select id="netCC"><option value="100">100cc</option><option value="150" selected>150cc</option><option value="200">200cc</option></select>
+        <label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="netCpu" checked style="width:auto">CPUで8人まで埋める</label>
+        <button class="btn pri" id="netGo" style="justify-content:center">🏁 レース開始</button>
+      </div>
+    </div>
+    <div id="netStatus"></div>
+  </div>
+</div>
+
+<script src="js/three.min.js"></script>
+<script src="js/peerjs.min.js"></script>
+<script src="js/util.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/courses.js"></script>
+<script src="js/track.js"></script>
+<script src="js/chars.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="js/items.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/npc.js"></script>
+<script src="js/gimmick.js"></script>
+<script src="js/net.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
