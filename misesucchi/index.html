@@ -639,8 +639,7 @@ details.fold[open]>summary{margin-bottom:10px}
         <div class="cab-body"><div class="cab-out"><span>とりだし口</span><div id="cabPrize"></div></div><div class="cab-mid"><i></i><i></i><div class="cab-door"></div></div><div class="cab-out"><span>PRIZE</span><div class="cab-coin">🪙</div></div></div>
         <div class="cab-feet"><i></i><i></i></div>
       </div>
-      <div id="brokenCtl" style="display:none;margin-top:10px;text-align:center"><div class="stsel" style="justify-content:center"><button class="chip" data-g="hand">🖐 手でとる</button><button class="chip" data-g="stick">🥢 棒でとる</button></div>
-        <p class="muted" style="margin:6px 0 0"><span id="brokenTime"></span></p></div>
+      <div id="brokenCtl" style="display:none;margin-top:10px;text-align:center"><p class="muted" style="margin:6px 0 0"><span id="brokenTime"></span></p></div>
       <div class="sec" style="margin-top:14px"><span class="sh"><i class="ic" data-ic="note"></i>おやつずかん<em class="en">zukan</em></span><small id="smCount"></small></div>
       <div class="sgrid" id="smGrid"></div>
     </div>
@@ -1842,7 +1841,9 @@ function shakeMachine(power){if(!U)return;const {Body}=Matter;
 function glassTap(e){
   if(!U||U.paused)return;requestMotion();unlockAudio();
   const r=$('ufoCv').getBoundingClientRect(),x=(e.clientX-r.left)/r.width*340,y=(e.clientY-r.top)/r.height*380;
-  if(isBroken()&&(grabMode==='stick'||inHole(x,y))){e.preventDefault();brokenDown(e,x,y);return}
+  PT.set(e.pointerId,[x,y]);
+  if(isBroken()&&PT.size>=2){e.preventDefault();gDown=null;const m=ptMid();stick={x:m[0],y:m[1],close:0,t:0};return}
+  if(isBroken()&&inHole(x,y)){e.preventDefault();brokenDown(e,x,y);return}
   // 叩いた場所ごとに回数を積み上げる（リセットしない）
   S.glassSpots=S.glassSpots||[];let sp=S.glassSpots.find(q=>Math.hypot(q.x-x,q.y-y)<42);
   if(!sp){sp={x:Math.round(x),y:Math.round(y),hits:0,stage:0,cracks:[]};S.glassSpots.push(sp)}
@@ -1864,14 +1865,13 @@ function glassBreak(sp){
   ufoMsg('ガシャーン!! ガラスが割れた！',1600);drawBroken();
 }
 // ===== 割れたガラス：手でとる／棒でとる／かたむけてとる =====
-let grabMode='hand',gDown=null,stick=null;
+let gDown=null,stick=null;const PT=new Map();const ptMid=()=>{const v=[...PT.values()];return [v.reduce((a,p)=>a+p[0],0)/v.length,v.reduce((a,p)=>a+p[1],0)/v.length]};
 if(S.glass&&S.glass.at&&!S.glass.holes)S.glass={holes:[{poly:S.glass.hole,at:S.glass.at}],blood:S.glass.blood||[]};// 前の形式から移行
 const isBroken=()=>!!(S.glass&&S.glass.holes&&S.glass.holes.length);
 function checkRepair(){if(!isBroken())return;const n=S.glass.holes.length;S.glass.holes=S.glass.holes.filter(h=>Date.now()-h.at<864e5);
   if(S.glass.holes.length<n){if(!S.glass.holes.length)S.glass=null;save();ufoMsg('ガラスが直ったよ✨',1600);drawBroken()}}
 function drawBroken(){const on=isBroken();$('brokenCtl').style.display=on?'':'none';
-  if(on){const left=Math.max(0,864e5-(Date.now()-Math.min(...S.glass.holes.map(h=>h.at))));$('brokenTime').textContent=`直るまで あと${Math.floor(left/36e5)}時間${Math.floor(left%36e5/6e4)}分`;
-    document.querySelectorAll('#brokenCtl .chip[data-g]').forEach(b=>b.classList.toggle('on',b.dataset.g===grabMode))}}
+  if(on){const left=Math.max(0,864e5-(Date.now()-Math.min(...S.glass.holes.map(h=>h.at))));$('brokenTime').textContent=`直るまで あと${Math.floor(left/36e5)}時間${Math.floor(left%36e5/6e4)}分`}}
 function worldHit(sx,sy){// 画面の点 → いちばん手前の景品
   for(const l of [0,1,2]){const z=l/2,s=zView(z).s;const wx=170+(sx-170)/s,wy=UFO.FLOOR+(sy-zView(z).dy-UFO.FLOOR)/s;
     const hit=Matter.Query.point(U.prizes.filter(b=>b._layer===l),{x:wx,y:wy});if(hit.length)return hit[0]}return null}
@@ -1884,9 +1884,8 @@ function bloodSpurt(x,y){if(sndKey()!=='off')crackSound(false);ufoMsg('いった
   for(let i=0;i<14;i++)S.glass.blood.push([x+(Math.random()-.5)*160,y+(Math.random()-.5)*120,4+Math.random()*16,Math.random()<.5]);
   S.glass.blood=S.glass.blood.slice(-160);GL.spurt={x,y,t:0};save()}
 function brokenDown(e,x,y){
-  if(grabMode==='stick'){stick={x,y,close:0,t:0};return}
   gDown={x,y,t:Date.now()}}
-function brokenMove(x,y){if(stick&&!stick.t){stick.x=x;stick.y=y}if(gDown&&Math.hypot(x-gDown.x,y-gDown.y)>14)gDown.moved=true}
+function brokenMove(x,y){if(stick&&!stick.t&&PT.size){const m=ptMid();stick.x=m[0];stick.y=m[1]}if(gDown&&Math.hypot(x-gDown.x,y-gDown.y)>14)gDown.moved=true}
 function brokenUp(x,y){
   if(stick&&!stick.t){stick.t=1;const sx=stick.x,sy=stick.y;
     setTimeout(()=>{const b=inHole(sx,sy)?worldHit(sx,sy):null;
@@ -1900,8 +1899,9 @@ function brokenUp(x,y){
   const b=worldHit(x,y);if(b)takePrize(b,'🖐 そーっと…ゲット！');else ufoMsg('つかめなかった…',900)}
 function glassKnockOnly(){knockSound();shakeMachine(.15)}
 const cvXY=e=>{const r=$('ufoCv').getBoundingClientRect();return [(e.clientX-r.left)/r.width*340,(e.clientY-r.top)/r.height*380]};
-$('ufoCv').addEventListener('pointermove',e=>{if(isBroken()){const [x,y]=cvXY(e);brokenMove(x,y)}});
-$('ufoCv').addEventListener('pointerup',e=>{if(isBroken()&&U&&!U.paused){const [x,y]=cvXY(e);brokenUp(x,y)}});
+$('ufoCv').addEventListener('pointermove',e=>{const [x,y]=cvXY(e);if(PT.has(e.pointerId))PT.set(e.pointerId,[x,y]);if(isBroken())brokenMove(x,y)});
+$('ufoCv').addEventListener('pointerup',e=>{const [x,y]=cvXY(e);if(isBroken()&&U&&!U.paused)brokenUp(x,y);PT.delete(e.pointerId)});
+$('ufoCv').addEventListener('pointercancel',e=>{PT.delete(e.pointerId)});
 // 隠しコマンド：かたむける
 let lastFall=0;
 window.addEventListener('deviceorientation',e=>{if(!U||!isBroken()||U.paused||!$('p-reward').classList.contains('on')){if(U)U.eng.gravity.x=0;return}
@@ -1918,7 +1918,6 @@ function listenMotion(){window.addEventListener('devicemotion',e=>{const a=e.acc
     if(d>14&&now-lastShake>220&&U&&!U.paused&&$('p-reward').classList.contains('on')){lastShake=now;shakeMachine(Math.min(3,d/14));if(Math.random()<.3)ufoMsg('ゆさゆさ…！',500)}}
   lastAcc={x:a.x,y:a.y,z:a.z}})}
 $('ufoCv').addEventListener('pointerdown',glassTap);
-$('brokenCtl').onclick=e=>{const g=e.target.dataset.g;if(!g)return;grabMode=g;drawBroken()};
 listenMotion();
 const holdBtn=(id,k,ph,next)=>{const b=$(id);
   b.addEventListener('pointerdown',e=>{e.preventDefault();if(!U||U.phase!==ph)return;b.classList.add('hold');U.phase=next;b.setPointerCapture&&b.setPointerCapture(e.pointerId)});
