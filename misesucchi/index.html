@@ -538,6 +538,46 @@ details.fold[open]>summary{margin-bottom:10px}
 .msg.me{background:var(--focus2);color:var(--ink)}
 .toast{font-family:var(--font)}
 [data-theme="night"] .stage .scene{opacity:.9}
+/* ===== ブラッシュアップ：やること・おさらい・今週 ===== */
+.chip:active,.ibtn2:active,nav button:active{transform:scale(.95)}
+.chip,.ibtn2,nav button{transition:transform .12s}
+.todo-add{display:flex;gap:6px;flex-wrap:wrap}
+.todo-add input[type=text]{flex:1 1 100%;min-width:0}
+.todo-add input[type=date]{flex:1;min-width:0;font-size:14px;min-height:38px}
+.todo-add button{flex:none;border:1.3px solid var(--ink);background:var(--focus2);border-radius:12px;padding:7px 14px;font:inherit;font-weight:700;color:var(--ink)}
+.todo{list-style:none;margin:10px 0 0;padding:0}
+.todo li{display:flex;align-items:center;gap:10px;padding:9px 2px;border-top:1px dashed var(--line);animation:fade .3s}
+.todo li:first-child{border-top:0}
+.todo .ck{flex:none;width:26px;height:26px;border-radius:9px;border:1.6px solid var(--ink);background:#fff;font-size:15px;line-height:1;color:#fff;display:grid;place-items:center;padding:0}
+.todo li.done .ck{background:var(--ink)}
+.todo .tx{color:var(--ink);flex:1;min-width:0;font-weight:600;font-size:14px;line-height:1.4;word-break:break-word}
+.todo li.done .tx{text-decoration:line-through;color:var(--sub)}
+.todo .due{flex:none;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:#f1ece2;color:var(--sub)}
+.todo .due.soon{background:#ffe3c2;color:#a85a10}.todo .due.late{background:#ffd3d3;color:#b3202c}
+.todo .del{flex:none;border:0;background:none;color:var(--sub);font-size:18px;padding:2px 6px}
+.rv-units{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px}
+.rv-u{text-align:left;border:1.3px solid var(--inkA);border-radius:14px;background:#fff;padding:9px 11px;font:inherit;color:var(--ink)}
+.rv-u b{display:block;font-size:13px;line-height:1.35}.rv-u small{color:var(--sub);font-size:11px}
+.rv-u .bar{height:5px;border-radius:9px;background:#eee7da;margin-top:6px;overflow:hidden}.rv-u .bar i{display:block;height:100%;background:#7fbf8f;border-radius:9px;transition:width .4s}
+.rv-u.full{border-color:#7fbf8f;background:#f3fbf4}
+.rv-card{margin-top:10px;border:1.6px solid var(--ink);border-radius:18px;background:#fffdf6;padding:16px 14px;min-height:150px;box-shadow:3px 4px 0 var(--line);animation:rvin .35s}
+@keyframes rvin{from{opacity:0;transform:translateY(8px) rotate(-1deg)}to{opacity:1;transform:none}}
+.rv-card .tag{display:inline-block;font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--focus2);margin-bottom:8px}
+.rv-card .tag.miss{background:#ffd9d9}.rv-card .tag.tip{background:#fff0b8}
+.rv-card p{color:var(--ink);margin:0;font-size:16px;line-height:1.7;font-weight:600}
+.rv-card p .hide{background:#e9e2d3;color:transparent;border-radius:6px;padding:0 4px;transition:.25s}
+.rv-card.open p .hide{background:#fff3b0;color:inherit}
+.rv-btns{display:flex;gap:8px;margin-top:10px}
+.rv-btns button{flex:1;border:1.4px solid var(--ink);border-radius:14px;padding:11px 6px;font:inherit;font-weight:800;font-size:14px;color:var(--ink);background:#fff}
+.rv-btns .ok{background:#cfeed6}.rv-btns .ng{background:#ffe1d6}.rv-btns .see{background:var(--focus2)}
+.rv-prog{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--sub);font-weight:700}
+.rv-prog .bar{flex:1;height:6px;border-radius:9px;background:#eee7da;overflow:hidden}.rv-prog .bar i{display:block;height:100%;background:#7fbf8f;transition:width .4s}
+.wk-row{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.wk-row b{font-size:28px}.wk-row span{color:var(--sub);font-size:12px}
+.cab-leds{position:absolute;left:14px;right:14px;bottom:-3px;height:6px;display:flex;justify-content:space-between;pointer-events:none}
+.cab-leds i{width:6px;height:6px;border-radius:50%;background:#ffd24a;box-shadow:0 0 6px #ffd24a;animation:led 1.2s infinite}
+.cab-leds i:nth-child(3n+1){animation-delay:.4s;background:#ff7fb0;box-shadow:0 0 6px #ff7fb0}.cab-leds i:nth-child(3n+2){animation-delay:.8s;background:#7fd6ff;box-shadow:0 0 6px #7fd6ff}
+@keyframes led{0%,100%{opacity:.25}40%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.cab-leds i{animation:none;opacity:.8}}
 </style>
 </head>
 <body>
@@ -578,6 +618,11 @@ details.fold[open]>summary{margin-bottom:10px}
       <div class="goal"><div class="bar"><i id="goalBar"></i></div><b id="goalNum">0 / 8</b></div>
     </div>
     </div>
+    <div class="card" id="todoCard">
+      <div class="sec"><span class="sh"><i class="ic" data-ic="note"></i>やること<em class="en">to do</em></span> <small id="todoCnt"></small></div>
+      <div class="todo-add"><input type="text" id="todoIn" class="tin" maxlength="40" placeholder="例：数学ワーク p.32〜35" enterkeyhint="done"><input type="date" id="todoDue" class="tin" aria-label="しめきり"><button id="todoAdd">＋</button></div>
+      <ul class="todo" id="todoList"></ul>
+    </div>
     <details class="card fold" id="stFold">
       <summary class="sec"><span class="sh"><i class="ic" data-ic="flag"></i>ステージ<em class="en">stage</em></span><small class="cur" id="stCur"></small></summary>
       <div class="stsel" id="stsel"></div>
@@ -612,6 +657,11 @@ details.fold[open]>summary{margin-bottom:10px}
       <div class="week" id="week"></div>
     </div>
     <div class="card">
+      <div class="sec"><span class="sh"><i class="ic" data-ic="goal"></i>今週<em class="en">this week</em></span> <small>月曜からの合計</small></div>
+      <div class="wk-row"><b id="wkMin">0</b><span id="wkSub"></span></div>
+      <div id="wkTodo"></div>
+    </div>
+    <div class="card">
       <div class="sec"><span class="sh"><i class="ic" data-ic="book"></i>教科べつ<em class="en">subjects</em></span> <small>ぜんぶの合計</small></div>
       <div id="bySubj"></div>
     </div>
@@ -628,7 +678,7 @@ details.fold[open]>summary{margin-bottom:10px}
     <div class="card" id="snackCard">
       <div class="sec"><span class="sh"><i class="ic" data-ic="sparkle"></i>おやつUFOキャッチャー<em class="en">claw</em></span><small>🪙1まいで3回</small></div>
       <div class="cab">
-        <div class="cab-head"><div class="cab-title">OYATSU CATCHER<sup>DX</sup></div></div>
+        <div class="cab-head"><div class="cab-leds"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cab-title">OYATSU CATCHER<sup>DX</sup></div></div>
         <div class="cab-glass"><div class="ufo-box"><canvas id="ufoCv" width="340" height="380"></canvas><div class="ufo-tries" id="ufoTries"></div><div class="ufo-msg" id="ufoMsg"></div></div></div>
         <div class="cab-base"></div>
         <div class="cab-panel"><div class="cab-ctl">
@@ -678,6 +728,11 @@ details.fold[open]>summary{margin-bottom:10px}
         <button class="ibtn2 send" id="aiSend" aria-label="送る">➤</button>
       </div>
       <p class="muted" id="aiNote"></p>
+    </div>
+    <div class="card" id="rvCard">
+      <div class="sec"><span class="sh"><i class="ic" data-ic="book"></i>おさらいカード<em class="en">review</em></span> <small id="rvCnt"></small></div>
+      <div class="subj" id="rvSubj"></div>
+      <div id="rvBody"></div>
     </div>
   </section>
 
@@ -1760,7 +1815,7 @@ function ufoRelease(k){
 function ufoEndTry(){U.tries--;S.ufoTries=U.tries;save();U.hy=UFO.TOPY;U.z=0;ufoSetLayer(0);U.aL=U.aR=.72;ufoPose();
   if(U.won.length===0)ufoMsg(pick(['おしい…！','ざんねん','もうちょっと！','うーん…']),1400);
   ufoRestock(false);U.phase=U.tries>0?'ready':'over';if(U.phase==='over')setTimeout(()=>ufoMsg('おしまい。またあそんでね',1800),1500);ufoUI()}
-function ufoShowWin(){const sn=U.won.shift();U.paused=true;const rare=sn[3]==='SR'||sn[3]==='SSR';
+function ufoShowWin(){const sn=U.won.shift();U.paused=true;const rare=sn[3]==='SR'||sn[3]==='SSR';buzz(rare?[40,40,40,40,160]:40);
   const isNew=!(S.snacks||{})[sn[0]];(S.snacks=S.snacks||{})[sn[0]]=(S.snacks[sn[0]]||0)+1;save();
   if(rare){const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
   $('smRes').classList.toggle('rare',rare);$('smArt').innerHTML=snackSVG(sn[4],sn[5]);$('smR').textContent=sn[3];$('smR').className='rr '+sn[3];
@@ -1812,17 +1867,29 @@ function ufoDraw(){
   if(isBroken()){const G=S.glass;G.holes.forEach(H=>{const h=H.poly;
     (H.cracks||[]).forEach(c=>{ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=c.w;ctx.beginPath();c.pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke()});
     ctx.save();ctx.beginPath();h.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();ctx.strokeStyle='rgba(60,60,80,.6)';ctx.lineWidth=3;ctx.stroke();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,.08)';ctx.fill();ctx.restore();
+    ctx.fillStyle='rgba(30,25,50,.13)';ctx.fill();ctx.clip();ctx.strokeStyle='rgba(20,15,40,.28)';ctx.lineWidth=9;ctx.stroke();ctx.restore();
     h.forEach((p,i)=>{if(i%2)return;ctx.fillStyle='rgba(225,240,255,.7)';ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(p[0]+(Math.sin(i)*10),p[1]+8);ctx.lineTo(p[0]+(Math.cos(i)*8),p[1]-6);ctx.fill()});});
     // 血
     G.blood.forEach(([x,y,r,drip])=>{ctx.fillStyle='rgba(176,16,32,.85)';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();if(drip){ctx.fillRect(x-r*.25,y,r*.5,r*2.6);ctx.beginPath();ctx.arc(x,y+r*2.6,r*.35,0,7);ctx.fill()}});
     if(GL.spurt){const sp=GL.spurt;sp.t++;for(let i=0;i<10;i++){const a=-Math.PI/2+(i-5)*.25,d=sp.t*6;ctx.fillStyle='rgba(200,20,40,.9)';ctx.beginPath();ctx.arc(sp.x+Math.cos(a)*d,sp.y+Math.sin(a)*d+sp.t*sp.t*.25,4,0,7);ctx.fill()}if(sp.t>26)GL.spurt=null}
-    if(stick){const g=stick.t?Math.min(1,(stick.t++)/12):0,gap=16*(1-g);ctx.strokeStyle='#8a5a34';ctx.lineWidth=5;ctx.lineCap='round';
-      [[-gap,-1],[gap,1]].forEach(([dx,k])=>{ctx.beginPath();ctx.moveTo(stick.x+dx+150,stick.y-230+k*8);ctx.lineTo(stick.x+dx,stick.y);ctx.stroke()});ctx.lineWidth=1}}
+    if(stick){const g=stick.t?Math.min(1,(stick.t++)/12):0,gap=16*(1-g);ctx.lineCap='round';
+      [[-gap,-1],[gap,1]].forEach(([dx,k])=>{const x0=stick.x+dx+150,y0=stick.y-230+k*8,x1=stick.x+dx,y1=stick.y;
+        ctx.strokeStyle='rgba(40,25,10,.25)';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x0+3,y0+4);ctx.lineTo(x1+3,y1+4);ctx.stroke();
+        const gr=ctx.createLinearGradient(x0,y0,x1,y1);gr.addColorStop(0,'#5a3418');gr.addColorStop(.75,'#a8703f');gr.addColorStop(1,'#e6c79a');
+        ctx.strokeStyle=gr;ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+        ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x0-1.5,y0-1);ctx.lineTo(x1-1.5,y1-1);ctx.stroke()});ctx.lineWidth=1}
+    if(gDown&&!gDown.moved){// のばした手
+      const t=Math.min(1,(Date.now()-gDown.t)/700),e=1-Math.pow(1-t,3),hx=gDown.x+26*(1-e),hy=gDown.y+12+150*(1-e),w=Math.sin(Date.now()/60)*(1-t)*1.2;
+      ctx.save();ctx.translate(hx+w,hy);ctx.rotate(-.12);ctx.lineCap='round';ctx.lineJoin='round';
+      ctx.strokeStyle='#f3c9a8';ctx.lineWidth=26;ctx.beginPath();ctx.moveTo(8,24);ctx.lineTo(60,240);ctx.stroke();
+      ctx.strokeStyle='#8fb4e8';ctx.lineWidth=31;ctx.beginPath();ctx.moveTo(27,100);ctx.lineTo(60,240);ctx.stroke();
+      ctx.fillStyle='#f6d2b4';ctx.strokeStyle='#c99673';ctx.lineWidth=1.4;ctx.beginPath();ctx.ellipse(4,14,17,19,0,0,7);ctx.fill();ctx.stroke();
+      [[-13,-2,-.5],[-6,-10,-.2],[2,-12,0],[10,-10,.22]].forEach(([fx,fy,a])=>{ctx.save();ctx.translate(fx,fy);ctx.rotate(a);ctx.beginPath();ctx.roundRect?ctx.roundRect(-4,-17+7*e,8,20,4):ctx.rect(-4,-17+7*e,8,20);ctx.fill();ctx.stroke();ctx.restore()});
+      ctx.save();ctx.translate(19,10);ctx.rotate(.9);ctx.beginPath();ctx.roundRect?ctx.roundRect(-4,-14,8,18,4):ctx.rect(-4,-14,8,18);ctx.fill();ctx.stroke();ctx.restore();ctx.restore()}}
   // ガラスの反射
   ctx.fillStyle='rgba(255,255,255,.18)';ctx.beginPath();ctx.moveTo(250,0);ctx.lineTo(300,0);ctx.lineTo(180,380);ctx.lineTo(130,380);ctx.fill();
 }
-function ufoLoop(){ufoRAF=0;if(!U||!$('p-reward').classList.contains('on'))return;try{if(!U.paused)ufoStep();ufoDraw();ufoUI()}catch(e){ufoMsg('エラー：'+(e&&e.message||e));return}ufoRAF=requestAnimationFrame(ufoLoop)}
+function ufoLoop(){ufoRAF=0;if(!U||!$('p-reward').classList.contains('on')){hum(false);return}try{if(!U.paused)ufoStep();ufoDraw();ufoUI();hum(!U.paused&&['mx','mz','drop','lift','home'].includes(U.phase))}catch(e){ufoMsg('エラー：'+(e&&e.message||e));return}ufoRAF=requestAnimationFrame(ufoLoop)}
 function ufoOpen(){checkRepair();setTimeout(drawBroken,50);let tries=0;const go=()=>{let ok=false;try{ok=ufoInit()}catch(e){U=null;ufoMsg('エラー：'+(e&&e.message||e));return}if(ok){$('ufoMsg').className='ufo-msg';if(U.phase==='off')U.phase=U.tries>0?'ready':'over';if(!ufoRAF)ufoRAF=requestAnimationFrame(ufoLoop)}else if(++tries<20)setTimeout(go,250);else ufoMsg('読みこめませんでした（部品が見つかりません）。ページを開き直してください')};go()}
 $('ufoStart').onclick=()=>{requestMotion();if(!U)return;if(U.tries>0)return;if(!(S.tickets>0)){toast('🪙コインがないよ。🍅を1つ終えるともらえる！');return}
   S.tickets--;U.tries=3;S.ufoTries=3;save();unlockAudio();U.phase='ready';ufoMsg('スタート！',1000);$('gTk').textContent=S.tickets;draw();ufoUI()};
@@ -1831,6 +1898,9 @@ $('ufoStart').onclick=()=>{requestMotion();if(!U)return;if(U.tries>0)return;if(!
 const GL={hits:0,last:0,stage:0,cracks:[],shards:[],at:null};
 function crackSound(big){if(sndKey()==='off')return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,len=big?.6:.18,buf=ac.createBuffer(1,ac.sampleRate*len,ac.sampleRate),d=buf.getChannelData(0);
   for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,big?2:4);const src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='highpass';f.frequency.value=big?1200:2500;g.gain.value=big?.6:.35;src.buffer=buf;src.connect(f);f.connect(g);g.connect(ac.destination);src.start(n)}catch(e){}}
+function tinkle(){if(sndKey()==='off')return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime;for(let i=0;i<9;i++){const o=ac.createOscillator(),g=ac.createGain(),t=n+.12+i*.06+Math.random()*.04;o.type='sine';o.frequency.value=2200+Math.random()*3200;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.05,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+.22);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.25)}}catch(e){}}
+let humO=null,humG=null;function hum(on){try{if(sndKey()==='off'||!ac){on=false}if(on&&!humO){humO=ac.createOscillator();humG=ac.createGain();humO.type='sawtooth';humO.frequency.value=92;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=420;humG.gain.value=0;humO.connect(f).connect(humG).connect(ac.destination);humO.start()}if(humG)humG.gain.setTargetAtTime(on?.035:0,ac.currentTime,.05)}catch(e){}}
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 function knockSound(){if(sndKey()==='off')return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.setValueAtTime(420,n);o.frequency.exponentialRampToValueAtTime(160,n+.08);g.gain.setValueAtTime(.25,n);g.gain.exponentialRampToValueAtTime(.001,n+.1);o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+.12)}catch(e){}}
 function addCracks(sp,n,len){const x=sp.x,y=sp.y;sp.cracks=sp.cracks||[];for(let k=0;k<n;k++){const a=Math.random()*Math.PI*2;let px=x,py=y;const pts=[[Math.round(px),Math.round(py)]];const L=len*(.6+Math.random()*.6);
   for(let d=0;d<L;d+=8+Math.random()*10){const aa=a+(Math.random()-.5)*.6;px+=Math.cos(aa)*12;py+=Math.sin(aa)*12;pts.push([Math.round(px),Math.round(py)])}sp.cracks.push({pts,w:+(.8+Math.random()).toFixed(1)})}
@@ -1855,7 +1925,7 @@ function glassTap(e){
   save();
 }
 function glassBreak(sp){
-  crackSound(true);const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
+  crackSound(true);tinkle();buzz([60,40,120]);const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
   GL.shards=Array.from({length:22},()=>{const cx=sp.x+(Math.random()-.5)*120,cy=sp.y+(Math.random()-.5)*120,sz=10+Math.random()*24;return {x:cx,y:cy,vx:(Math.random()-.5)*6,vy:-2-Math.random()*4,r:0,vr:(Math.random()-.5)*.3,
     p:[[0,-sz],[sz*.8,sz*.4],[-sz*.7,sz*.6]].map(([a,b])=>[a*(.7+Math.random()*.6),b*(.7+Math.random()*.6)])}});
   // この場所に穴（24時間たつまで直らない）
@@ -1879,7 +1949,7 @@ function inPoly(h,x,y){let c=false;for(let i=0,j=h.length-1;i<h.length;j=i++){if
 function inHole(x,y){return isBroken()&&S.glass.holes.some(H=>inPoly(H.poly,x,y))}
 function takePrize(b,how){Matter.Composite.remove(U.eng.world,b);if(b._tag){Matter.Composite.remove(U.eng.world,[b._tag,b._tagC]);U.tags=U.tags.filter(t=>t!==b._tag)}
   U.prizes=U.prizes.filter(x=>x!==b);ufoMsg(how,1200);setTimeout(()=>{U.won.push(b._snack);ufoRestock(false)},500)}
-function bloodSpurt(x,y){if(sndKey()!=='off')crackSound(false);ufoMsg('いったーい!! 指を切った🩸',1600);
+function bloodSpurt(x,y){buzz(180);if(sndKey()!=='off')crackSound(false);ufoMsg('いったーい!! 指を切った🩸',1600);
   const c=document.querySelector('.cab');if(c){c.classList.remove('cab-shake');void c.offsetWidth;c.classList.add('cab-shake')}
   for(let i=0;i<14;i++)S.glass.blood.push([x+(Math.random()-.5)*160,y+(Math.random()-.5)*120,4+Math.random()*16,Math.random()<.5]);
   S.glass.blood=S.glass.blood.slice(-160);GL.spurt={x,y,t:0};save()}
@@ -1967,6 +2037,50 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 let bt;function say(t){const b=$('bubble');b.textContent=t;b.classList.add('show');clearTimeout(bt);bt=setTimeout(()=>b.classList.remove('show'),2800)}
 function bounce(){const c=$('chara');c.classList.remove('jump');void c.offsetWidth;c.classList.add('jump')}
 function confetti(n=50){const cs=['#e46a5a','#f3a6b3','#e8b84a','#5fae7a','#7aa7e0'];for(let i=0;i<n;i++){const p=document.createElement('div');p.className='confetti';p.style.left=Math.random()*100+'vw';p.style.background=pick(cs);p.style.animationDuration=(1.6+Math.random()*1.6)+'s';p.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),3800)}}
+// ===== やることリスト =====
+function drawTodo(){const L=(S.todos=S.todos||[]),td=jst();
+  const dd=t=>!t.due?9e9:Math.round((Date.parse(t.due)-Date.parse(td))/864e5);
+  const list=L.slice().sort((a,b)=>(a.done-b.done)||(dd(a)-dd(b))||(a.id-b.id));
+  const left=L.filter(t=>!t.done).length;$('todoCnt').textContent=L.length?(left?`のこり ${left}こ`:'ぜんぶ おわり！'):'';
+  $('todoList').innerHTML=list.map(t=>{const d=dd(t);let b='';
+    if(t.due&&!t.done){const c=d<0?'late':d<=1?'soon':'';b=`<span class="due ${c}">${d<0?'期限すぎ':d===0?'きょうまで':d===1?'あしたまで':`あと${d}日`}</span>`}
+    else if(t.due)b=`<span class="due">${+t.due.slice(5,7)}/${+t.due.slice(8)}</span>`;
+    return `<li class="${t.done?'done':''}" data-id="${t.id}"><button class="ck" aria-label="できた">✓</button><span class="tx">${esc(t.t)}</span>${b}<button class="del" aria-label="けす">×</button></li>`}).join('')}
+function addTodo(){const v=$('todoIn').value.trim();if(!v)return;(S.todos=S.todos||[]).push({id:Date.now(),t:v,due:$('todoDue').value||'',done:0});$('todoIn').value='';$('todoDue').value='';save();drawTodo()}
+$('todoAdd').onclick=addTodo;$('todoIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();addTodo()}});
+$('todoList').onclick=e=>{const li=e.target.closest('li');if(!li)return;const id=+li.dataset.id,t=S.todos.find(x=>x.id===id);if(!t)return;
+  if(e.target.closest('.del')){S.todos=S.todos.filter(x=>x!==t)}else if(e.target.closest('.ck')){t.done=t.done?0:1;if(t.done&&!S.todos.some(x=>!x.done))toast('やること ぜんぶ おわり！おつかれさま')}else return;save();drawTodo()};
+// ===== おさらいカード（中2の内容からポイントを確認）=====
+let RV=null,rvS=null;
+const rvKey=k=>k.s+'/'+k.u,rvDone=k=>((S.mast=S.mast||{})[rvKey(k)]||[]).filter(Boolean).length;
+function rvCloze(t){// 「：」「＝」のうしろをかくして、思い出してからめくる
+  const m=t.match(/^(.{2,}?[：＝=]\s*)(.+)$/);return m?esc(m[1])+'<span class="hide">'+esc(m[2])+'</span>':null}
+function drawReview(){const subs=[...new Set(KB.map(k=>k.s))];if(!rvS||!subs.includes(rvS))rvS=subs.includes(S.subj)?S.subj:subs[0];
+  $('rvSubj').innerHTML=subs.map(n=>`<button class="chip ${rvS===n?'on':''}" data-s="${n}">${n}</button>`).join('');
+  const all=KB.reduce((a,k)=>a+k.p.length,0),dn=KB.reduce((a,k)=>a+rvDone(k),0);$('rvCnt').textContent=`おぼえた ${dn} / ${all}`;
+  if(RV){drawRvCard();return}
+  $('rvBody').innerHTML='<div class="rv-units">'+KB.filter(k=>k.s===rvS).map(k=>{const d=rvDone(k),n=k.p.length;return `<button class="rv-u ${d>=n?'full':''}" data-u="${esc(k.u)}"><b>${esc(k.u)}</b><small>${d>=n?'ぜんぶ おぼえた ✓':`${d} / ${n}`}</small><div class="bar"><i style="width:${d/n*100}%"></i></div></button>`}).join('')+'</div>'}
+function rvStart(u){const k=KB.find(x=>x.s===rvS&&x.u===u);if(!k)return;const m=(S.mast=S.mast||{})[rvKey(k)]||[];
+  let q=k.p.map((_,i)=>i).filter(i=>!m[i]);if(!q.length)q=k.p.map((_,i)=>i);RV={k,q,step:'tip',open:false,n:q.length};drawReview()}
+function drawRvCard(){const k=RV.k;let h='';
+  if(RV.step==='tip')h=`<div class="rv-card"><span class="tag tip">コツ</span><p>${esc(k.k)}</p></div><div class="rv-btns"><button class="see" data-a="next">はじめる →</button></div>`;
+  else if(RV.step==='q'){const i=RV.q[0],c=rvCloze(k.p[i]);
+    h=`<div class="rv-card ${RV.open||!c?'open':''}"><span class="tag">ポイント</span><p>${c||esc(k.p[i])}</p></div>`+
+      (c&&!RV.open?'<div class="rv-btns"><button class="see" data-a="open">こたえを見る</button></div>':'<div class="rv-btns"><button class="ng" data-a="ng">まだ…もう1回</button><button class="ok" data-a="ok">おぼえた ✓</button></div>')+
+      `<div class="rv-prog"><span>${RV.n-RV.q.length} / ${RV.n}</span><div class="bar"><i style="width:${(RV.n-RV.q.length)/RV.n*100}%"></i></div></div>`}
+  else h=`<div class="rv-card"><span class="tag miss">よくあるミス</span><p>${esc(k.m)}</p></div><div class="rv-btns"><button class="see" data-a="end">おわる</button></div>`;
+  $('rvBody').innerHTML=`<p class="muted" style="margin:8px 0 0"><button class="chip" data-a="back" style="padding:4px 10px">← もどる</button>　${esc(k.s)}・${esc(k.u)}</p>`+h}
+$('rvSubj').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;rvS=b.dataset.s;RV=null;drawReview()};
+$('rvBody').onclick=e=>{const u=e.target.closest('[data-u]');if(u){rvStart(u.dataset.u);return}const b=e.target.closest('[data-a]');if(!b||!RV)return;const a=b.dataset.a;
+  if(a==='back'||a==='end')RV=null;else if(a==='next')RV.step='q';else if(a==='open')RV.open=true;
+  else{const i=RV.q.shift();RV.open=false;if(a==='ok'){const key=rvKey(RV.k);(S.mast[key]=S.mast[key]||[])[i]=1;save()}else RV.q.push(i);if(!RV.q.length){RV.step='miss';if(rvDone(RV.k)>=RV.k.p.length)toast('この単元、ぜんぶ おぼえた！')}}
+  drawReview()};
+// ===== 今週のきろく =====
+function drawWeek(){const now=Date.now(),td=jst(),wd=(new Date(td+'T00:00:00Z').getUTCDay()+6)%7,days=[];for(let i=wd;i>=0;i--)days.push(jst(now-i*864e5));
+  const L=S.logs.filter(l=>days.includes(l.d)),min=L.reduce((a,l)=>a+l.min,0);$('wkMin').textContent=min>=60?(min/60).toFixed(1):min;$('wkSub').textContent=(min>=60?'時間':'分')+`　🍅 ${L.length}こ`;
+  const main=['数学','英語','国語','理科','社会'],not=main.filter(n=>!L.some(l=>l.subj===n));
+  $('wkTodo').innerHTML=not.length?'<p class="muted" style="margin:0 0 6px">今週まだの教科</p><div class="subj">'+not.map(n=>`<button class="chip" data-s="${n}">${n}</button>`).join('')+'</div>':(L.length?'<p class="muted" style="margin:0">5教科ぜんぶ できてる！</p>':'')}
+$('wkTodo').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;S.subj=b.dataset.s;S.unit='';save();go('timer');drawSubj()};
 let tt;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2200)}
 function modal(ic,t,p){$('mIc').textContent=ic;$('mT').textContent=t;$('mP').innerHTML=p;$('modal').classList.add('on')}
 let onboardGo='';
@@ -1981,7 +2095,7 @@ document.querySelectorAll('.mode b').forEach(b=>b.onclick=async()=>{if(S.run&&!a
 function go(p){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));
-  if(p==='stats')drawStats();if(p==='reward'){drawReward();drawGacha();drawSnack();drawPawn();ufoOpen()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai')drawAI();if(p==='timer'){draw();drawTest();drawPick()}
+  if(p==='stats'){drawStats();drawWeek()}if(p==='reward'){drawReward();drawGacha();drawSnack();drawPawn();ufoOpen()}if(p==='set'){drawSet();drawSnd();drawLook()}if(p==='ai'){drawAI();drawReview()}if(p==='timer'){draw();drawTest();drawPick();drawTodo()}
   window.scrollTo({top:0});
 }
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.p)};
@@ -1993,8 +2107,8 @@ setInterval(()=>{
   draw();
 },250);
 addEventListener('pagehide',()=>save());
-document.addEventListener('visibilitychange',()=>{if(document.hidden)save();if(!document.hidden){dayCheck();drawTest();draw()}});
-paintIcons();applyLook();dayCheck();drawSubj();drawTest();drawPick();draw();applyLayout();fetchWx();
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();if(document.hidden)hum(false);if(!document.hidden){dayCheck();drawTest();draw()}});
+paintIcons();applyLook();dayCheck();drawSubj();drawTest();drawPick();drawTodo();draw();applyLayout();fetchWx();
 setTimeout(()=>say(S.run?'おかえり！つづいてるよ':pick(TALK.idle)),500);
 if(!S.onboarded){if(!(S.tickets>0))S.tickets=1;save();setTimeout(()=>{modal('🎰','ようこそ ミセスッちへ！','まずはガチャをまわして、いっしょにがんばる<b>キャラ</b>を決めよう！');onboardGo='reward'},700)}
 </script>
