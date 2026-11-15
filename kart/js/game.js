@@ -5,7 +5,7 @@ const MT_TIME = [0, 0.55, 1.05, 1.65];
 
 // ---------- 入力 ----------
 const Input = {
-  keys: {}, touch: { l: false, r: false, a: false, b: false, drift: false, item: false }, autoAccel: U.isTouch, tilt: 0,
+  keys: {}, touch: { ax: null, a: false, b: false, drift: false, item: false }, autoAccel: U.isTouch, tilt: 0,
   st: { steer: 0, accel: false, brake: false, drift: false, item: false, back: false, look: false },
   prevItem: false, prevDrift: false, itemEdge: false, driftEdge: false,
   init() {
@@ -18,7 +18,7 @@ const Input = {
     let steer = 0;
     if (k.ArrowLeft || k.KeyA) steer -= 1;
     if (k.ArrowRight || k.KeyD) steer += 1;
-    if (t.l) steer -= 1; if (t.r) steer += 1;
+    if (t.ax != null) steer += t.ax;
     let accel = !!(k.ArrowUp || k.KeyW || k.KeyX) || t.a;
     let brake = !!(k.ArrowDown || k.KeyS || k.KeyZ) || t.b;
     let drift = !!(k.Space || k.ShiftLeft || k.ShiftRight || k.KeyR) || t.drift;
@@ -39,7 +39,7 @@ const Input = {
     }
     if (this.autoAccel && !brake) accel = true;
     // タッチは押しっぱなしで自動ドリフト
-    if (t.l || t.r) { this.tHold = (this.tHold || 0) + 1 / 60; if (this.tHold > 0.3) drift = true; } else this.tHold = 0;
+    if (t.ax != null && Math.abs(t.ax) > 0.72) { this.tHold = (this.tHold || 0) + 1 / 60; if (this.tHold > 0.35) drift = true; } else if (t.ax == null || Math.abs(t.ax) < 0.45) this.tHold = 0; else if (this.tHold > 0.35) drift = true;
     steer = U.clamp(steer, -1, 1);
     this.itemEdge = item && !this.prevItem; this.prevItem = item;
     this.driftEdge = drift && !this.prevDrift; this.prevDrift = drift;
@@ -405,7 +405,8 @@ class Game {
     if (!k.grounded) turnRate *= 0.55;
     if (inWater) turnRate *= 0.9;
     let yawRate = 0;
-    let steer = locked ? 0 : inp.steer;
+    if (k.isPlayer && !k.finished) { const tg = inp.steer || 0; k.steerS = U.damp(k.steerS || 0, tg, Math.abs(tg) < Math.abs(k.steerS || 0) ? 14 : 9, dt); } else k.steerS = inp.steer || 0;
+    let steer = locked ? 0 : k.steerS;
     if (k.reverseT > 0) steer = -steer;
     if (k.gasT > 0 || k.eyeburnT > 0) steer += Math.sin(this.time * 4 + k.weight) * 0.5;
     if (k.slick) { k.slickSteer = U.damp(k.slickSteer, steer, 1.6, dt); steer = k.slickSteer; k.d += Math.sin(this.time * 1.7 + k.weight) * 2.2 * dt; }
@@ -442,6 +443,7 @@ class Game {
     }
     k.slide = U.damp(k.slide, k.drift * 0.42, 6, dt);
     k.yaw += yawRate * dt;
+    if (k.isPlayer && !k.drift && k.grounded && Math.abs(inp.steer || 0) < 0.08 && Math.abs(k.yaw) < 0.5) k.yaw = U.damp(k.yaw, 0, 1.6, dt); // 手を離すと道なりに戻る
     // トラック曲率
     const kap = tr.lerpArr(tr.kap, s);
     const scale = U.clamp(1 / (1 - kap * k.d), 0.6, 1.7);
@@ -700,7 +702,7 @@ class Game {
     const shs = Math.max(0.3, 1 - (k.h - so) * 0.08) * sc; k.shadow.scale.set(shs, shs, shs);
     // ホイール
     k.wheelRot += k.v * dt / 0.32;
-    k.steerVis = U.damp(k.steerVis, k.input.steer || 0, 10, dt);
+    k.steerVis = U.damp(k.steerVis, k.isPlayer ? (k.steerS || 0) : (k.input.steer || 0), 10, dt);
     for (const w of m.kart.wheels) { w.tire.parent.rotation.x = k.wheelRot; if (w.front) w.g.rotation.y = -k.steerVis * 0.45; }
     m.drv.rotation.z = -k.steerVis * 0.18;
     m.anim(this.time + k.id.length);

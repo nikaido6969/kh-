@@ -15,8 +15,9 @@ const COURSES = [
     deco: [['tree', 50], ['rock', 40], ['bush', 60], ['reed', 50]],
     music: { bpm: 140, root: 57, scale: 'dorian', seed: 11 },
     cmds: [
-      S(130, { fit: 1, items: 0.5, bumps: 0.4 }), C(90, 40), S(60, { dy: -3 }), S(40, { dy: 3 }), C(-70, 35, { bumps: 0.5 }), C(160, 38, { items: 0.5 }),
-      S(70, { fit: 2, dy: -3 }), S(50, { dy: 3, ramp: { h: 3, len: 18 } }), C(-60, 40), C(150, 40, { bumps: 0.6 }), C(90, 40), S(90),
+      S(130, { fit: 1, items: 0.5, bumps: 0.4 }), C(90, 40, { arch: 'rock' }), S(60, { fit: 2, dy: -3, w: 27 }), S(40, { dy: 3 }), C(-60, 35, { bumps: 0.5, w: 12 }), C(60, 35),
+      S(50, { dy: 8 }), S(40, { dy: -9, ramp: { h: 3, len: 16 } }), C(90, 38, { items: 0.5 }), S(70, { dy: -2, w: 28 }), S(50, { dy: 3, arch: 'fall' }), C(-45, 36, { dy: 6, w: 12 }),
+      C(45, 36, { dy: -6 }), C(90, 40, { bumps: 0.6 }), S(60, { boost: 0.5 }), C(90, 40), S(90),
     ],
   },
   {
@@ -26,8 +27,9 @@ const COURSES = [
     deco: [['deadtree', 50], ['reed', 90], ['mushroom', 16], ['stump', 30]],
     music: { bpm: 122, root: 52, scale: 'phrygian', seed: 19 },
     cmds: [
-      S(120, { fit: 1, items: 0.5 }), C(90, 35, { dy: -2 }), S(80, { bumps: 0.5 }), C(-90, 30, { dy: 2 }), S(50, { ramp: { h: 3, len: 16 } }), S(30),
-      C(180, 35, { dy: -2, items: 0.5 }), S(70, { fit: 2 }), C(-90, 30, { dy: 2 }), C(90, 35), C(90, 40, { boost: 0.5 }), C(90, 40), S(90),
+      S(120, { fit: 1, items: 0.5 }), C(90, 35, { dy: -2, arch: 'rock' }), S(80, { fit: 2, bumps: 0.5, w: 27 }), C(-90, 30, { dy: 2, w: 12 }), S(50, { ramp: { h: 3, len: 16 } }), S(30),
+      C(90, 30, { dy: -2 }), C(90, 35, { items: 0.5 }), S(60, { w: 11, dy: 3 }), C(-60, 30, { dy: -3 }), C(60, 30), S(40, { ramp: { h: 3, len: 16 } }), S(30, { w: 26 }),
+      C(90, 35, { boost: 0.5, arch: 'rib' }), C(-45, 30), C(45, 30, { dy: 2 }), C(90, 40), S(90),
     ],
   },
   {
@@ -37,8 +39,9 @@ const COURSES = [
     deco: [['pine', 90], ['rock', 40], ['mountain', 10]],
     music: { bpm: 152, root: 59, scale: 'minor', seed: 53 },
     cmds: [
-      S(110, { fit: 1, items: 0.5 }), C(90, 35, { dy: 8 }), S(28, { dy: 45, lin: true }), S(30), C(180, 28, { bank: 20, items: 0.5 }),
-      S(30, { dy: -48, lin: true, boost: 0.1 }), S(60, { bumps: 0.6, fit: 2 }), C(-90, 30, { dy: 10 }), S(22, { dy: -15, lin: true }), C(90, 35), C(90, 40), S(90),
+      S(110, { fit: 1, items: 0.5 }), C(90, 35, { dy: 8, arch: 'torii' }), S(60, { fit: 2 }), S(28, { dy: 45, lin: true }), S(30, { w: 12 }), C(180, 28, { bank: 20, items: 0.5 }),
+      S(30, { dy: -48, lin: true, boost: 0.1 }), S(40, { ramp: { h: 4, len: 20 } }), S(40, { bumps: 0.6 }), C(-90, 30, { dy: 10, tunnel: 'arch' }), S(22, { dy: -15, lin: true }),
+      C(-90, 26, { w: 12 }), C(180, 26, { dy: 6 }), S(24, { dy: 20, lin: true }), S(24, { dy: -26, lin: true, arch: 'rock' }), C(90, 35), C(90, 40, { items: 0.5 }), S(90),
     ],
   },
   {
@@ -48,9 +51,9 @@ const COURSES = [
     deco: [['bigtree', 50], ['mushroom', 50], ['glowflower', 80], ['bush', 40]],
     music: { bpm: 136, root: 57, scale: 'dorian', seed: 17 },
     cmds: [
-      S(130, { fit: 1, items: 0.5 }), C(90, 40, { dy: 12 }), S(70, { fit: 2, bumps: 0.8 }), C(-60, 30, { dy: -14 }), C(60, 30),
-      S(60, { ramp: { h: 4, len: 20 } }), S(40), C(90, 38, { dy: 10, items: 0.5 }), S(80, { bumps: 0.6 }), C(-60, 35, { dy: -10 }), C(60, 35),
-      C(90, 40, { boost: 0.5 }), S(80, { dy: 2 }), C(90, 45), S(90),
+      S(130, { fit: 1, items: 0.5 }), C(90, 40, { dy: 12, arch: 'torii' }), S(70, { fit: 2, bumps: 0.8, w: 12 }), C(-60, 30, { dy: -14 }), C(60, 30, { tunnel: 'arch' }),
+      S(60, { ramp: { h: 4, len: 20 } }), S(40, { w: 27 }), C(90, 38, { dy: 10, items: 0.5 }), S(26, { dy: -22, lin: true }), S(50, { bumps: 0.6, arch: 'rock' }), C(-60, 35, { dy: 12, w: 12 }), C(60, 35),
+      C(90, 40, { boost: 0.5 }), S(60, { dy: 2 }), C(-45, 30), C(45, 30), C(90, 45), S(90),
     ],
   },
   // ---------- 惑星めぐり ----------
@@ -61,9 +64,9 @@ const COURSES = [
     deco: [['cloud', 60]],
     music: { bpm: 128, root: 53, scale: 'minor', seed: 101 },
     cmds: [
-      S(130, { fit: 1, items: 0.5 }), C(90, 45, { dy: 15, bank: 15 }), S(80, { boost: 0.5 }),
-      C(450, 36, { dy: -30, bank: 20, items: 0.3 }), S(70, { fit: 2 }), C(90, 40, { dy: 15 }), S(60, { ramp: { h: 4, len: 22 } }),
-      S(28, { gap: true }), S(60), C(90, 50), S(80),
+      S(130, { fit: 1, items: 0.5 }), C(90, 45, { dy: 15, bank: 15, arch: 'ring' }), S(80, { fit: 2, boost: 0.5, w: 12 }),
+      C(450, 36, { dy: -30, bank: 20, items: 0.3 }), S(70, { w: 26 }), S(26, { dy: -22, lin: true }), C(90, 40, { dy: 15 }), S(60, { ramp: { h: 4, len: 22 } }),
+      S(28, { gap: true }), S(50, { arch: 'ring' }), S(26, { dy: 22, lin: true }), C(-60, 35), C(60, 35, { items: 0.5 }), C(90, 50), S(80),
     ],
   },
   {
@@ -73,8 +76,9 @@ const COURSES = [
     deco: [['lavarock', 40], ['crystal', 10], ['cloud', 30]],
     music: { bpm: 148, root: 50, scale: 'phrygian', seed: 141 },
     cmds: [
-      S(120, { fit: 1, items: 0.5 }), C(90, 40, { dy: 10 }), S(35, { dy: 55, lin: true }), S(30), C(90, 30, { bank: 25 }), S(35, { dy: -55, lin: true, boost: 0.1 }),
-      S(40, { ramp: { h: 5, len: 25 } }), S(30, { gap: true }), S(50), C(90, 35, { bumps: 0.6 }), S(80, { fit: 2, dy: -10, items: 0.5 }), C(90, 40), S(90),
+      S(120, { fit: 1, items: 0.5 }), C(90, 40, { dy: 10, arch: 'rock' }), S(60, { fit: 2, w: 12 }), S(35, { dy: 55, lin: true }), S(30), C(90, 30, { bank: 25 }), S(35, { dy: -55, lin: true, boost: 0.1 }),
+      S(40, { ramp: { h: 5, len: 25 } }), S(30, { gap: true }), S(50, { w: 26 }), C(-60, 30, { bumps: 0.6 }), C(60, 30, { tunnel: 'tube' }), C(90, 35),
+      S(24, { dy: 18, lin: true }), S(24, { dy: -28, lin: true, items: 0.5 }), C(90, 40, { arch: 'rock' }), S(90),
     ],
   },
   {
@@ -84,9 +88,9 @@ const COURSES = [
     deco: [['crater', 30], ['asteroid', 30], ['flag', 3]],
     music: { bpm: 124, root: 55, scale: 'lydian', seed: 131 },
     cmds: [
-      S(140, { fit: 1, items: 0.5 }), C(90, 45, { bumps: 0.8 }), S(60, { ramp: { h: 5, len: 26 } }), S(60, { gap: true }), S(60, { fit: 2 }),
-      C(90, 35, { dy: 15 }), S(60), C(-60, 40, { bumps: 1.0 }), C(60, 40, { dy: -15, items: 0.5 }), S(80, { boost: 0.3 }), S(40, { ramp: { h: 6, len: 26 } }),
-      S(50, { gap: true }), S(60), C(90, 40), S(60), C(90, 45), S(90),
+      S(140, { fit: 1, items: 0.5 }), C(90, 45, { bumps: 0.8, arch: 'ring' }), S(60, { fit: 2, w: 12 }), S(60, { ramp: { h: 5, len: 26 } }), S(60, { gap: true }), S(50),
+      C(90, 35, { dy: 15 }), S(26, { dy: -25, lin: true }), C(-60, 40, { bumps: 1.0, w: 27 }), C(60, 40, { dy: 10, items: 0.5 }), S(80, { boost: 0.3 }), S(40, { ramp: { h: 6, len: 26 } }),
+      S(50, { gap: true }), S(60, { arch: 'ring' }), C(90, 40), S(60, { w: 12 }), C(90, 45), S(90),
     ],
   },
   {
@@ -96,9 +100,9 @@ const COURSES = [
     deco: [['coral', 60], ['seaweed', 80], ['rock', 30], ['palm', 10]],
     music: { bpm: 118, root: 62, scale: 'dorian', seed: 83 },
     cmds: [
-      S(120, { fit: 1, items: 0.5 }), C(90, 40), S(80, { dy: -30, boost: 0.15 }), C(-70, 35), C(150, 40, { items: 0.5 }),
-      S(90, { fit: 2, bumps: 0.3 }), C(-90, 30, { dy: -6 }), C(180, 40, { dy: 8 }), S(70, { ramp: { h: 4, len: 20 } }),
-      S(40), C(100, 38, { dy: 28 }), S(90),
+      S(120, { fit: 1, items: 0.5 }), C(90, 40, { arch: 'rock' }), S(80, { fit: 2, dy: -30, boost: 0.15 }), C(-70, 35, { w: 12 }), C(160, 40, { items: 0.5 }),
+      S(60, { bumps: 0.3, w: 27 }), S(24, { dy: -16, lin: true }), C(-90, 30, { tunnel: 'arch' }), C(180, 40, { dy: 8 }), S(70, { ramp: { h: 4, len: 20 } }),
+      S(40, { arch: 'rib' }), C(-45, 30), C(45, 30, { dy: 10 }), C(90, 38, { dy: 28 }), S(90),
     ],
   },
   // ---------- 未知の世界 ----------
@@ -109,10 +113,10 @@ const COURSES = [
     deco: [['crystal', 60], ['stalag', 40], ['mushroom', 20]],
     music: { bpm: 152, root: 50, scale: 'phrygian', seed: 97 },
     cmds: [
-      S(110, { fit: 1, items: 0.5, tunnel: 'tube' }), C(90, 35, { tunnel: 'tube', dy: -15 }), S(70, { boost: 0.5 }),
-      C(-90, 30, { tunnel: 'tube', dy: -10 }), C(180, 34, { dy: -5, items: 0.6 }), S(60, { fit: 2, tunnel: 'tube' }),
-      C(90, 30, { tunnel: 'tube', dy: 10 }), S(70, { ramp: { h: 4, len: 20 } }), S(28, { gap: true }), S(50),
-      C(90, 40, { dy: 20 }), S(80, { tunnel: 'tube' }),
+      S(110, { fit: 1, items: 0.5, tunnel: 'tube' }), C(90, 35, { tunnel: 'tube', dy: -15 }), S(70, { fit: 2, boost: 0.5, w: 12 }),
+      C(-90, 30, { tunnel: 'tube', dy: -10 }), C(180, 34, { dy: -5, items: 0.6, w: 26 }), S(26, { dy: -20, lin: true }), S(60, { tunnel: 'tube' }),
+      C(90, 30, { tunnel: 'tube', dy: 10 }), S(70, { ramp: { h: 4, len: 20 } }), S(28, { gap: true }), S(50, { arch: 'rib' }), S(26, { dy: 20, lin: true }),
+      C(-60, 30), C(60, 30, { w: 12 }), C(90, 40, { dy: 20 }), S(80, { tunnel: 'tube' }),
     ],
   },
   {
@@ -122,9 +126,9 @@ const COURSES = [
     deco: [['floatrock', 60], ['cloudpuff', 50], ['rainbow', 4]],
     music: { bpm: 132, root: 64, scale: 'lydian', seed: 61 },
     cmds: [
-      S(140, { fit: 1, items: 0.5, boost: 0.85 }), S(40, { ramp: { h: 4, len: 24 } }), S(36, { gap: true }), C(90, 40, { dy: -10 }),
-      S(60, { fit: 2 }), C(450, 32, { dy: 30, bank: 20, items: 0.4 }), C(90, 40), S(60, { ramp: { h: 4, len: 22 } }), S(40, { gap: true }),
-      C(-60, 35, { dy: -10 }), C(60, 35, { dy: -10 }), C(90, 40, { dy: -10 }), S(90),
+      S(140, { fit: 1, items: 0.5, boost: 0.85 }), S(40, { ramp: { h: 4, len: 24 } }), S(36, { gap: true }), C(90, 40, { dy: -10, arch: 'ring' }),
+      S(60, { fit: 2, w: 12 }), S(28, { dy: 30, lin: true }), C(90, 36, { bank: 20, items: 0.4 }), S(26, { dy: -22, lin: true }), S(60, { ramp: { h: 4, len: 22 } }), S(40, { gap: true }),
+      C(-60, 35, { w: 26 }), C(60, 35), S(100, { cork: 360 }), C(90, 40, { dy: 2 }), S(40), C(90, 40, { items: 0.5, arch: 'ring' }), S(90),
     ],
   },
   {
@@ -134,9 +138,9 @@ const COURSES = [
     deco: [['crystal', 80], ['tentacle', 16], ['glowflower', 60], ['asteroid', 20]],
     music: { bpm: 144, root: 61, scale: 'lydian', seed: 151 },
     cmds: [
-      S(130, { fit: 1, items: 0.5, boost: 0.85 }), C(90, 40, { dy: 15 }), S(30, { dy: 40, lin: true }), C(-90, 30), C(90, 30, { items: 0.5 }),
-      S(28, { dy: -45, lin: true }), S(40, { ramp: { h: 5, len: 24 } }), S(40, { gap: true }), S(50), C(90, 35, { dy: -10, bank: 20 }),
-      S(40), C(90, 40), S(70, { fit: 2 }), C(90, 40), S(90),
+      S(130, { fit: 1, items: 0.5, boost: 0.85 }), C(90, 40, { dy: 15, arch: 'ring' }), S(60, { fit: 2, w: 12 }), S(30, { dy: 40, lin: true }), C(-90, 30), C(90, 30, { items: 0.5 }),
+      S(28, { dy: -45, lin: true }), S(40, { ramp: { h: 5, len: 24 } }), S(40, { gap: true }), S(50, { w: 27 }), C(90, 35, { dy: -10, bank: 20 }), L(18), S(50),
+      C(-60, 30, { tunnel: 'tube' }), C(60, 30), C(90, 40), S(40), C(90, 40, { arch: 'ring' }), S(90),
     ],
   },
   {
@@ -146,10 +150,10 @@ const COURSES = [
     deco: [['asteroid', 30], ['tentacle', 30]],
     music: { bpm: 168, root: 58, scale: 'phrygian', seed: 127 },
     cmds: [
-      S(150, { fit: 1, items: 0.5, boost: 0.85 }), C(90, 40, { dy: 20, bank: 20 }), S(60, { tunnel: 'tube' }), L(20),
-      S(80, { fit: 2, items: 0.5 }), C(90, 30), S(60, { ramp: { h: 4, len: 20 } }), S(34, { gap: true }),
-      S(60, { boost: 0.5 }), C(90, 35, { dy: -20, bank: 25 }), S(110, { cork: 360 }), C(-60, 40, { tunnel: 'tube' }),
-      C(60, 40, { tunnel: 'tube' }), C(90, 45, { items: 0.4 }), S(90),
+      S(150, { fit: 1, items: 0.5, boost: 0.85 }), C(90, 40, { dy: 20, bank: 20, arch: 'rib' }), S(60, { tunnel: 'tube' }), L(20),
+      S(80, { fit: 2, items: 0.5, w: 12 }), C(90, 30), S(60, { ramp: { h: 4, len: 20 } }), S(34, { gap: true }), S(60, { boost: 0.5, w: 27 }), S(26, { dy: -24, lin: true }),
+      C(90, 35, { dy: -20, bank: 25 }), S(110, { cork: 360 }), C(-60, 40, { tunnel: 'tube' }), C(60, 40, { tunnel: 'tube' }), S(26, { dy: 24, lin: true, arch: 'rib' }),
+      C(90, 45, { items: 0.4 }), S(90),
     ],
   },
 ];

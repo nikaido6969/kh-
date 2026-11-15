@@ -128,11 +128,12 @@ class Track {
     const aiS = smooth(smooth(raw, 14), 8);
     this.ai = aiS;
     // アイテムボックス・ダッシュ板・看板位置
-    this.itemRows = []; this.boosts = []; this.signs = [];
+    this.itemRows = []; this.boosts = []; this.signs = []; this.arches = [];
     cmds.forEach((c, k) => {
       const st = this.cmdStart[k], cnt = this.cmdCount[k] || 1;
       if (c.items != null) this.itemRows.push(st + Math.floor(cnt * c.items));
       if (c.boost != null) this.boosts.push(st + Math.floor(cnt * c.boost));
+      if (c.arch) this.arches.push({ i: st + 2, type: c.arch });
       if (c.sign) this.signs.push({ i: st + Math.floor(cnt * 0.3), text: c.sign });
     });
     // 範囲
@@ -223,6 +224,7 @@ class Track {
     this._buildTunnels(G);
     this._buildStart(G);
     this._buildSigns(G);
+    this._buildArches(G);
     if (!def.noGround) this._buildGround(G);
     this._buildPillars(G);
     this._buildDeco(G);
@@ -442,6 +444,39 @@ class Track {
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(Math.min(ed * 1.6, 16), 3.2), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide }));
     sign.position.set(0, 7, 0.3); g.add(sign);
     G.add(g);
+  }
+
+  _buildArches(G) {
+    const fr = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
+    for (const a of this.arches) {
+      const j = a.i % this.N; this.frame(j * this.ds, fr);
+      const ed = this.hw[j] + this.sh[j] + 1.5;
+      const g = new THREE.Group();
+      g.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(fr.r, fr.u, fr.t.clone().negate())); g.position.copy(fr.p);
+      if (a.type === 'rock') {
+        const m = U.mat(0x8a6a50, { flat: true });
+        for (const s of [-1, 1]) { const p = new THREE.Mesh(new THREE.DodecahedronGeometry(3.2, 0), m); p.scale.set(1, 3.6, 1.2); p.position.set(s * (ed + 2), 8, 0); p.rotation.z = -s * 0.12; g.add(p); }
+        const top = new THREE.Mesh(new THREE.DodecahedronGeometry(3.4, 0), m); top.scale.set((ed + 5) / 3, 0.9, 1.3); top.position.set(0, 18, 0); g.add(top);
+        for (let i = 0; i < 6; i++) { const v = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3 + i % 3 * 2, 4), U.mat(0x3f8a34)); v.position.set(-ed + i * ed / 2.6, 14 - (i % 3), 0.5); g.add(v); }
+      } else if (a.type === 'ring') {
+        for (let i = 0; i < 3; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(ed + 4 + i * 0.2, 0.7, 8, 40), U.mat([0x5ae8ff, 0xff5ad8, 0xffe04a][i], { e: [0x20a0ff, 0xc02090, 0xc09010][i], ei: 0.9 })); r.position.set(0, 4, -i * 5); g.add(r); }
+      } else if (a.type === 'rib') {
+        for (let i = 0; i < 5; i++) { const r = new THREE.Mesh(new THREE.TorusGeometry(ed + 2, 0.7, 6, 20, Math.PI), U.mat(0xf0ead8, { flat: true })); r.position.set(0, 0, -i * 6); r.scale.y = 1.25 - i * 0.05; g.add(r); }
+      } else if (a.type === 'torii') {
+        const red = U.mat(0xd8323a), blk = U.mat(0x222222);
+        for (const s of [-1, 1]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.9, 16, 10), red); p.position.set(s * ed, 8, 0); g.add(p); }
+        const b1 = new THREE.Mesh(new THREE.BoxGeometry(ed * 2 + 7, 1.2, 1.6), red); b1.position.y = 16; g.add(b1);
+        const b2 = new THREE.Mesh(new THREE.BoxGeometry(ed * 2 + 9, 0.7, 2), blk); b2.position.y = 17; g.add(b2);
+        const b3 = new THREE.Mesh(new THREE.BoxGeometry(ed * 2 + 2, 0.9, 1.2), red); b3.position.y = 12.5; g.add(b3);
+      } else if (a.type === 'fall') {
+        const wm = new THREE.MeshBasicMaterial({ color: 0xbfe8ff, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false });
+        for (const s of [-1, 1]) {
+          const cl = new THREE.Mesh(new THREE.DodecahedronGeometry(5, 0), U.mat(0x7a7268, { flat: true })); cl.scale.set(1.2, 5, 2.5); cl.position.set(s * (ed + 6), 14, 0); g.add(cl);
+          const w = new THREE.Mesh(new THREE.PlaneGeometry(7, 34), wm); w.position.set(s * (ed + 1.5), 15, 0); w.rotation.y = Math.PI / 2; g.add(w);
+        }
+      }
+      G.add(g);
+    }
   }
 
   _buildSigns(G) {

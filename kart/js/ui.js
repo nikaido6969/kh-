@@ -121,12 +121,19 @@ const UI = {
     on('netGo', () => this.netGo());
     on('netCopy', () => { try { navigator.clipboard.writeText(NET.code || ''); NET.status('コードをコピーしました：' + NET.code); } catch (e) { } });
     // タッチ：画面左右でハンドル
+    // 指の位置＝ハンドルの切れ角（無段階）。画面中央が直進、指を置いた方向へ切る
     const zones = () => {
-      const ts = this._touches || {}; let l = false, r = false;
-      for (const id in ts) { if (ts[id] < innerWidth / 2) l = true; else r = true; }
-      const both = l && r;
-      Input.touch.l = l && !both; Input.touch.r = r && !both; Input.touch.b = both;
-      this.$('tzL').classList.toggle('on', l); this.$('tzR').classList.toggle('on', r);
+      const ts = this._touches || {}; const ids = Object.keys(ts);
+      const ind = this.$('tind');
+      if (!ids.length) { Input.touch.ax = null; Input.touch.b = false; ind.style.opacity = 0; return; }
+      Input.touch.b = ids.length >= 2;
+      const x = ts[ids[ids.length - 1]];
+      const half = Math.min(innerWidth * 0.5, Math.max(120, innerWidth * 0.3));
+      let v = U.clamp((x - innerWidth / 2) / half, -1, 1);
+      const dead = 0.05; v = Math.abs(v) < dead ? 0 : Math.sign(v) * (Math.abs(v) - dead) / (1 - dead);
+      Input.touch.ax = Math.sign(v) * Math.pow(Math.abs(v), 1.25);
+      ind.style.opacity = 1; ind.style.left = x + 'px';
+      ind.style.transform = `translateX(-50%) rotate(${Input.touch.ax * 35}deg)`;
     };
     this._touches = {};
     const active = () => GAME.running && !GAME.paused && !this.cur;
