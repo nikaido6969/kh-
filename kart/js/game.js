@@ -45,6 +45,7 @@ const Input = {
     steer = U.clamp(steer, -1, 1);
     this.itemEdge = item && !this.prevItem; this.prevItem = item;
     this.driftEdge = drift && !this.prevDrift; this.prevDrift = drift;
+    const magic = !!k.KeyM || t.magic; this.magicEdge = magic && !this.prevMagic; this.prevMagic = magic;
     const jump = !!(k.KeyJ || k.KeyV) || t.jump;
     this.jumpEdge = jump && !this.prevJump; this.prevJump = jump;
     Object.assign(this.st, { steer, accel, brake, drift, item, back: brake, look });
@@ -57,9 +58,9 @@ class Particles {
   constructor(scene) {
     this.pool = []; this.scene = scene;
     const tex = U.glowTex();
-    for (let i = 0; i < 260; i++) {
+    for (let i = 0; i < 520; i++) {
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
-      sp.visible = false; scene.add(sp);
+      sp.visible = false; sp.renderOrder = 6; scene.add(sp);
       this.pool.push({ sp, life: 0, max: 1, v: new THREE.Vector3(), g: 0, s0: 1, s1: 0 });
     }
     this.i = 0;
@@ -202,6 +203,7 @@ class Game {
     this.finalLapShown = false; this.resultsShown = false; this.rocket = { first: null };
     this.running = true; this.paused = false;
     HUD.setup(this);
+    this.classicName = null;
     const mus = Object.assign({}, this.def.music);
     if (this.battle) { const keys = Object.keys(CLASSICS); mus.classic = keys[Math.floor(Math.random() * keys.length)]; this.classicName = CLASSICS[mus.classic].name; }
     SND.startBGM(mus); SND.setMode('wait');
@@ -275,7 +277,7 @@ class Game {
       const inp = this.started ? Input.poll() : { steer: 0, accel: false, brake: false, drift: false };
       if (this.started) {
         Object.assign(this.player.input, inp);
-        this.player.input.driftEdge = Input.driftEdge; this.player.input.itemEdge = Input.itemEdge; this.player.input.jumpEdge = Input.jumpEdge;
+        this.player.input.driftEdge = Input.driftEdge; this.player.input.itemEdge = Input.itemEdge; this.player.input.jumpEdge = Input.jumpEdge; this.player.input.magicEdge = Input.magicEdge;
       }
       if (this.player.finished) this.aiInput(this.player, dt);
     }
@@ -296,8 +298,9 @@ class Game {
     this.particles.update(dt);
     this.updateCamera(dt);
     this.updateScenery(dt);
+    this.updateMagicFx(dt);
     HUD.update(this, dt);
-    if (this.player) SND.setEngine(this.player.v, this.player.boostT > 0);
+    if (this.player) { SND.setEngine(this.player.v, this.player.boostT > 0); const p = this.player; SND.setWake(p.inWater && p.waterDepth < 2.4 && p.grounded ? U.clamp(Math.abs(p.v) / 40, 0, 1) : 0); }
     if (window.NET && NET.active) NET.tick(this, dt);
   }
 
@@ -367,6 +370,7 @@ class Game {
     const locked = !this.started || k.spinT > 0 || k.knockT > 0 || k.sleepT > 0 || k.flatT > 1.6;
     // アイテム使用
     if (!locked && inp.itemEdge && k.item && k.rollT <= 0) this.useItem(k, inp);
+    this.updateMagic(k, dt, inp);
     // 最高速
     // ノリノリ加速：ぶつからずに走り続けるほど最高速が伸びる
     if (this.started && !locked && k.v > k.vmax * 0.6) k.flow = Math.min(1, k.flow + dt / 13); else if (k.v < k.vmax * 0.3) k.flow = Math.max(0, k.flow - dt * 0.25);
@@ -385,7 +389,8 @@ class Game {
     const wy = this._worldY(k);
     const inWater = def.water != null && wy < def.water;
     if (inWater) vm *= 0.94;
-    if (k.inWater !== inWater) { if (k.isPlayer) SND.play('splash'); k.inWater = inWater; }
+    k.waterDepth = def.water != null ? def.water - wy : -99;
+    if (k.inWater !== inWater) { if (k.inWater !== undefined) this.waterSplash(k, inWater); k.inWater = inWater; }
     if (k.boostT > 0) vm = Math.max(vm, VM * 1.24);
     if (k.starT > 0) vm = Math.max(vm, VM * 1.12);
     const ufo = k.ufoT > 0;
@@ -437,7 +442,7 @@ class Game {
     }
     if (k.drift) {
       if (!inp.drift || k.v < 10 || locked || ufo) {
-        if (k.mt > 0 && !locked) { k.boostT = Math.max(k.boostT, MT_TIME[k.mt]); k.boostCol = k.mt; if (k.isPlayer) SND.play('boost'); }
+        if (k.mt > 0 && !locked) { this.chargeMagic(k, 0.04 * k.mt); k.boostT = Math.max(k.boostT, MT_TIME[k.mt]); k.boostCol = k.mt; if (k.isPlayer) SND.play('boost'); }
         k.drift = 0; k.mt = 0; k.driftCharge = 0;
       } else {
         const base = 0.8 + 0.48 * steer * k.drift;
@@ -512,7 +517,7 @@ class Game {
         if (k.airT > 0.3) k.squash = 1;
         k.h = sOff; k.grounded = true; k.vh = 0; k.fromGap = false;
         if (k.airT > 0.35 && k.isPlayer) SND.play('land');
-        if (k.trick) { k.boostT = Math.max(k.boostT, 0.9); k.boostCol = 1; if (k.isPlayer) SND.play('boost'); }
+        if (k.trick) { this.chargeMagic(k, 0.06); k.boostT = Math.max(k.boostT, 0.9); k.boostCol = 1; if (k.isPlayer) SND.play('boost'); }
         k.trick = false; k.hop = false; k.airT = 0;
       }
       if (k.h < -14) { this.fallOut(k, !!(fl2 & 1)); return; }
@@ -545,7 +550,8 @@ class Game {
     if (!k.finished && k.dist >= this.laps * tr.L) this.finish(k);
     // 粒子
     if (k.grounded && k.v > 20 && off && !hardSh && Math.random() < 0.5) this.dust(k, shSurf === 'grass' ? 0x9ac86a : 0xa07a4a);
-    if (inWater && Math.random() < 0.3) this.bubble(k);
+    if (inWater && k.waterDepth > 2.4 && Math.random() < 0.3) this.bubble(k);
+    this.waterSpray(k, dt);
   }
 
   _worldY(k) { const fr = this.track.frame(k.dist, this.fr); return fr.p.y + fr.r.y * k.d + fr.u.y * k.h; }
@@ -598,6 +604,7 @@ class Game {
         if (Math.abs(this.dDist(k.dist, b.s)) < 1.8 && Math.abs(k.d - b.d) < 1.8 && k.h < 3) {
           b.alive = false; b.t = 1.6; b.mesh.visible = false;
           for (let i = 0; i < 8; i++) this.particles.emit(b.mesh.position, new THREE.Vector3((Math.random() - 0.5) * 12, Math.random() * 10, (Math.random() - 0.5) * 12), [0xff7ad8, 0x7ad8ff, 0xffe07a][i % 3], 0.6, 1, 0.2, 12);
+          if (!k.isRemote) this.chargeMagic(k, 0.08);
           if (!k.isRemote && !k.item && k.rollT <= 0 && !k.finished) this.rollItem(k);
           break;
         }
@@ -703,8 +710,11 @@ class Game {
     const lift = k.respawnT > 0 ? k.respawnT * 6 : 0;
     m.root.position.copy(fr.p).addScaledVector(fr.r, k.d).addScaledVector(fr.u, k.h + lift + (k.ufoT > 0 ? 0 : 0));
     const sc = k.giantT > 0 ? 10 : k.shrinkT > 0 ? 0.5 : 1;
-    const cur = U.damp(m.root.scale.x, sc, 5, dt);
-    m.root.scale.set(cur * (1 + 0.12 * k.squash), (k.flatT > 0 ? cur * 0.18 : cur) * (1 - 0.28 * k.squash), cur * (1 + 0.12 * k.squash));
+    const cur = k.scaleBase = U.damp(k.scaleBase ?? 1, sc, 5, dt);
+    let gx = 1, gz = 1, gy = 1;
+    if (k.puffT > 0) { k.puffT -= dt; const p = 1 + Math.min(1.5, k.puffT * 1.4); gx = gy = gz = p; }
+    if (k.stretchT > 0) { k.stretchT -= dt; gz = 1 + Math.abs(Math.sin((0.6 - k.stretchT) * 18)) * 1.2; gx = 0.65; }
+    m.root.scale.set(cur * gx * (1 + 0.12 * k.squash), (k.flatT > 0 ? cur * 0.18 : cur) * gy * (1 - 0.28 * k.squash), cur * gz * (1 + 0.12 * k.squash));
     m.root.visible = !k.out && !(k.respawnT > 0 && Math.floor(this.time * 15) % 2) && !(k.invT > 0 && this.battle && Math.floor(this.time * 20) % 2);
     this.visualExtra(k, fr, dt);
     // 影
@@ -823,6 +833,21 @@ const HUD = {
     this.el.hink.style.opacity = 0;
   },
   hide() { this.el.hud.style.display = 'none'; this.horror(false); this.clearBlind(); },
+  magic(k) {
+    const v = Math.min(1, k.magic || 0), full = v >= 1, M = MAGIC[k.ch.id];
+    for (const id of ['bMagic', 'hmagic']) {
+      const e = document.getElementById(id); if (!e) continue;
+      e.style.setProperty('--p', (v * 100).toFixed(1) + '%'); e.classList.toggle('full', full);
+    }
+    const n = document.getElementById('hmagicN'); if (n && M && n.textContent !== M.name) n.textContent = M.name;
+  },
+  cutin(k, M) {
+    const e = document.getElementById('hcutin'); if (!e) return;
+    e.innerHTML = `<div class="cbg" style="--mc:#${M.col.toString(16).padStart(6, '0')}"></div><img src="${UI.thumbs[k.ch.id]}" alt=""><div class="ctx"><small>${k.ch.rare ? '★ RARE MAGIC ★' : 'MAGIC'}</small><b>${M.name}</b><span>「${M.line}」</span></div>`;
+    e.className = ''; void e.offsetWidth; e.className = 'on' + (k.ch.rare ? ' rare' : '');
+  },
+  eraser() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="eraser">消</div>'; e.className = 'on er'; setTimeout(() => e.className = '', 1600); },
+  slash() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="slash"></div>'; e.className = 'on sl'; setTimeout(() => e.className = '', 900); },
   toast(t) { const box = document.getElementById('htoasts'); const e = document.createElement('div'); e.className = 'toast'; e.textContent = t; box.appendChild(e); while (box.children.length > 3) box.firstChild.remove(); setTimeout(() => e.remove(), 2600); },
   blind(style) { const e = document.getElementById('hblind'); e.className = 'on ' + style; clearTimeout(this.bT); },
   clearBlind() { const e = document.getElementById('hblind'); if (e) e.className = ''; },
@@ -846,6 +871,7 @@ const HUD = {
     this.shakeT = Math.max(0, this.shakeT - dt);
     if (this.msgT > 0) { this.msgT -= dt; if (this.msgT <= 0) this.el.hmsg.className = ''; }
     const k = g.player; if (!k) return;
+    this.magic(k);
     this.el.hpos.innerHTML = (k.rank + 1) + '<small>位</small>';
     this.el.hpos.className = 'r' + Math.min(k.rank + 1, 4);
     if (g.battle) {

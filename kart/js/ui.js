@@ -38,6 +38,7 @@ const UI = {
     let last = performance.now();
     const loop = (t) => {
       const dt = Math.min(0.05, (t - last) / 1000); last = t;
+      const racing = GAME.running && !this.cur; if (racing !== this._racingCls) { this._racingCls = racing; document.body.classList.toggle('racing', racing); }
       if (GAME.running) {
         if (GAME.cfg.waitGo) GAME.raceT = -4;
         GAME.update(dt); GAME.render();
@@ -52,35 +53,89 @@ const UI = {
   // ---- メニュー背景 ----
   buildMenuScene() {
     const s = new THREE.Scene();
-    s.background = new THREE.Color(0xf6efe4);
-    s.add(new THREE.HemisphereLight(0xffffff, 0x8a7a6a, 0.9));
-    const d = new THREE.DirectionalLight(0xffffff, 0.9); d.position.set(5, 10, 7); s.add(d);
-    const floor = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.6, 0.3, 48), U.mat(0xffffff, { r: 0.4 }));
-    floor.position.y = -0.15; s.add(floor);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.06, 8, 64), U.mat(0xff6a8a, { e: 0xff3a6a }));
-    ring.rotation.x = Math.PI / 2; s.add(ring);
-    this.menuScene = s;
-    this.menuCam = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 100);
-    this.menuCam.position.set(0, 2.6, 7.5); this.menuCam.lookAt(0, 0.9, 0);
+    // 夕焼けの空
+    const sg = new THREE.SphereGeometry(400, 32, 16), cols = [], top = new THREE.Color(0x3a7ae8), mid = new THREE.Color(0x9ac8ff), bot = new THREE.Color(0xffd8a8);
+    const sp = sg.attributes.position;
+    for (let i = 0; i < sp.count; i++) { const y = sp.getY(i) / 400; const c = y > 0.15 ? mid.clone().lerp(top, Math.min(1, (y - 0.15) / 0.6)) : bot.clone().lerp(mid, U.clamp((y + 0.05) / 0.2, 0, 1)); cols.push(c.r, c.g, c.b); }
+    sg.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    s.add(new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false })));
+    s.fog = new THREE.Fog(0xffe2c0, 160, 480);
+    s.add(new THREE.HemisphereLight(0xcfe4ff, 0x4a6a2a, 0.55));
+    const sun = new THREE.DirectionalLight(0xffe2b8, 1.7); sun.position.set(30, 45, 20); sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, near: 5, far: 150 }); sun.shadow.bias = -0.0008; s.add(sun);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: U.glowTex(), color: 0xfff0c0, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, fog: false })); glow.position.set(150, 70, 100); glow.scale.set(120, 120, 1); s.add(glow);
+    // 島
+    const gt = U.surfTex('meadow').clone(); gt.needsUpdate = true; gt.repeat.set(14, 14);
+    const ground = new THREE.Mesh(new THREE.CircleGeometry(90, 64), new THREE.MeshStandardMaterial({ map: gt, roughness: 1 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; s.add(ground);
+    const tt = U.surfTex('gravel').clone(); tt.needsUpdate = true; tt.repeat.set(10, 1);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(9, 13.6, 96, 1), new THREE.MeshStandardMaterial({ map: tt, roughness: 1 })); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.03; ring.receiveShadow = true; s.add(ring);
+    for (const r of [8.8, 13.8]) { const c = new THREE.Mesh(new THREE.TorusGeometry(r, 0.18, 6, 96), U.mat(0xffffff)); c.rotation.x = Math.PI / 2; c.position.y = 0.08; s.add(c); }
+    // 台座
+    const ped = new THREE.Group(); s.add(ped);
+    const pb = new THREE.Mesh(new THREE.CylinderGeometry(3.3, 3.7, 0.7, 48), U.mat(0xfff8ee, { r: 0.35 })); pb.position.y = 0.35; pb.castShadow = pb.receiveShadow = true; ped.add(pb);
+    const pr = new THREE.Mesh(new THREE.TorusGeometry(3.4, 0.1, 8, 64), U.mat(0xff6a8a, { e: 0xff3a6a, ei: 0.9 })); pr.rotation.x = Math.PI / 2; pr.position.y = 0.72; ped.add(pr);
+    // 木・キノコ・遠くの山
+    const rng = U.rng(9), m4 = new THREE.Matrix4();
+    const place = (type, n, r0, r1, s0, s1) => {
+      const parts = DECO[type](), mats = [];
+      for (let i = 0; i < n; i++) { const a = rng() * 6.28, r = r0 + rng() * (r1 - r0), k = s0 + rng() * (s1 - s0); mats.push(new THREE.Matrix4().compose(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), rng() * 6.28), new THREE.Vector3(k, k, k))); }
+      for (const part of parts) { const im = new THREE.InstancedMesh(part.geo, part.mat, n); mats.forEach((mm, i) => { m4.multiplyMatrices(mm, part.m); im.setMatrixAt(i, m4); }); im.castShadow = true; s.add(im); }
+    };
+    place('tree', 22, 17, 40, 0.8, 1.4); place('round', 14, 16, 36, 0.8, 1.3); place('mushroom', 9, 15.5, 26, 0.45, 0.8); place('flowerclump', 40, 14.5, 30, 0.8, 1.3); place('rock', 10, 15, 32, 0.6, 1.1);
+    place('mountain', 10, 120, 170, 0.8, 1.3);
+    for (let i = 0; i < 9; i++) { const c = new THREE.Sprite(new THREE.SpriteMaterial({ map: SCN_TEX.cloud(), transparent: true, opacity: 0.95, depthWrite: false, fog: false })); const a = rng() * 6.28, r = 90 + rng() * 120; c.position.set(Math.cos(a) * r, 40 + rng() * 40, Math.sin(a) * r); const w = 50 + rng() * 60; c.scale.set(w, w * 0.5, 1); s.add(c); }
+    // 周回するライバルたち
+    this.menuRacers = [];
+    const pool = CHARS.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+    pool.forEach((ch, i) => {
+      const m = buildRacerModel(ch); m.root.traverse(o => { if (o.isMesh) o.castShadow = true; }); s.add(m.root);
+      this.menuRacers.push({ m, a: i * Math.PI / 2, r: 10.3 + (i % 2) * 2, v: 0.42 + i * 0.035, wob: rng() * 6 });
+    });
+    this.menuScene = s; this.menuPed = ped;
+    this.menuCam = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 900);
     this.menuT = 0;
     this.setMenuChar(this.sel.ch);
+    // タイトル：タップでスタート
+    this.$('tPress').addEventListener('click', () => this.titleStart());
   },
+  titleStart() {
+    SND.init(); SND.play('title');
+    this.$('s-title').classList.add('menu-on');
+    this.titleMusic();
+    if (this.gyroStart) this.gyroStart();
+  },
+  titleMusic() { if (!GAME.running && SND.ctx) { SND.startBGM({ bpm: 126, root: 62, scale: 'major', seed: 5 }); } },
   setMenuChar(id) {
-    if (this.menuModel) this.menuScene.remove(this.menuModel.root);
+    if (this.menuModel) this.menuPed.remove(this.menuModel.root);
     const ch = CHARS.find(c => c.id === id) || CHARS[0];
     this.menuModel = buildRacerModel(ch);
-    this.menuScene.add(this.menuModel.root);
+    this.menuModel.root.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    this.menuModel.root.position.y = 0.72; this.menuModel.root.scale.setScalar(1.25);
+    this.menuPed.add(this.menuModel.root);
   },
   menuRender(dt) {
-    this.menuT += dt;
-    if (this.menuModel) { this.menuModel.root.rotation.y = this.menuT * 0.8; this.menuModel.anim(this.menuT); }
-    const wide = innerWidth > innerHeight;
-    const showModel = ['s-char', 's-title', 's-online'].includes(this.cur);
-    if (this.menuModel) this.menuModel.root.visible = showModel;
-    const side = this.cur === 's-char' ? 3.2 : this.cur === 's-title' ? -3.6 : 0;
-    if (wide) { this.menuCam.position.set(side, 2.6, 8.5); this.menuCam.lookAt(side, 0.9, 0); }
-    else { this.menuCam.position.set(0, 3.4, 12); this.menuCam.lookAt(0, this.cur === 's-char' ? -2.2 : -0.6, 0); }
-    this.renderer.render(this.menuScene, this.menuCam);
+    this.menuT += dt; const t = this.menuT;
+    if (this.menuModel) { this.menuModel.root.rotation.y = t * 0.8; this.menuModel.anim(t); }
+    for (const R of this.menuRacers) {
+      R.a += R.v * dt * (1 + 0.15 * Math.sin(t * 0.7 + R.wob));
+      const x = Math.cos(R.a) * R.r, z = Math.sin(R.a) * R.r;
+      R.m.root.position.set(x, 0.02, z); R.m.root.rotation.y = -R.a + Math.PI;
+      R.m.root.rotateZ(-0.12);
+      for (const w of R.m.kart.wheels) w.g.rotation.x += R.v * R.r * dt / 0.32;
+      R.m.anim(t + R.wob);
+      const fl = R.m.kart.flames; const boost = Math.sin(t * 0.9 + R.wob) > 0.85; fl.forEach(f => { f.visible = boost; f.scale.y = 1 + Math.random() * 0.8; });
+    }
+    const wide = innerWidth > innerHeight, cur = this.cur, c = this.menuCam;
+    if (cur === 's-char') {
+      const side = wide ? 3.6 : 0;
+      c.position.set(side, wide ? 3.6 : 4.6, wide ? 9.5 : 13); c.lookAt(side, wide ? 1.7 : -0.4, 0);
+    } else {
+      const a = t * 0.07 + 0.6, r = wide ? 30 : 38, h = wide ? 10 : 14;
+      c.position.set(Math.cos(a) * r, h, Math.sin(a) * r);
+      const lx = wide && cur === 's-title' ? 4 : 0;
+      c.lookAt(Math.cos(a + Math.PI / 2) * lx, 2.4, Math.sin(a + Math.PI / 2) * lx);
+    }
+    this.renderer.render(this.menuScene, c);
   },
   makeThumbs() {
     const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
@@ -174,7 +229,8 @@ const UI = {
       el.addEventListener('mousedown', () => { ids.add('m'); if (pulse) { Input.touch[key] = true; setTimeout(() => Input.touch[key] = false, 120); } set(); });
       el.addEventListener('mouseup', () => { ids.delete('m'); set(); }); el.addEventListener('mouseleave', () => { ids.delete('m'); set(); });
     };
-    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bBrake', 'b'); btn('bJump', 'jump');
+    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bBrake', 'b'); btn('bJump', 'jump'); btn('bMagic', 'magic', true);
+    this.$('hmagic').addEventListener('mousedown', () => { Input.touch.magic = true; setTimeout(() => Input.touch.magic = false, 120); });
     const itemTap = (e) => { e.preventDefault(); Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); };
     this.$('hitem').addEventListener('touchstart', itemTap, { passive: false });
     this.$('hitem').addEventListener('mousedown', itemTap);
@@ -187,7 +243,7 @@ const UI = {
     });
   },
   back(to) {
-    if (to === 'title') { NET.leave(); this.show('s-title'); }
+    if (to === 'title') { NET.leave(); this.show('s-title'); this.titleMusic(); }
     else this.show(to);
   },
   syncTune() {
@@ -234,7 +290,8 @@ const UI = {
     for (const ch of CHARS) {
       const d = document.createElement('button');
       d.className = 'cc' + (ch.id === this.sel.ch ? ' sel' : '');
-      d.innerHTML = `<img src="${this.thumbs[ch.id]}" alt=""><span>${ch.name}</span>`;
+      d.innerHTML = `<img src="${this.thumbs[ch.id]}" alt=""><span>${ch.name}</span>${ch.rare ? '<em class="rare">RARE</em>' : ''}`;
+      if (ch.rare) d.classList.add('rarecard');
       d.onclick = () => { SND.play('select'); this.sel.ch = ch.id; g.querySelectorAll('.cc').forEach(x => x.classList.remove('sel')); d.classList.add('sel'); this.charInfo(); this.setMenuChar(ch.id); };
       g.appendChild(d);
     }
@@ -244,7 +301,8 @@ const UI = {
   charInfo() {
     const ch = CHARS.find(c => c.id === this.sel.ch);
     const lab = ['スピード', '加速', 'ハンドル', '重さ'];
-    this.$('charInfo').innerHTML = `<h3>${ch.name}</h3><p>${ch.desc}</p>` + ch.st.map((v, i) => `<div class="bar"><label>${lab[i]}</label><i><b style="width:${v * 20}%"></b></i></div>`).join('');
+    const M = MAGIC[ch.id];
+    this.$('charInfo').innerHTML = `<h3>${ch.name}${ch.rare ? ' <em class="rare">★RARE</em>' : ''}</h3><p>${ch.desc}</p><p class="cmagic">✨ 魔法「${M.name}」<br><small>${M.desc}</small></p>` + ch.st.map((v, i) => `<div class="bar"><label>${lab[i]}</label><i><b style="width:${v * 20}%"></b></i></div>`).join('');
   },
   courseThumb(def) {
     const cv = document.createElement('canvas'); cv.width = cv.height = 120;
@@ -305,7 +363,7 @@ const UI = {
   },
   // ---- レース開始 ----
   makeField(n) {
-    const others = CHARS.filter(c => c.id !== this.sel.ch).sort(() => Math.random() - 0.5).slice(0, n - 1);
+    const others = CHARS.filter(c => c.id !== this.sel.ch && !c.rare).sort(() => Math.random() - 0.5).slice(0, n - 1);
     const ai = others.map((c, i) => ({ ch: c.id, type: 'ai', name: c.name, skill: (this.sel.cc === 200 ? 0.97 : 0.95) + (i / n) * 0.045 }));
     return ai;
   },
@@ -351,7 +409,7 @@ const UI = {
   quit() {
     GAME.dispose(); HUD.hide(); this.$('btnPause').style.display = 'none';
     if (NET.active) { NET.leave(); }
-    this.gp = null; this.show('s-title');
+    this.gp = null; this.show('s-title'); this.titleMusic();
   },
   retry() {
     if (this.gp) { this.runGPRace(); return; }

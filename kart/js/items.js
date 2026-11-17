@@ -362,7 +362,7 @@ Object.assign(Game.prototype, {
           if (p.vh !== null) { p.vh -= 28 * dt; p.h += p.vh * dt; }
           if (p.h <= off + 0.5 && p.vh !== null) {
             p.h = off + 0.5;
-            if (T === 'waterb') { SND.play('splash'); this.explode(p, 4.8, 'slip', { balloons: 1 }, 0x5ab8ff); this.removeProj(p, false); continue; }
+            if (T === 'waterb') { SND.splash(0.9); for (let q = 0; q < 30; q++) { const a = Math.random() * 6.28, sp = 4 + Math.random() * 8; this.particles.emit(p.mesh.position, new THREE.Vector3(Math.cos(a) * sp, 6 + Math.random() * 10, Math.sin(a) * sp), q % 2 ? 0xf4fbff : 0x9ad4ff, 0.8, 0.6, 0.15, 24, false); } this.explode(p, 4.8, 'slip', { balloons: 1 }, 0x5ab8ff); this.removeProj(p, false); continue; }
             if (T === 'tako') { SND.play('sizzle'); this.explode(p, 2.8, 'burn', { balloons: 1 }, 0xd88a3a); this.removeProj(p, false); continue; }
             if (T === 'bomb') { p.vh = null; p.v = 0; p.life = Math.min(p.life, 1.1); }
           }

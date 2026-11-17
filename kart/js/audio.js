@@ -72,7 +72,7 @@ const SND = {
       case 'fall': T(900, 0.9, 'triangle', 0.2, 0.15); break;
       case 'select': T(880, 0.07, 'square', 0.1); T(1320, 0.07, 'sine', 0.06, 0, 0.03); break;
       case 'back': T(440, 0.07, 'square', 0.1); break;
-      case 'splash': N(0.6, 0.5, 1400, 0.6, 0.3); N(0.3, 0.3, 400, 1, 1, 0.05); for (let i = 0; i < 5; i++) T(800 + Math.random() * 1200, 0.06, 'sine', 0.05, 1.5, 0.05 + i * 0.04); break;
+      case 'splash': this.splash(0.8); break;
       case 'land': N(0.15, 0.35, 180, 1); T(70, 0.15, 'sine', 0.3, 0.5); break;
       // --- アイテム ---
       case 'scope': T(2400, 0.06, 'sine', 0.08); T(2400, 0.06, 'sine', 0.08, 0, 0.15); T(2400, 0.3, 'sine', 0.08, 0, 0.3); break;
@@ -128,6 +128,11 @@ const SND = {
       case 'clank': T(1800, 0.08, 'square', 0.12, 0.6); T(900, 0.1, 'square', 0.1, 0.7, 0.07); N(0.08, 0.3, 3000, 1, 1, 0.14); break;
       case 'firework': T(400 + Math.random() * 300, 0.5, 'sine', 0.05, 3); N(0.6, 0.35, 900, 0.5, 0.3, 0.45); N(0.9, 0.12, 5000, 1, 1, 0.55, 'highpass'); break;
       case 'chirp': [0, 0.09, 0.2].forEach(d => T(3200 + Math.random() * 900, 0.06, 'sine', 0.05, 1.3, d)); break;
+      case 'title': [523, 659, 784, 1046, 1318].forEach((f, i) => { T(f, 0.22, 'square', 0.12, 0, i * 0.07); T(f * 2, 0.18, 'sine', 0.05, 0, i * 0.07); }); [1046, 1318, 1568].forEach(f => T(f, 0.9, 'triangle', 0.08, 0, 0.4)); N(0.6, 0.15, 6000, 1, 1, 0.35, 'highpass'); break;
+      case 'magicReady': [1046, 1318, 1568, 2093].forEach((f, i) => T(f, 0.16, 'sine', 0.1, 0, i * 0.05)); break;
+      case 'magic': N(0.9, 0.3, 3000, 0.7, 0.3); [523, 784, 1046, 1568, 2093].forEach((f, i) => T(f, 0.5, 'triangle', 0.09, 1.01, i * 0.05)); T(150, 0.6, 'sawtooth', 0.12, 3, 0); break;
+      case 'magicRare': N(1.4, 0.35, 2500, 0.5, 0.25); [392, 523, 659, 784, 1046, 1318, 1568, 2093].forEach((f, i) => { T(f, 0.8, 'triangle', 0.08, 1.005, i * 0.06); T(f * 1.5, 0.6, 'sine', 0.04, 1, i * 0.06 + 0.03); }); T(80, 1.2, 'sawtooth', 0.15, 4, 0); break;
+      case 'woof': T(520, 0.08, 'square', 0.12, 0.6); T(440, 0.12, 'square', 0.1, 0.5, 0.1); break;
       case 'heart': T(55, 0.15, 'sine', 0.7, 0.6); T(50, 0.15, 'sine', 0.55, 0.6, 0.18); break;
     }
   },
@@ -150,7 +155,34 @@ const SND = {
     this.engine.f.frequency.setTargetAtTime(500 + Math.abs(sp) * 20, t, 0.1);
     this.engine.g.gain.setTargetAtTime(0.04 + Math.min(0.06, Math.abs(sp) * 0.0013), t, 0.1);
   },
-  stopEngine() { if (this.engine) { this.engine.o1.stop(); this.engine.o2.stop(); this.engine = null; } },
+  // ---- 水しぶき：ドボン（低音）＋ザバァ（広帯域）＋パラパラ（水滴）＋シャー（余韻） ----
+  splash(power = 1) {
+    if (!this.ctx) return;
+    const p = U.clamp(power, 0.2, 1.4), T = (...a) => this.tone(...a), N = (...a) => this.noise(...a);
+    T(95, 0.35, 'sine', 0.55 * p, 0.45);                       // ドボン
+    N(0.18, 0.7 * p, 900, 0.4, 0.35, 0, 'lowpass');             // 水を割る衝撃
+    N(0.9 * p + 0.3, 0.55 * p, 1800, 0.5, 0.25);                // ザバァ
+    N(1.3 * p + 0.3, 0.22 * p, 5200, 0.8, 0.7, 0.08, 'highpass'); // シャー
+    const n = Math.round(10 + 16 * p);
+    for (let i = 0; i < n; i++) { const d = 0.08 + Math.random() * (0.5 + 0.6 * p); T(1300 + Math.random() * 2600, 0.04 + Math.random() * 0.05, 'sine', 0.05 + Math.random() * 0.05, 1.6 + Math.random(), d); }
+  },
+  setWake(level) {
+    if (!this.ctx) return;
+    if (!this.wake) {
+      const s = this.ctx.createBufferSource(); s.buffer = this.noiseBuf; s.loop = true;
+      const bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 0.6;
+      const hp = this.ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 500;
+      const g = this.ctx.createGain(); g.gain.value = 0;
+      const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain(); lfo.frequency.value = 7; lg.gain.value = 400; lfo.connect(lg); lg.connect(bp.frequency); lfo.start();
+      s.connect(bp); bp.connect(hp); hp.connect(g); g.connect(this.sfx); s.start();
+      this.wake = { s, g, bp, lfo };
+    }
+    const t = this.now();
+    this.wake.g.gain.setTargetAtTime(level * 0.38, t, 0.08);
+    this.wake.bp.frequency.setTargetAtTime(900 + level * 1600, t, 0.1);
+  },
+  stopEngine() {
+    if (this.wake) { try { this.wake.s.stop(); this.wake.lfo.stop(); } catch (e) { } this.wake = null; } if (this.engine) { this.engine.o1.stop(); this.engine.o2.stop(); this.engine = null; } },
 
   // ---- BGM：イントロ→Aメロ→Bメロ→サビ の構成で自動作曲 ----
   startBGM(m) {

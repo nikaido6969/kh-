@@ -282,6 +282,36 @@ const CHARS = [
       return (t) => { bow.rotation.z = Math.sin(t * 5) * 0.3; };
     },
   },
+  {
+    id: 'omunie', name: 'おむにえさん', desc: '紫に光る謎のレアキャラ。全能の魔法を操る', color: 0x7a2ad8, st: [5, 4, 4, 3], rare: true,
+    build(g) {
+      const robe = U.mat(0x6a1ac8, { r: 0.35, e: 0x2a0a50, ei: 0.6 });
+      const gold = U.mat(0xffd23a, { m: 0.8, r: 0.25, e: 0x6a4a00, ei: 0.4 });
+      mk(g, GEO.cone(0.62, 1.25, 20), 0, 0, 0.62, 0, { mat: robe });
+      const head = new THREE.Group(); head.position.y = 1.36; g.add(head);
+      mk(head, GEO.sph(0.38, 18, 14), 0xb08aff, 0, 0, 0, { mo: { r: 0.3, e: 0x3a1a8a, ei: 0.5 } });
+      mk(head, GEO.cone(0.46, 0.7, 20), 0, 0, 0.32, -0.06, { mat: robe, r: [-0.25, 0, 0] });
+      for (const s of [-1, 1]) {
+        mk(head, GEO.sph(0.085, 10, 8), 0xffffff, s * 0.14, 0.02, 0.32, { mo: { e: 0xffffff, ei: 1.4 } });
+        mk(head, GEO.sph(0.045, 8, 6), 0x3a0a8a, s * 0.14, 0.02, 0.4);
+      }
+      mk(head, GEO.box(0.12, 0.03, 0.02), 0x3a0a8a, 0, -0.14, 0.36);
+      const halo = mk(g, GEO.tor(0.36, 0.05, Math.PI * 2), 0, 0, 1.98, -0.05, { mat: gold, r: [Math.PI / 2 - 0.25, 0, 0] });
+      const orbs = [];
+      for (let i = 0; i < 3; i++) {
+        const o = new THREE.Mesh(GEO.sph(0.11, 10, 8), new THREE.MeshBasicMaterial({ color: [0xff7af0, 0xb07aff, 0x7ad8ff][i] }));
+        const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: U.glowTex(), color: [0xff7af0, 0xb07aff, 0x7ad8ff][i], transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+        gl.scale.set(0.7, 0.7, 0.7); o.add(gl); g.add(o); orbs.push(o);
+      }
+      const wand = new THREE.Group(); wand.position.set(0.45, 1.0, 0.25); g.add(wand);
+      mk(wand, GEO.cyl(0.03, 0.03, 0.8, 6), 0x3a1a0a, 0, 0.2, 0, { r: [0.3, 0, -0.3] });
+      mk(wand, new THREE.OctahedronGeometry(0.13, 0), 0, 0.12, 0.6, 0.12, { mat: gold });
+      return (t) => {
+        orbs.forEach((o, i) => { const a = t * 2.2 + i * 2.09; o.position.set(Math.cos(a) * 0.75, 1.2 + Math.sin(t * 3 + i) * 0.18, Math.sin(a) * 0.75); });
+        halo.rotation.z = t * 1.5; head.position.y = 1.36 + Math.sin(t * 2.5) * 0.04; wand.rotation.z = Math.sin(t * 3) * 0.25;
+      };
+    },
+  },
 ];
 
 // ===== カート =====

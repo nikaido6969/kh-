@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#f6efe4">
 <title>くねくねカート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800;900&display=swap">
 <style>
 :root{--bg:#f6efe4;--card:rgba(255,255,255,.86);--ink:#2a2622;--sub:#8a7f72;--acc:#ff4f7a;--acc2:#ffb020;--line:rgba(60,40,20,.12)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
 #cv{position:fixed;inset:0;width:100%;height:100%;display:block}
 button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:max(16px,env(safe-area-inset-top)) 16px 16px;overflow-y:auto;z-index:20;animation:fade .35s ease}
@@ -104,6 +106,41 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #htoasts{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;width:min(92vw,520px)}
 .toast{background:rgba(20,16,30,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 14px;border-radius:999px;font-weight:800;font-size:15px;animation:tin .25s cubic-bezier(.2,1.5,.4,1)}
 @keyframes tin{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
+#hdrops{position:absolute;inset:0;pointer-events:none}
+#hdrops i{position:absolute;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),rgba(200,230,255,.35) 40%,rgba(160,210,255,.12) 70%,transparent);box-shadow:inset 0 -3px 6px rgba(255,255,255,.35);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0}
+#hdrops.on i{animation:drop 2.2s ease-in forwards}
+@keyframes drop{0%{opacity:0;transform:scale(.4)}8%{opacity:1;transform:scale(1)}70%{opacity:.85}100%{opacity:0;transform:translateY(60px) scaleY(1.3)}}
+#hmagic{position:absolute;left:50%;top:calc(max(10px,env(safe-area-inset-top)) + 4px);margin-left:52px;width:140px;padding:6px 10px;border-radius:14px;background:rgba(20,10,40,.5);pointer-events:auto;cursor:pointer;--p:0%}
+#hmagic i{display:block;height:8px;border-radius:9px;background:linear-gradient(90deg,#b05aff var(--p),rgba(255,255,255,.2) var(--p))}
+#hmagic span{font-size:11px;font-weight:900}#hmagic kbd{font-size:10px;background:rgba(255,255,255,.25);border-radius:4px;padding:0 4px}
+#hmagic b{display:block;font-size:11px;font-weight:800;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hmagic.full{box-shadow:0 0 0 2px #e0b0ff,0 0 18px #b05aff;animation:mg 0.8s infinite alternate}
+@keyframes mg{to{box-shadow:0 0 0 2px #fff,0 0 28px #d08aff}}
+body.touch #hmagic{display:none}
+#bMagic{left:auto;right:calc(max(18px,env(safe-area-inset-right)) + 236px);bottom:30px;width:78px;height:78px;--p:0%;background:conic-gradient(#b05aff var(--p),rgba(20,16,30,.42) var(--p))}
+#bMagic.full{border-color:#f0d0ff;box-shadow:0 0 22px #b05aff;animation:mg 0.8s infinite alternate}
+#hfun{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#hfun .eraser{position:absolute;top:30%;left:-40%;width:38%;height:34%;border-radius:14px;background:linear-gradient(90deg,#fff 0 62%,#2a5ad8 62% 100%);box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:flex-start;padding-left:6%;font-family:"Dela Gothic One",sans-serif;font-size:60px;color:#2a1652;text-shadow:none}
+#hfun.er .eraser{animation:era 1.5s ease-in-out forwards}
+@keyframes era{0%{left:-40%;transform:rotate(-8deg)}25%{left:20%;transform:rotate(8deg)}50%{left:45%;transform:rotate(-8deg)}75%{left:70%;transform:rotate(8deg)}100%{left:110%;transform:rotate(-8deg)}}
+#hfun .slash{position:absolute;left:-10%;right:-10%;top:48%;height:10px;background:linear-gradient(90deg,transparent,#fff 30%,#fff 70%,transparent);box-shadow:0 0 24px #fff;transform:rotate(-14deg) scaleX(0)}
+#hfun.sl .slash{animation:sla .7s ease-out forwards}
+@keyframes sla{0%{transform:rotate(-14deg) scaleX(0)}30%{transform:rotate(-14deg) scaleX(1)}100%{transform:rotate(-14deg) scaleX(1);opacity:0}}
+#hcutin{position:absolute;left:0;right:0;top:30%;height:130px;pointer-events:none;opacity:0}
+#hcutin.on{animation:cut 2.1s cubic-bezier(.2,.9,.3,1) forwards}
+@keyframes cut{0%{opacity:1;transform:translateX(100%)}14%{transform:translateX(0)}80%{opacity:1;transform:translateX(-3%)}100%{opacity:0;transform:translateX(-110%)}}
+#hcutin .cbg{position:absolute;inset:0;background:linear-gradient(100deg,transparent 0,var(--mc) 12%,var(--mc) 88%,transparent 100%);transform:skewY(-4deg);opacity:.92;box-shadow:0 0 0 4px #fff inset}
+#hcutin img{position:absolute;left:12%;top:-25px;height:170px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+#hcutin .ctx{position:absolute;left:calc(12% + 180px);top:18px;right:6%;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.45)}
+#hcutin .ctx small{font-family:"Dela Gothic One",sans-serif;letter-spacing:.3em;font-size:13px}
+#hcutin .ctx b{display:block;font-family:"Dela Gothic One",sans-serif;font-size:clamp(26px,5vw,48px);line-height:1.1}
+#hcutin .ctx span{font-size:14px;font-weight:800}
+#hcutin.rare .cbg{background:linear-gradient(100deg,transparent 0,#3a0a7a 12%,#b05aff 50%,#3a0a7a 88%,transparent 100%)}
+.cc{position:relative}
+.cc .rare,h3 .rare{font-style:normal;font-size:9px;font-weight:900;color:#fff;background:linear-gradient(135deg,#ff7af0,#7a2ad8);border-radius:6px;padding:1px 5px}
+.cc .rare{position:absolute;top:2px;right:2px}
+.rarecard{background:linear-gradient(160deg,#f4e8ff,#e0c8ff)!important;box-shadow:0 0 0 2px #b05aff,0 0 16px rgba(176,90,255,.6)}
+.cmagic{color:#7a2ad8!important;font-weight:900}.cmagic small{color:#6a5a8a;font-weight:500}
 #hgas{position:absolute;inset:0;background:radial-gradient(circle,transparent 30%,rgba(90,200,40,.7));opacity:0;transition:opacity .4s}
 #hhorror{position:absolute;inset:0;opacity:0;transition:opacity .8s;background:radial-gradient(ellipse at center,rgba(0,0,0,.15) 20%,rgba(0,0,0,.92) 80%)}
 #hhorror.on{opacity:1;animation:flick 2.3s infinite}
@@ -123,7 +160,8 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #cv{transition:filter .3s}
 #btnPause{position:fixed;right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));z-index:15;display:none;background:rgba(255,255,255,.3);color:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;font-weight:900}
 /* タッチ */
-#touch{position:fixed;inset:0;pointer-events:none;z-index:12;display:none}
+#touch{position:fixed;inset:0;pointer-events:none;z-index:12;display:none!important}
+body.touch.racing #touch{display:block!important}
 #touch button{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.6);color:#fff;font-weight:900;font-size:22px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);touch-action:none}
 #touch button.on{background:rgba(255,255,255,.55)}
 #tstick{position:absolute;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(255,255,255,.1);opacity:0;transition:opacity .12s;pointer-events:none}
@@ -157,12 +195,57 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 #tzR.on{background:linear-gradient(270deg,rgba(255,255,255,.18),transparent 60%)}
 #thint{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;padding:10px 16px;border-radius:16px;font-size:14px;line-height:1.6;text-align:center;transition:opacity .6s;pointer-events:none;width:max-content;max-width:90vw}
 #hitem{pointer-events:auto}
-@media (min-aspect-ratio:1/1){#s-title{align-items:flex-start;padding-left:7vw}#s-title .logo,#s-title .tag{text-align:left}#s-title>div[style]{height:3vh!important}}
 .tune{display:grid;gap:8px;padding:14px 16px}
 .tune label{display:flex;justify-content:space-between;font-weight:800}
 .tune input[type=range]{width:100%;accent-color:var(--acc);padding:0}
 .tune .tl{display:flex;justify-content:space-between;font-size:12px;color:var(--sub)}
 .tune small{color:var(--sub);font-size:12px;text-align:center}
+/* ===== タイトル ===== */
+#s-title{padding:0;overflow:hidden;justify-content:center;align-items:stretch;flex-direction:row;gap:0}
+.tvig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 120% 90% at 50% 40%,transparent 45%,rgba(20,10,40,.45)),linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(20,10,40,.35))}
+.tlogo{position:relative;align-self:center;flex:1 1 50%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4vh 2vw;transform:rotate(-4deg);animation:lgin .9s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes lgin{from{transform:rotate(-4deg) scale(.2) translateY(-60px);opacity:0}to{transform:rotate(-4deg) scale(1);opacity:1}}
+.tl1,.tl2{font-family:"Dela Gothic One","Hiragino Sans",sans-serif;line-height:.95;display:flex;gap:.02em;white-space:nowrap}
+.tl1{font-size:clamp(52px,10.5vw,128px)}
+.tl2{font-size:clamp(64px,13vw,160px);margin-top:-.04em}
+.tl1 span,.tl2 span{display:inline-block;-webkit-text-stroke:.16em #2a1652;paint-order:stroke fill;color:transparent;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 .06em 0 #2a1652) drop-shadow(0 .14em .12em rgba(30,10,60,.45));animation:wave 2.4s ease-in-out infinite}
+.tl1 span:nth-child(1){background-image:linear-gradient(180deg,#fff6a8,#ffb020);animation-delay:0s}
+.tl1 span:nth-child(2){background-image:linear-gradient(180deg,#ffd0e8,#ff4f9a);animation-delay:.12s}
+.tl1 span:nth-child(3){background-image:linear-gradient(180deg,#c8ffd8,#30c070);animation-delay:.24s}
+.tl1 span:nth-child(4){background-image:linear-gradient(180deg,#c8ecff,#3a8aff);animation-delay:.36s}
+.tl2 span{background-image:linear-gradient(180deg,#ffffff 0%,#ffe04a 40%,#ff7a1a 100%);animation-delay:calc(.48s + var(--i,0)*.12s)}
+.tl2 span:nth-child(2){--i:1}.tl2 span:nth-child(3){--i:2}
+@keyframes wave{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-.08em) rotate(-3deg)}50%{transform:translateY(0) rotate(0)}}
+.tsub{margin-top:.6em;font-family:"Dela Gothic One",sans-serif;font-size:clamp(12px,1.6vw,18px);letter-spacing:.42em;color:#fff;background:#2a1652;padding:.35em 1em .3em 1.4em;border-radius:999px;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.tlogo::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);background-size:250% 100%;mix-blend-mode:overlay;animation:shine 4.5s ease-in-out infinite 1.2s;-webkit-mask:linear-gradient(#000,#000)}
+@keyframes shine{0%{background-position:150% 0}35%,100%{background-position:-60% 0}}
+.tsp{position:absolute;width:22px;height:22px;pointer-events:none;background:radial-gradient(circle,#fff 0 18%,transparent 20%),linear-gradient(0deg,transparent 45%,#fff 48% 52%,transparent 55%),linear-gradient(90deg,transparent 45%,#fff 48% 52%,transparent 55%);animation:twk 2.1s ease-in-out infinite;filter:drop-shadow(0 0 6px #fff)}
+@keyframes twk{0%,100%{transform:scale(0) rotate(0);opacity:0}50%{transform:scale(1) rotate(45deg);opacity:1}}
+.tpress{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px 38px 12px;border-radius:999px;background:linear-gradient(180deg,#ff6a8a,#ff3a6a);border:4px solid #fff;color:#fff;font-family:"Dela Gothic One",sans-serif;font-size:clamp(18px,3vw,26px);box-shadow:0 6px 0 #a01848,0 14px 30px rgba(80,0,40,.45);animation:pulse 1.4s ease-in-out infinite}
+.tpress small{font-family:inherit;font-size:.48em;letter-spacing:.3em;opacity:.9}
+@keyframes pulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.06)}}
+.tmenu{position:relative;z-index:2;flex:1 1 46%;max-width:480px;align-self:center;display:none;flex-direction:column;gap:9px;padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 14px 8px;max-height:100%;overflow-y:auto}
+#s-title.menu-on .tmenu{display:flex}
+#s-title.menu-on .tpress{display:none}
+.mbtn{position:relative;display:flex;align-items:center;gap:12px;padding:9px 14px 9px 9px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(246,240,255,.92));border:3px solid #fff;box-shadow:0 5px 0 rgba(42,22,82,.28),0 10px 24px rgba(30,10,60,.22);text-align:left;font-family:inherit;color:#2a1652;transition:transform .15s,box-shadow .15s;opacity:0;animation:min .5s cubic-bezier(.2,1.3,.4,1) forwards}
+.mbtn:nth-child(1){animation-delay:.05s}.mbtn:nth-child(2){animation-delay:.12s}.mbtn:nth-child(3){animation-delay:.19s}.mbtn:nth-child(4){animation-delay:.26s}.mbtn:nth-child(5){animation-delay:.33s}
+@keyframes min{from{opacity:0;transform:translateX(60px) scale(.9)}to{opacity:1;transform:none}}
+.mbtn:hover,.mbtn:focus-visible{transform:translateX(-6px) scale(1.02);box-shadow:0 7px 0 rgba(42,22,82,.3),0 14px 30px rgba(30,10,60,.3);outline:none}
+.mbtn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(42,22,82,.3)}
+.mic{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:inset 0 -4px 0 rgba(0,0,0,.18),inset 0 3px 0 rgba(255,255,255,.4)}
+.mtx{flex:1;min-width:0;display:flex;flex-direction:column}
+.mtx b{font-size:19px;font-weight:900;letter-spacing:.02em}
+.mtx small{font-size:11.5px;font-weight:500;color:#6a5a8a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mgo{font-size:28px;font-weight:900;color:var(--c2);line-height:1}
+.mbtn.big{padding:12px 16px 12px 11px;background:linear-gradient(180deg,#fff8d8,#ffe8b0)}
+.mbtn.big .mic{width:58px;height:58px;font-size:32px}
+.mbtn.big .mtx b{font-size:23px}
+.mchips{display:flex;gap:8px;justify-content:flex-end;opacity:0;animation:min .5s .42s forwards}
+.mchip{padding:8px 16px;border-radius:999px;background:rgba(42,22,82,.72);color:#fff;font-family:inherit;font-weight:800;font-size:13px;border:2px solid rgba(255,255,255,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.tver{position:absolute;left:max(12px,env(safe-area-inset-left));bottom:8px;font-size:11px;font-weight:800;color:rgba(255,255,255,.75);letter-spacing:.1em}
+@media (orientation:portrait){#s-title{flex-direction:column;justify-content:flex-start}.tlogo{flex:none;padding-top:8vh}.tmenu{flex:none;width:100%;max-width:520px;align-self:center;padding:10px 16px 24px}}
+@media (orientation:landscape) and (max-height:500px){.tl1{font-size:13vh}.tl2{font-size:16.5vh}.mbtn{padding:6px 12px 6px 7px;gap:10px}.mic{width:40px;height:40px;font-size:22px}.mbtn.big .mic{width:46px;height:46px;font-size:26px}.mtx b{font-size:16px}.mbtn.big .mtx b{font-size:19px}.mtx small{font-size:10.5px}.tmenu{gap:6px}}
+@media (prefers-reduced-motion:reduce){.tl1 span,.tl2 span,.tsp,.tpress,.tlogo::after{animation:none}}
 #s-pause,#s-results{justify-content:center;background:rgba(246,239,228,.4)}
 </style>
 </head>
@@ -177,7 +260,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
   <canvas id="hmap" width="170" height="170"></canvas>
   <div id="hmtw"><div id="hmt"></div></div>
   <div id="hflow"><span>ノリノリ</span><i><b id="hflowb"></b></i></div>
-  <div id="hgas"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
+  <div id="hcutin"></div><div id="hfun"></div><div id="hmagic" title="M キーで魔法"><i></i><span>魔法 <kbd>M</kbd></span><b id="hmagicN"></b></div><div id="hgas"></div><div id="hdrops"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
   <div id="hmsg"></div><div id="hink"></div><div id="hflash"></div><div id="hbanner"></div><div id="htoasts"></div>
 </div>
 <button id="btnPause">Ⅱ</button>
@@ -186,6 +269,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
   <div id="tpad"><span>ここに左手の親指を置いて<br>左右にスライド＝ハンドル</span></div>
   <button class="tbtn" id="bItem"><b id="bItemI">🎁</b><small>アイテム</small></button>
   <button class="tbtn" id="bDrift"><b>↪︎</b><small>ドリフト<br>(長押し)</small></button>
+  <button class="tbtn" id="bMagic"><b>✨</b><small>魔法</small></button>
   <button class="tbtn" id="bJump"><b>⤴︎</b><small>ジャンプ</small></button>
   <button class="tbtn" id="bBrake"><b>⏪</b><small>ブレーキ</small></button>
   <div id="thint">左手：親指を置いて左右にスライドでハンドル<br>右手：ドリフト（曲がりながら長押し→離すと加速）／ジャンプ（罠をとび越える・空中で押すと着地加速）<br>アイテムボタンで使う／ブレーキ長押しでバック<br>📱 iPhoneを傾けても少し曲がります</div>
@@ -195,17 +279,23 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 
 <!-- タイトル -->
 <div class="screen" id="s-title">
-  <h1 class="logo">くねくね<br>カート</h1>
-  <p class="tag">18人の変なやつらと、12の空想コース・8つのバトルステージで暴れろ</p>
-  <div style="height:min(30vh,240px)"></div>
-  <div class="menu">
-    <button class="btn pri" data-mode="gp"><span class="ic">🏆</span><span>グランプリ<small>4コース連戦・ポイントで総合優勝を狙え</small></span></button>
-    <button class="btn" data-mode="vs"><span class="ic">🏁</span><span>VSレース<small>好きなコースで1レース</small></span></button>
-    <button class="btn pri" data-mode="battle" style="background:linear-gradient(135deg,#3aa8ff,#9a5aff)"><span class="ic">🎈</span><span>風船バトル<small>風船10個を守りきれ！8ステージ・ありえない武器</small></span></button>
-    <button class="btn" data-mode="tt"><span class="ic">⏱️</span><span>タイムアタック<small>ひとりで最速タイムに挑戦</small></span></button>
-    <button class="btn" data-mode="online"><span class="ic">🌐</span><span>友達対戦<small>部屋コードでオンライン対戦（最大8人）</small></span></button>
-    <div class="row2"><button class="btn" id="btnHelp"><span class="ic">🎮</span>操作方法</button><button class="btn" id="btnSet"><span class="ic">⚙️</span>設定</button></div>
+  <div class="tvig"></div>
+  <div class="tlogo" aria-label="くねくねカート">
+    <div class="tl1"><span>く</span><span>ね</span><span>く</span><span>ね</span></div>
+    <div class="tl2"><span>カ</span><span>ー</span><span>ト</span></div>
+    <div class="tsub">KUNEKUNE KART</div>
+    <i class="tsp" style="left:8%;top:12%"></i><i class="tsp" style="left:88%;top:28%;animation-delay:.7s"></i><i class="tsp" style="left:62%;top:86%;animation-delay:1.4s"></i>
   </div>
+  <button class="tpress" id="tPress"><span>タップしてスタート</span><small>TAP TO START</small></button>
+  <nav class="tmenu" id="tMenu">
+    <button class="mbtn big" data-mode="gp" style="--c1:#ffb020;--c2:#ff4f7a"><span class="mic">🏆</span><span class="mtx"><b>グランプリ</b><small>4コース連戦で総合優勝を狙え</small></span><span class="mgo">›</span></button>
+    <button class="mbtn" data-mode="battle" style="--c1:#5ad8ff;--c2:#7a5aff"><span class="mic">🎈</span><span class="mtx"><b>風船バトル</b><small>重火器ありの大乱闘・8ステージ</small></span><span class="mgo">›</span></button>
+    <button class="mbtn" data-mode="vs" style="--c1:#7dff8a;--c2:#20b070"><span class="mic">🏁</span><span class="mtx"><b>VSレース</b><small>好きなコースで1レース</small></span><span class="mgo">›</span></button>
+    <button class="mbtn" data-mode="tt" style="--c1:#ffe04a;--c2:#ff8a3a"><span class="mic">⏱️</span><span class="mtx"><b>タイムアタック</b><small>ひとりで最速タイムに挑戦</small></span><span class="mgo">›</span></button>
+    <button class="mbtn" data-mode="online" style="--c1:#ff8ad8;--c2:#b05aff"><span class="mic">🌐</span><span class="mtx"><b>友達対戦</b><small>部屋コードでオンライン（最大8人）</small></span><span class="mgo">›</span></button>
+    <div class="mchips"><button class="mchip" id="btnHelp">🎮 操作方法</button><button class="mchip" id="btnSet">⚙️ 設定</button></div>
+  </nav>
+  <div class="tver">ver 1.0</div>
 </div>
 
 <div class="screen" id="s-cc">
@@ -280,6 +370,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
     🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
     🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
+    ✨ <b>魔法</b>：キャラごとに固有の魔法あり。走る・アイテム箱・ミニターボでゲージが溜まり、満タンで「魔法」ボタン（キーボードはM）。紫のレアキャラ「おむにえさん」は全能の魔法を使える。<br>
     📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その上＝ジャンプ（罠や地雷をとび越える。ジャンプ台から飛んだ空中で押すと着地で加速）、左＝アイテム、左上＝ブレーキ（長押しでバック）。キーボードはJでジャンプ。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
     <p><b>重火器（レース・バトル共通）</b>：🔫機関銃（前方に連射）　💥バズーカ（一直線のロケット弾・大爆発）　⚠️地雷（後ろに3個・踏むと爆発）　🚀ミサイル（前の相手を追尾）</p>
@@ -340,6 +431,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 <script src="js/npc.js"></script>
 <script src="js/gimmick.js"></script>
 <script src="js/scenery.js"></script>
+<script src="js/magic.js"></script>
 <script src="js/net.js"></script>
 <script src="js/ui.js"></script>
 </body>

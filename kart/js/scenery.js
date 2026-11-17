@@ -279,6 +279,65 @@ Object.assign(Game.prototype, {
       }
     }
     S.fx = S.fx.filter(f => f.t > 0);
+    if (S.rings) for (const r of S.rings) { if (r.t <= 0) continue; r.t -= dt; const k2 = 1 - r.t / 1.1; const sc = r.size * (0.4 + k2 * 2.6); r.m.scale.set(sc, sc, sc); r.m.material.opacity = 0.6 * (1 - k2); if (r.t <= 0) r.m.visible = false; }
+  },
+
+  // ---- 水しぶき ----
+  waterSplash(k, entering) {
+    const p = k.model.root.position;
+    const near = !this.player || p.distanceTo(this.camera.position) < 90;
+    if (!near) return;
+    const power = U.clamp(Math.abs(k.v) / 35 + Math.abs(k.vh) / 12, 0.25, 1.4);
+    const wy = this.def.water, at = new THREE.Vector3(p.x, wy + 0.1, p.z);
+    const F = this.fwdVec(k);
+    // 王冠状に飛び散る水柱
+    const n = Math.round(80 * power);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = 4 + Math.random() * 9 * power;
+      const v = new THREE.Vector3(Math.cos(a) * sp, 7 + Math.random() * 12 * power, Math.sin(a) * sp).addScaledVector(F, Math.abs(k.v) * 0.35);
+      this.particles.emit(at, v, i % 3 ? 0xd8eeff : 0x7fb8e0, 0.75 + Math.random() * 0.6, 0.9 + Math.random() * 0.8, 0.25, 24, false);
+    }
+    // 霧
+    for (let i = 0; i < 10 * power; i++) this.particles.emit(at.clone().add(new THREE.Vector3((Math.random() - 0.5) * 3, 0.5 + Math.random() * 1.5, (Math.random() - 0.5) * 3)), new THREE.Vector3((Math.random() - 0.5) * 3, 2 + Math.random() * 2, (Math.random() - 0.5) * 3), 0xffffff, 1.4, 1.6, 4.5, 0, false);
+    this.ripple(at, 1.2 + power * 2.2);
+    if (k.isPlayer) { SND.splash(power); HUD.shake(0.25 * power); if (entering && power > 0.7) this.screenDrops(); }
+    else if (p.distanceTo(this.camera.position) < 40) SND.splash(power * 0.5);
+  },
+  waterSpray(k, dt) {
+    if (!k.inWater || !k.grounded || k.waterDepth > 2.4 || Math.abs(k.v) < 8) return;
+    const p = k.model.root.position; if (this.player && p.distanceTo(this.camera.position) > 70) return;
+    const F = this.fwdVec(k), up = new THREE.Vector3(0, 1, 0), L = new THREE.Vector3().crossVectors(up, F).normalize();
+    const sp = Math.abs(k.v), wy = this.def.water;
+    const rate = Math.round(2 + sp / 7);
+    for (let i = 0; i < rate; i++) {
+      for (const s of [-1, 1]) {   // 車輪の横に扇状のしぶき
+        const at = p.clone().addScaledVector(F, -0.7).addScaledVector(L, s * 0.9); at.y = wy + 0.05;
+        const v = new THREE.Vector3().addScaledVector(L, s * (3 + Math.random() * sp * 0.18)).addScaledVector(F, -sp * 0.15 + Math.random() * 2);
+        v.y = 3 + Math.random() * sp * 0.22;
+        this.particles.emit(at, v, Math.random() < 0.5 ? 0xd8eeff : 0x8cc0e6, 0.45 + Math.random() * 0.35, 0.6 + Math.random() * 0.5, 0.15, 22, false);
+      }
+    }
+    if (Math.random() < sp / 40) {   // 後ろに立ちのぼる水煙（ルースターテール）
+      const at = p.clone().addScaledVector(F, -1.6); at.y = wy + 0.2;
+      this.particles.emit(at, new THREE.Vector3().addScaledVector(F, -sp * 0.2).add(new THREE.Vector3(0, 5 + Math.random() * 3, 0)), 0xffffff, 0.9, 0.8, 2.6, 6, false);
+    }
+    k.rippleT = (k.rippleT || 0) - dt;
+    if (k.rippleT <= 0) { k.rippleT = 0.12; this.ripple(new THREE.Vector3(p.x, wy + 0.06, p.z), 0.8); }
+  },
+  ripple(at, size) {
+    const S = this.scn; if (!S) return;
+    if (!S.rings) S.rings = [];
+    let r = S.rings.find(x => x.t <= 0);
+    if (!r) {
+      if (S.rings.length >= 24) r = S.rings[0];
+      else { const m = new THREE.Mesh(new THREE.RingGeometry(0.75, 1, 28), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.renderOrder = 3; this.scene.add(m); r = { m, t: 0 }; S.rings.push(r); }
+    }
+    r.m.position.copy(at); r.t = 1.1; r.size = size; r.m.visible = true;
+  },
+  screenDrops() {
+    const e = document.getElementById('hdrops'); if (!e) return;
+    e.innerHTML = Array.from({ length: 14 }, () => { const s = 18 + Math.random() * 46; return `<i style="left:${Math.random() * 100}%;top:${Math.random() * 90}%;width:${s}px;height:${s * 1.15}px;animation-delay:${Math.random() * 0.3}s"></i>`; }).join('');
+    e.classList.remove('on'); void e.offsetWidth; e.classList.add('on');
   },
 
   fireworks(at) { if (this.scn) this.scn.fx.push({ at: at.clone(), t: 5, next: 0 }); },
