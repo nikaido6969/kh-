@@ -46,6 +46,7 @@ Object.assign(Game.prototype, {
   toast(k, text) { if (k.isPlayer) HUD.toast(text); },
 
   rollItem(k) {
+    if (this.itemCount(k) >= 3) return;
     let table;
     if (this.battle) table = BATTLE_TABLE;
     else {
@@ -54,12 +55,15 @@ Object.assign(Game.prototype, {
     }
     if (this.cfg.mode === 'tt') table = { karaage: 1 };
     let tot = 0; for (const v of Object.values(table)) tot += v;
-    let r = Math.random() * tot; k.item = null;
-    for (const [key, w] of Object.entries(table)) { r -= w; if (r <= 0) { k.item = key; break; } }
-    if (!k.item) k.item = Object.keys(table)[0];
-    k.itemN = ITEMS[k.item].n || 1;
-    k.rollT = k.isPlayer ? 1.1 : 0.9;
+    let r = Math.random() * tot, got = null;
+    for (const [key, w] of Object.entries(table)) { r -= w; if (r <= 0) { got = key; break; } }
+    if (!got) got = Object.keys(table)[0];
+    if (!k.item && k.rollT <= 0) { k.item = got; k.itemN = ITEMS[got].n || 1; k.rollT = k.isPlayer ? 1.1 : 0.9; }
+    else { (k.bag || (k.bag = [])).push({ id: got, n: ITEMS[got].n || 1 }); if (k.isPlayer) { SND.play('item'); HUD.toast(`${ITEMS[got].icon} ${ITEMS[got].name} をキープ`); } }
   },
+  itemCount(k) { return (k.item || k.rollT > 0 ? 1 : 0) + (k.bag ? k.bag.length : 0); },
+  promoteItem(k) { if (!k.item && k.rollT <= 0 && k.bag && k.bag.length) { const b = k.bag.shift(); k.item = b.id; k.itemN = b.n; } },
+  swapItem(k, i) { if (!k.bag || !k.bag[i] || k.rollT > 0) return; const b = k.bag[i]; if (k.item) k.bag[i] = { id: k.item, n: k.itemN }; else k.bag.splice(i, 1); k.item = b.id; k.itemN = b.n; SND.play('select'); },
 
   // 前方のターゲット
   targetAhead(k, maxD = 160) {
@@ -208,7 +212,7 @@ Object.assign(Game.prototype, {
         SND.play('jikka'); break;
     }
     k.itemN--;
-    if (k.itemN <= 0) { k.item = null; k.itemN = 0; }
+    if (k.itemN <= 0) { k.item = null; k.itemN = 0; this.promoteItem(k); }
   },
 
   fwdVec(k) {
@@ -220,6 +224,7 @@ Object.assign(Game.prototype, {
 
   // ---- 毎フレームのステータス ----
   updateStatus(k, dt) {
+    if (!k.item) this.promoteItem(k);
     for (const key of ['blindT', 'sleepT', 'flatT', 'gasT', 'hoverT', 'zoneT', 'eyeburnT', 'bellyT', 'giantT', 'invT', 'shieldT', 'windT', 'hammerT', 'reverseT', 'grabT'])
       if (k[key] > 0) k[key] = Math.max(0, k[key] - dt);
     // ライフル照準

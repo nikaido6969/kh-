@@ -209,7 +209,7 @@ const UI = {
     };
     const tstart = (e) => {
       if (!active()) return;
-      if (e.target.closest && e.target.closest('.tbtn,#hitem,#btnPause')) return;
+      if (e.target.closest && e.target.closest('.tbtn,#hitem,.hbag,#btnPause')) return;
       SND.init();
       for (const t of e.changedTouches) {
         if (t.clientX >= innerWidth * 0.5 && t.clientY > innerHeight * 0.5) { Input.touch.jump = true; setTimeout(() => Input.touch.jump = false, 120); const tj = this.$('tjump'); tj.classList.add('on'); setTimeout(() => tj.classList.remove('on'), 160); continue; }
@@ -232,7 +232,8 @@ const UI = {
       el.addEventListener('mousedown', () => { ids.add('m'); if (pulse) { Input.touch[key] = true; setTimeout(() => Input.touch[key] = false, 120); } set(); });
       el.addEventListener('mouseup', () => { ids.delete('m'); set(); }); el.addEventListener('mouseleave', () => { ids.delete('m'); set(); });
     };
-    btn('bItem', 'item', true); btn('bMagic', 'magic', true);
+    btn('bMagic', 'magic', true);
+    for (let i = 0; i < 2; i++) { const e = this.$('hbag' + i); const f = (ev) => { ev.preventDefault(); if (GAME.running && GAME.player) GAME.swapItem(GAME.player, i); }; e.addEventListener('touchstart', f, { passive: false }); e.addEventListener('mousedown', f); }
     try { if (U.isTouch && screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => { }); } catch (e) { }
     this.$('hmagic').addEventListener('mousedown', () => { Input.touch.magic = true; setTimeout(() => Input.touch.magic = false, 120); });
     const itemTap = (e) => { e.preventDefault(); Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); };

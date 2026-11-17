@@ -59,7 +59,7 @@ Object.assign(Game.prototype, {
       case 'keshigomu':
         if (k.isPlayer) HUD.eraser();
         for (const p of this.projs) if (p.alive && p.owner !== k.id) this.removeProj(p);
-        for (const o of this.karts) if (o !== k && !o.isRemote) { o.item = null; o.itemN = 0; o.rollT = 0; }
+        for (const o of this.karts) if (o !== k && !o.isRemote) { o.item = null; o.itemN = 0; o.rollT = 0; o.bag = []; }
         break;
       case 'gacha': { const pool = this.battle ? ['bazooka', 'missile', 'hammer', 'sp_harisen', 'sp_ame'] : ['missile', 'bazooka', 'tv', 'sp_zabuton10', 'sp_jikka']; k.item = pool[Math.floor(Math.random() * pool.length)]; k.itemN = 1; k.rollT = 0.6; break; }
       case 'hiyashi': for (const o of behind(40)) { this.hitAny(o, 'sleep', { t: 1.6, noBalloon: true }); this.iceCube(o, 1.6); } k.boostT = Math.max(k.boostT, 1.5); break;

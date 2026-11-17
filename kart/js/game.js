@@ -659,7 +659,7 @@ class Game {
           b.alive = false; b.t = 1.6; b.mesh.visible = false;
           for (let i = 0; i < 8; i++) this.particles.emit(b.mesh.position, new THREE.Vector3((Math.random() - 0.5) * 12, Math.random() * 10, (Math.random() - 0.5) * 12), [0xff7ad8, 0x7ad8ff, 0xffe07a][i % 3], 0.6, 1, 0.2, 12);
           if (!k.isRemote) this.chargeMagic(k, 0.08);
-          if (!k.isRemote && !k.item && k.rollT <= 0 && !k.finished) this.rollItem(k);
+          if (!k.isRemote && !k.finished && this.itemCount(k) < 3) this.rollItem(k);
           break;
         }
       }
@@ -942,6 +942,7 @@ const HUD = {
     if (k.rollT > 0) { const keys = Object.keys(g.battle ? BATTLE_TABLE : ITEMS).filter(x => !ITEMS[x].sp); this.el.hitemi.textContent = ITEMS[keys[Math.floor(g.time * 14) % keys.length]].icon; this.el.hitemn.textContent = ''; }
     else if (k.item) { this.el.hitemi.textContent = ITEMS[k.item].icon; this.el.hitemn.textContent = k.itemN > 1 ? '×' + k.itemN : ''; }
     else { this.el.hitemi.textContent = ''; this.el.hitemn.textContent = ''; }
+    for (let i = 0; i < 2; i++) { const e = document.getElementById('hbag' + i); if (!e) continue; const b = k.bag && k.bag[i]; const ic = b ? ITEMS[b.id].icon + (b.n > 1 ? '<small>×' + b.n + '</small>' : '') : ''; if (e.innerHTML !== ic) e.innerHTML = ic; e.classList.toggle('has', !!b); }
     const bi = document.getElementById('bItemI'); if (bi) { const ic = this.el.hitemi.textContent || '🎁'; if (bi.textContent !== ic) bi.textContent = ic; bi.parentNode.style.opacity = this.el.hitemi.textContent ? 1 : 0.55; }
     this.el.hlines.style.opacity = k.boostT > 0 || k.ufoT > 0 ? 1 : Math.max(0, (k.v - k.vmax * 1.2) / (k.vmax * 0.2));
     this.el.hmt.style.background = k.drift ? '#' + MT_COL[k.mt].toString(16).padStart(6, '0') : 'transparent';
