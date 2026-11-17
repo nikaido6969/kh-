@@ -312,7 +312,9 @@ const UI = {
     p.forEach(q => { a = Math.min(a, q.x); b = Math.max(b, q.x); e = Math.min(e, q.z); f = Math.max(f, q.z); });
     const s = 100 / Math.max(b - a, f - e);
     c.lineWidth = 5; c.lineJoin = 'round'; c.strokeStyle = U.hex(def.theme.skyTop);
-    c.beginPath(); p.forEach((q, i) => { const x = 10 + (q.x - a) * s + (100 - (b - a) * s) / 2, y = 10 + (q.z - e) * s + (100 - (f - e) * s) / 2; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.stroke();
+    const X = (q) => 10 + (q.x - a) * s + (100 - (b - a) * s) / 2, Y = (q) => 10 + (q.z - e) * s + (100 - (f - e) * s) / 2;
+    c.beginPath(); p.forEach((q, i) => { i ? c.lineTo(X(q), Y(q)) : c.moveTo(X(q), Y(q)); }); if (!def.open) c.closePath(); c.stroke();
+    if (def.open) { const q0 = p[0], q1 = p[p.length - 1]; c.fillStyle = '#2ab060'; c.beginPath(); c.arc(X(q0), Y(q0), 6, 0, 7); c.fill(); c.fillStyle = '#ff3a5a'; c.beginPath(); c.arc(X(q1), Y(q1), 6, 0, 7); c.fill(); }
     return cv.toDataURL();
   },
   openCourse() {

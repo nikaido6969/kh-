@@ -158,6 +158,29 @@ const COURSES = [
   },
 ];
 
+// ===== 一本道（スタート→ゴール）化：各コースの生成ルール =====
+const GEN = {
+  kawara: { name: 'グラベルラリー 河原', desc: '道なき河原を切り裂くラリー。川をザブザブ突っ切れ', length: 3400, flat: true, mix: { rally: 4, river: 3, wild: 3, rallyJump: 2, scurve: 2, crests: 1, tight90: 1 } },
+  numa: { length: 3200, flat: true, mix: { river: 4, scurve: 2, chicane: 2, wild: 2, gapjump: 1, tight90: 2, rally: 1 } },
+  yamamichi: { desc: '九十九折りのヘアピン、崖から空中ダイブ、トンネル', length: 4200, mix: { hairpins: 3, hairpinsDown: 2, climb: 2, cliff: 3, dropoff: 2, tunnel: 1, sweeper: 1, rallyJump: 1 } },
+  mori: { name: 'フォレストラリー', desc: '木々の間の道なき道を全開で駆け抜けるラリー', length: 3600, mix: { rally: 4, rallyJump: 2, scurve: 2, chicane: 1, tight90: 2, crests: 2, wild: 2 } },
+  jupiter: { length: 4000, mix: { spiral: 2, sweeper: 3, cliff: 2, gapjump: 2, descent: 2, climb: 1, scurve: 1 } },
+  kinsei: { length: 3800, mix: { climb: 3, dropoff: 3, cliff: 2, hairpins: 2, hairpinsDown: 1, sweeper: 1, gapjump: 1 } },
+  tsuki: { length: 4500, mix: { wild: 3, crests: 3, gapjump: 3, cliff: 2, sweeper: 1, rallyJump: 2 } },
+  kaitei: { length: 3500, mix: { descent: 2, climb: 2, scurve: 2, sweeper: 2, tube: 1, crests: 1, chicane: 1 }, yMin: -60, yMax: 30 },
+  chitei: { length: 3600, mix: { tube: 4, hairpinsDown: 2, descent: 2, cliff: 2, chicane: 1, gapjump: 1 } },
+  kumo: { length: 4200, mix: { gapjump: 3, cliff: 3, spiral: 2, sweeper: 2, cork: 1, climb: 1 } },
+  suisho: { length: 4600, mix: { climb: 2, dropoff: 2, wild: 2, gapjump: 2, spiral: 1, loop: 1, scurve: 2, rallyJump: 1 } },
+  bosen: { length: 5000, mix: { loop: 2, cork: 2, spiral: 2, tube: 2, gapjump: 2, chicane: 2, sweeper: 1, cliff: 1 } },
+};
+COURSES.forEach((c, i) => {
+  const g = GEN[c.id]; if (!g) return;
+  delete c.cmds; c.open = true; c.gen = Object.assign({ seed: 1000 + i * 97 }, g);
+  if (g.name) c.name = g.name; if (g.desc) c.desc = g.desc;
+  c.desc = c.desc + `（約${(g.length / 1000).toFixed(1)}km）`;
+  c.wildSurf = { kawara: 'gravel', numa: 'mudpath', mori: 'forest', tsuki: 'moon', suisho: 'crystalground', yamamichi: 'trail' }[c.id] || c.surf;
+});
+
 // ===== 風船バトル ステージ（正多角形リング：自動で閉じる） =====
 const ARENA_BASE = { w: 56, sh: 2, gravity: 28, laps: 0, edge: ['rock', 'bush'] };
 const ARENAS = [
@@ -184,6 +207,69 @@ const CUPS = [
   { name: '惑星めぐりカップ', icon: '🪐' },
   { name: '未知の世界カップ', icon: '👽' },
 ];
+
+
+// ===== 一本道コース自動生成（スタート→ゴール 3〜5km） =====
+// 道の部品（パターン）を組み合わせ、自分の道と重ならないように並べる
+const PATTERNS = {
+  hairpins: (r, d) => [C(d * 165, 15 + r() * 5, { dy: 6 }), S(30 + r() * 20, { dy: 6 }), C(-d * 165, 15 + r() * 5, { dy: 6 }), S(30, { dy: 4 })],
+  hairpinsDown: (r, d) => [C(d * 165, 16 + r() * 5, { dy: -6 }), S(30 + r() * 20, { dy: -6 }), C(-d * 165, 16 + r() * 5, { dy: -6 }), S(30, { dy: -4 })],
+  scurve: (r, d) => [C(d * (45 + r() * 30), 30 + r() * 15), C(-d * (45 + r() * 30), 30 + r() * 15), S(30 + r() * 30)],
+  chicane: (r, d) => [S(40), C(d * 50, 18), S(12, { w: 13 }), C(-d * 100, 18, { w: 13 }), S(12, { w: 13 }), C(d * 50, 18), S(40)],
+  tight90: (r, d) => [S(50 + r() * 40, { items: 0.4 }), C(d * 90, 14 + r() * 6), S(40)],
+  sweeper: (r, d) => [C(d * (100 + r() * 60), 55 + r() * 25, { bank: 18 }), S(40)],
+  spiral: (r, d) => [C(d * 360, 34, { dy: (r() < 0.5 ? 1 : -1) * 36, bank: 18 }), S(40)],
+  climb: (r, d) => [S(28 + r() * 10, { dy: 22 + r() * 18, lin: true }), S(40), C(d * 30, 50)],
+  descent: (r, d) => [S(50, { dy: -12 }), C(d * 40, 45, { dy: -10 }), S(50, { dy: -12, boost: 0.5 })],
+  crests: (r, d) => [S(42, { dy: 7 }), S(42, { dy: -7 }), S(42, { dy: 8 }), S(42, { dy: -8 }), S(40, { dy: 6 }), S(40, { dy: -6 })],
+  cliff: (r, d) => [S(60, { items: 0.3 }), S(36, { ramp: { h: 3, len: 18 } }), S(46, { gap: true, dy: -30, lin: true }), S(70, { boost: 0.4 }), C(d * 40, 45)],
+  dropoff: (r, d) => [S(50), S(26, { dy: -32, lin: true }), S(80, { bumps: 0.4 }), C(d * 50, 40)],
+  gapjump: (r, d) => [S(70, { boost: 0.5 }), S(40, { ramp: { h: 4, len: 24 } }), S(32, { gap: true }), S(60)],
+  wild: (r, d) => [S(60, { wild: true, w: 44, items: 0.5 }), C(d * (20 + r() * 30), 120, { wild: true, w: 44, dy: (r() - 0.5) * 16 }), S(120, { wild: true, w: 46, bumps: 0.5 }), C(-d * (20 + r() * 30), 120, { wild: true, w: 44 }), S(60, { wild: true, w: 40 })],
+  rally: (r, d) => [S(50, { wild: true, w: 26, bumps: 0.6 }), C(d * (60 + r() * 50), 24 + r() * 10, { wild: true, w: 26 }), S(40, { wild: true, w: 26, dy: 6 }), S(30, { wild: true, w: 26, dy: -6 }), C(-d * (70 + r() * 50), 22 + r() * 10, { wild: true, w: 26 }), S(50, { wild: true, w: 26, bumps: 0.7 })],
+  rallyJump: (r, d) => [S(60, { wild: true, w: 24 }), S(30, { wild: true, w: 24, dy: 9 }), S(26, { wild: true, w: 24, dy: -14, lin: true }), S(60, { wild: true, w: 24, bumps: 0.6 }), C(d * 70, 26, { wild: true, w: 24 })],
+  tunnel: (r, d) => [S(110 + r() * 60, { tunnel: 'arch' }), C(d * 45, 50, { tunnel: 'arch' }), S(40)],
+  tube: (r, d) => [S(90, { tunnel: 'tube' }), C(d * 70, 34, { tunnel: 'tube', dy: -8 }), S(60, { tunnel: 'tube' })],
+  river: (r, d) => [S(50, { dy: -3 }), S(60, { dy: 0 }), S(50, { dy: 3 }), C(d * 35, 50)],
+  loop: (r, d) => [S(60, { boost: 0.6 }), L(20), S(60)],
+  cork: (r, d) => [S(110, { cork: 360, boost: 0.1 }), S(30)],
+};
+
+function genCourse(def) {
+  const G = def.gen, r = U.rng(G.seed);
+  const pick = () => { let t = 0; for (const k in G.mix) t += G.mix[k]; let x = r() * t; for (const k in G.mix) { x -= G.mix[k]; if (x <= 0) return k; } return 'scurve'; };
+  const cmds = [S(110, { items: 0.85 })];
+  let tries = 0;
+  const half = (def.w / 2 + def.sh);
+  while (tries++ < 400) {
+    const tr = turtleRun(cmds);
+    const len = tr.pts.length;
+    if (len >= G.length) break;
+    const y = tr.end[1];
+    let name = pick();
+    if (y > (G.yMax ?? 140) && /climb|hairpins$|crests/.test(name)) name = 'descent';
+    if (y < (G.yMin ?? -100) && /descent|dropoff|cliff|Down/.test(name)) name = 'climb';
+    let placed = false;
+    for (const d of (r() < 0.5 ? [1, -1] : [-1, 1])) {
+      let add = PATTERNS[name](r, d);
+      if (G.flat) add = add.map(c => c.dy && name !== 'river' ? Object.assign({}, c, { dy: 0 }) : c);
+      if (cmds.length % 3 === 0) add[0] = Object.assign({}, add[0], { items: add[0].items ?? 0.5 });
+      const test = turtleRun(cmds.concat(add));
+      const p = test.pts, nOld = Math.max(0, len - 90);
+      let ok = true;
+      for (let i = len; i < p.length && ok; i += 3) for (let j = 0; j < nOld; j += 4) {
+        const dx = p[i].x - p[j].x, dz = p[i].z - p[j].z;
+        if (Math.abs(dx) > 120 || Math.abs(dz) > 120) continue;
+        const wi = (p[i].w || def.w) / 2 + def.sh, wj = (p[j].w || def.w) / 2 + def.sh;
+        if (Math.hypot(dx, dz) < wi + wj + 10 && Math.abs(p[i].y - p[j].y) < 18) { ok = false; break; }
+      }
+      if (ok) { cmds.push(...add); placed = true; break; }
+    }
+    if (!placed) cmds.push(C((r() < 0.5 ? 1 : -1) * 60, 40));   // 行き詰まったら向きを変えて逃げる
+  }
+  cmds.push(S(70, { boost: 0.3 }), S(140));
+  return cmds;
+}
 
 // ===== タートル生成（自動クローズ付き） =====
 function cmdLength(c) {
@@ -224,7 +310,7 @@ function turtleRun(cmds) {
         const e = c.lin ? tt : tt * tt * (3 - 2 * tt);
         y = y0 + (c.dy || 0) * e;
       }
-      pts.push({ x, y, z, ci, tt, loop });
+      pts.push({ x, y, z, ci, tt, loop, w: c.w });
     }
     if (c.t === 'l') y = y0;
   });
@@ -232,7 +318,8 @@ function turtleRun(cmds) {
 }
 
 function turtle(def) {
-  const lay = (typeof LAYOUT !== 'undefined' && LAYOUT[def.id]) || [];
+  if (def.gen && !def.cmds) def.cmds = genCourse(def);
+  const lay = (!def.gen && typeof LAYOUT !== 'undefined' && LAYOUT[def.id]) || [];
   let cmds = def.cmds.map((c, i) => {
     const o = Object.assign({}, c);
     if (lay[i] != null) { if (o.t === 's') o.len = lay[i]; else if (o.t === 'c') o.r = lay[i]; }

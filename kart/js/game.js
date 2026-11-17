@@ -1,5 +1,7 @@
 // ===== レースエンジン =====
 const CC_BASE = { 100: 26.5, 150: 34.5, 200: 44 }; // 従来比 -20%（ノリノリ加速で伸びる）
+const LOOSE = ['gravel', 'dirt', 'trail', 'mudpath', 'forest', 'moon', 'meadow', 'sand', 'seabed', 'redsand', 'cliff'];
+const DUSTCOL = { gravel: 0xc8bca8, dirt: 0xa07a4a, trail: 0xb89a70, mudpath: 0x6a5030, forest: 0x8a6a40, moon: 0xb8b8c0, meadow: 0xa8b878, sand: 0xe8d4a0, redsand: 0xd08a50, cliff: 0xb0a090 };
 const MT_COL = [0xffffff, 0x4ac8ff, 0xffa020, 0xd060ff];
 const MT_TIME = [0, 0.55, 1.05, 1.65];
 
@@ -146,7 +148,7 @@ class Game {
     cfg.racers.forEach((r, i) => {
       const k = new Kart(this, CHARS.find(c => c.id === r.ch) || CHARS[0], r);
       const row = Math.floor(i / 2);
-      k.dist = -8 - row * 6.5; k.d = (i % 2 ? 1 : -1) * this.track.hw[0] * 0.45;
+      k.dist = (this.track.open ? this.track.startS : 0) - 8 - row * 6.5; k.d = (i % 2 ? 1 : -1) * this.track.hw[0] * 0.45;
       k.lastSafe = k.dist;
       k.skill = r.skill || 1;
       this.karts.push(k);
@@ -307,6 +309,7 @@ class Game {
   // ----- AI -----
   aiInput(k, dt) {
     if (this.battle) return this.battleAI(k, dt);
+    if (this.track.open && k.finished) { const inp = k.input; inp.accel = false; inp.brake = k.v > 3; inp.steer = U.clamp(-k.yaw * 2 - k.d * 0.05, -1, 1); inp.itemEdge = false; return; }
     const tr = this.track, inp = k.input;
     const s = tr.wrap(k.dist);
     k.aiOffT -= dt;
@@ -348,6 +351,7 @@ class Game {
   }
 
   dDist(a, b) { // a - b を周回考慮で
+    if (this.track.open) return a - b;
     let x = a - b; const L = this.track.L;
     x = ((x % L) + L * 1.5) % L - L / 2; return x;
   }
@@ -426,15 +430,18 @@ class Game {
     if (k.slick) { k.slickSteer = U.damp(k.slickSteer, steer, 1.6, dt); steer = k.slickSteer; k.d += Math.sin(this.time * 1.7 + k.weight) * 2.2 * dt; }
     if (k.zoneT > 0) turnRate *= 1.35;
     if (k.slick) turnRate *= 0.75;
+    const sfNow = tr.surfAt(s);
+    k.loose = k.grounded && LOOSE.includes(sfNow);
+    if (k.loose) { turnRate *= 0.9; k.slideX = U.damp(k.slideX || 0, steer * Math.min(1, k.v / 30) * 0.32, 3, dt); } else k.slideX = U.damp(k.slideX || 0, 0, 5, dt);
     if (k.windT > 0) k.d += (k.windDir || -Math.sign(k.d || 1)) * 9 * dt;
     // ジャンプ & ドリフト
     if (!locked && !ufo && inp.jumpEdge) {
-      if (k.grounded) { k.vh = 10.5 * Math.sqrt(def.gravity / 30); k.grounded = false; k.airT = 0; k.hop = false; k.jumped = true; if (k.isPlayer) SND.play('hop'); }
+      if (k.grounded) { k.vh = 10.5 * Math.sqrt(def.gravity / 30) + Math.max(0, k.wvy || 0); k.grounded = false; k.airT = 0; k.hop = false; k.jumped = true; if (k.isPlayer) SND.play('hop'); }
       else if (!k.trick && k.airT < 0.7) { k.trick = true; k.trickT = 0; if (k.isPlayer) { SND.play('hop'); HUD.toast('🤸 ジャンプアクション！着地で加速'); } }
       inp.jumpEdge = false;
     }
     if (!locked && !ufo && inp.driftEdge && k.grounded) {
-      k.vh = 5.2; k.grounded = false; k.airT = 0; k.hop = true; if (k.isPlayer) SND.play('hop');
+      k.vh = 5.2 + Math.max(0, k.wvy || 0); k.grounded = false; k.airT = 0; k.hop = true; if (k.isPlayer) SND.play('hop');
     }
     if (!locked && !ufo && inp.driftEdge && !k.grounded && !k.hop && k.airT < 0.35 && k.vh > 3 && !k.trick) { k.trick = true; k.trickT = 0; if (k.isPlayer) SND.play('hop'); }
     if (!locked && !ufo && inp.drift && !k.drift && Math.abs(steer) > 0.35 && k.v > 15 && (k.grounded || k.hop)) {
@@ -460,7 +467,7 @@ class Game {
       k.d = U.damp(k.d, tD, 2, dt); k.yaw = U.damp(k.yaw, 0, 6, dt); yawRate = 0;
       k.yaw += kap * k.v * dt * 0; // 軌道に沿う
     }
-    k.slide = U.damp(k.slide, k.drift * 0.42, 6, dt);
+    k.slide = U.damp(k.slide, k.drift * 0.42 + (k.slideX || 0), 6, dt);
     k.yaw += yawRate * dt;
     if (k.isPlayer && !k.drift && k.grounded && Math.abs(inp.steer || 0) < 0.08 && Math.abs(k.yaw) < 0.5) k.yaw = U.damp(k.yaw, 0, 1.6, dt); // 手を離すと道なりに戻る
     // トラック曲率
@@ -499,23 +506,29 @@ class Game {
     let sOff = tr.lerpArr(tr.off, s2);
     if (k.hoverT > 0) sOff = Math.max(sOff, 0) + 1.8;
     const gap = ((fl2 & 1) && k.hoverT <= 0) || k.offEdge;
+    const by = tr.baseY(s2), worldMode = tr.Uv[i2 * 3 + 1] > 0.75;
+    const dBase = (k.baseY == null || !worldMode) ? 0 : U.clamp(by - k.baseY, -3, 3);
+    k.baseY = by;
     if (ufo) { k.h = U.damp(k.h, 1.2, 4, dt); k.vh = 0; k.grounded = true; k.offEdge = false; }
     else if (k.grounded) {
-      if (gap) { k.grounded = false; k.fromGap = true; }
+      if (gap) { k.grounded = false; k.fromGap = true; k.vh = Math.max(k.vh, k.wvy || 0); }
       else {
         const nv = (sOff - k.h) / dt, pred = k.vh - g * dt;
-        if (nv < pred - 6 && sOff < k.h) { k.grounded = false; k.vh = pred; k.airT = 0; k.hop = false; }
-        else { k.h = sOff; k.vh = U.clamp(nv, -30, 30); }
+        const vsurf = nv + dBase / dt, wpred = (k.wvy || 0) - g * dt;
+        if (worldMode && vsurf < wpred - 5 && k.v > 20 && k.respawnT <= 0) { k.grounded = false; k.vh = wpred; k.airT = 0; k.hop = false; }
+        else if (!worldMode && nv < pred - 6 && sOff < k.h) { k.grounded = false; k.vh = pred; k.airT = 0; k.hop = false; }
+        else { k.h = sOff; k.vh = U.clamp(nv, -30, 30); k.wvy = U.clamp(vsurf, -45, 45); }
       }
     }
     if (!k.grounded && !ufo) {
-      k.vh -= g * dt; k.h += k.vh * dt; k.airT += dt;
+      k.vh -= g * dt; k.h += k.vh * dt - dBase; k.airT += dt;
       if (k.trick) k.trickT += dt;
       if (gap) k.fromGap = true;
       if (!gap && k.h <= sOff) {
         if (k.fromGap && k.h < sOff - 1.6) { this.fallOut(k, true); return; }
         if (k.airT > 0.3) k.squash = 1;
         k.h = sOff; k.grounded = true; k.vh = 0; k.fromGap = false;
+        if (k.airT > 0.6 && k.isPlayer) { HUD.shake(Math.min(0.5, k.airT * 0.25)); this.dust(k, 0xd8c8a8); this.dust(k, 0xd8c8a8); }
         if (k.airT > 0.35 && k.isPlayer) SND.play('land');
         if (k.trick) { this.chargeMagic(k, 0.06); k.boostT = Math.max(k.boostT, 0.9); k.boostCol = 1; if (k.isPlayer) SND.play('boost'); }
         k.trick = false; k.hop = false; k.airT = 0;
@@ -539,22 +552,54 @@ class Game {
     }
     // ラップ
     if (this.battle) return;
-    const lap = Math.floor(k.dist / tr.L) + 1;
-    if (lap !== k.lap) {
-      if (lap > k.lap && k.lap >= 1 && k.isPlayer && lap <= this.laps) {
-        if (lap === this.laps) { HUD.msg('FINAL LAP', 2, 'final'); SND.play('final'); if (SND.bgm) { SND.bgm.fast = 1.12; SND.bgm.trans = 1; } }
-        else { HUD.msg('LAP ' + lap, 1.2, 'small'); SND.play('lap'); }
+    if (tr.open) {
+      const togo = tr.finishS - k.dist;
+      if (k.isPlayer && togo < 500 && !k.last500 && k.dist > tr.startS) { k.last500 = true; HUD.msg('ラスト500m！', 2, 'final'); SND.play('final'); if (SND.bgm) { SND.bgm.fast = 1.12; SND.bgm.trans = 1; } }
+      k.lap = 1;
+      if (!k.finished && k.dist >= tr.finishS) this.finish(k);
+    } else {
+      const lap = Math.floor(k.dist / tr.L) + 1;
+      if (lap !== k.lap) {
+        if (lap > k.lap && k.lap >= 1 && k.isPlayer && lap <= this.laps) {
+          if (lap === this.laps) { HUD.msg('FINAL LAP', 2, 'final'); SND.play('final'); if (SND.bgm) { SND.bgm.fast = 1.12; SND.bgm.trans = 1; } }
+          else { HUD.msg('LAP ' + lap, 1.2, 'small'); SND.play('lap'); }
+        }
+        k.lap = lap;
       }
-      k.lap = lap;
+      if (!k.finished && k.dist >= this.laps * tr.L) this.finish(k);
     }
-    if (!k.finished && k.dist >= this.laps * tr.L) this.finish(k);
     // 粒子
     if (k.grounded && k.v > 20 && off && !hardSh && Math.random() < 0.5) this.dust(k, shSurf === 'grass' ? 0x9ac86a : 0xa07a4a);
     if (inWater && k.waterDepth > 2.4 && Math.random() < 0.3) this.bubble(k);
+    if (k.loose && k.v > 18 && !inWater && Math.random() < (Math.abs(k.slideX || 0) * 1.6 + 0.25) && (!this.player || k.model.root.position.distanceTo(this.camera.position) < 60)) this.dust(k, DUSTCOL[sfNow] || 0xc8b090);
+    if (k.isPlayer && tr.open) this.paceNote(k, dt);
     this.waterSpray(k, dt);
   }
 
   _worldY(k) { const fr = this.track.frame(k.dist, this.fr); return fr.p.y + fr.r.y * k.d + fr.u.y * k.h; }
+
+  paceNote(k, dt) {
+    k.noteT = (k.noteT || 0) - dt; if (k.noteT > 0) return; k.noteT = 0.3;
+    const tr = this.track, s = k.dist;
+    let note = null;
+    for (let a = 40; a < 150; a += 3) { const f = tr.flagAt(s + a); if (f & 1) { note = { t: 'ジャンプ！ 全開で', ic: '⤴', key: 'gap' + Math.round((s + a) / 50) }; break; } }
+    if (!note) for (let a = 40; a < 130; a += 4) if (tr.lerpArr(tr.off, s + a) > 1.5) { note = { t: 'ジャンプ台', ic: '⤴', key: 'ramp' + Math.round((s + a) / 50) }; break; }
+    if (!note) {
+      let maxK = 0, sum = 0, at = 0;
+      for (let a = 45; a < 125; a += 2) { const kk = tr.lerpArr(tr.kap, s + a); sum += kk * 2; if (Math.abs(kk) > Math.abs(maxK)) { maxK = kk; at = a; } }
+      const r = Math.abs(maxK) > 1e-4 ? 1 / Math.abs(maxK) : 1e9;
+      const lv = r < 20 ? 1 : r < 30 ? 2 : r < 42 ? 3 : r < 60 ? 4 : r < 90 ? 5 : 0;
+      if (lv) {
+        const deg = Math.abs(sum) * 57.3, dir = maxK > 0 ? '右' : '左';
+        note = { t: `${dir}${lv}${lv === 1 ? ' ヘアピン' : lv === 2 ? ' きつい' : ''}${deg > 110 ? ' ロング' : ''}`, ic: maxK > 0 ? '↱' : '↰', key: dir + lv + Math.round((s + at) / 60), lv };
+      } else {
+        const y0 = tr.baseY(s + 40), y1 = tr.baseY(s + 90);
+        if (y1 - y0 < -14) note = { t: '急な下り', ic: '↘', key: 'dn' + Math.round(s / 60) };
+        else if (y1 - y0 > 14) note = { t: '急な登り', ic: '↗', key: 'up' + Math.round(s / 60) };
+      }
+    }
+    if (note && note.key !== this.lastNote) { this.lastNote = note.key; HUD.note(note); if (note.lv && note.lv <= 2) SND.play('note'); }
+  }
 
   fallOut(k, gap) {
     if (k.isPlayer) { SND.play('fall'); HUD.msg('回収中…', 1.2, 'small'); }
@@ -565,6 +610,7 @@ class Game {
       s = d + 3;
     }
     k.dist = s; k.d = U.clamp(this.track.lerpArr(this.track.ai, s), -3, 3); k.h = 0; k.vh = 0; k.v = 0; k.yaw = 0;
+    k.baseY = null; k.wvy = 0;
     k.grounded = true; k.offEdge = false; k.fromGap = false; k.drift = 0; k.mt = 0; k.respawnT = 1.3; k.trick = false; k.hop = false;
     k.lastSafe = s;
   }
@@ -586,10 +632,10 @@ class Game {
 
   results() {
     if (this.battle) return this.battleResults();
-    const L = this.track.L * this.laps;
+    const L = this.track.open ? this.track.finishS : this.track.L * this.laps;
     return this.karts.map(k => {
       let t = k.finishTime;
-      if (!k.finished) { const rem = Math.max(0, L - k.dist); t = this.raceT + rem / Math.max(15, k.vmax * 0.9); }
+      if (!k.finished) { const rem = Math.max(0, L - Math.max(0, k.dist)); t = this.raceT + rem / Math.max(15, k.vmax * 0.9); }
       return { k, t, est: !k.finished };
     }).sort((a, b) => a.t - b.t);
   }
@@ -615,6 +661,7 @@ class Game {
   updateTraffic(dt) {
     for (const c of this.traffic) {
       c.dist += c.v * dt;
+      if (this.track.open && c.dist < this.track.startS + 30) c.dist = this.track.finishS - 30;
       const hw = this.track.lerpArr(this.track.hw, c.dist);
       c.d = Math.sin(this.time * 0.45 + c.ph) * hw * 0.65;
       const fl = this.track.flagAt(c.dist);
@@ -827,7 +874,7 @@ const HUD = {
     for (const [w, col] of [[9, 'rgba(0,0,0,0.35)'], [5, 'rgba(255,255,255,0.95)']]) {
       c.strokeStyle = col; c.lineWidth = w; c.beginPath();
       for (let j = 0; j <= tr.N; j += 3) { const q = j % tr.N; const x = tr.P[q * 3] * sx + this.map.ox, y = tr.P[q * 3 + 2] * sx + this.map.oz; j ? c.lineTo(x, y) : c.moveTo(x, y); }
-      c.closePath(); c.stroke();
+      if (!tr.open) c.closePath(); c.stroke();
     }
     this.mapBg = cv;
     this.el.hink.style.opacity = 0;
@@ -848,6 +895,7 @@ const HUD = {
   },
   eraser() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="eraser">消</div>'; e.className = 'on er'; setTimeout(() => e.className = '', 1600); },
   slash() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="slash"></div>'; e.className = 'on sl'; setTimeout(() => e.className = '', 900); },
+  note(n) { const e = document.getElementById('hnote'); if (!e) return; e.innerHTML = `<i>${n.ic}</i><b>${n.t}</b>`; e.className = ''; void e.offsetWidth; e.className = 'on' + (n.lv && n.lv <= 2 ? ' hot' : ''); },
   toast(t) { const box = document.getElementById('htoasts'); const e = document.createElement('div'); e.className = 'toast'; e.textContent = t; box.appendChild(e); while (box.children.length > 3) box.firstChild.remove(); setTimeout(() => e.remove(), 2600); },
   blind(style) { const e = document.getElementById('hblind'); e.className = 'on ' + style; clearTimeout(this.bT); },
   clearBlind() { const e = document.getElementById('hblind'); if (e) e.className = ''; },
@@ -878,7 +926,8 @@ const HUD = {
       this.el.hlap.innerHTML = '🎈×' + k.balloons;
       const bt = Math.max(0, g.battleT); this.el.htime.textContent = '残り ' + Math.floor(bt / 60) + ':' + String(Math.floor(bt % 60)).padStart(2, '0') + '　生存 ' + g.karts.filter(o => !o.out).length + '人';
     } else {
-      this.el.hlap.textContent = 'LAP ' + U.clamp(k.lap, 1, g.laps) + '/' + g.laps;
+      if (g.track.open) { const togo = Math.max(0, g.track.finishS - Math.max(g.track.startS, k.dist)); this.el.hlap.innerHTML = '🏁 残り <b>' + (togo >= 1000 ? (togo / 1000).toFixed(2) + '</b>km' : Math.round(togo) + '</b>m'); }
+      else this.el.hlap.textContent = 'LAP ' + U.clamp(k.lap, 1, g.laps) + '/' + g.laps;
       this.el.htime.textContent = this.fmt(k.finished ? k.finishTime : g.raceT);
     }
     this.el.hspeed.innerHTML = Math.round(Math.abs(k.v) * 3.6) + '<small>km/h</small>';

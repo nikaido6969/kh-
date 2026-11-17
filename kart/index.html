@@ -126,6 +126,13 @@ body.touch #hmagic{display:none}
 #hfun .slash{position:absolute;left:-10%;right:-10%;top:48%;height:10px;background:linear-gradient(90deg,transparent,#fff 30%,#fff 70%,transparent);box-shadow:0 0 24px #fff;transform:rotate(-14deg) scaleX(0)}
 #hfun.sl .slash{animation:sla .7s ease-out forwards}
 @keyframes sla{0%{transform:rotate(-14deg) scaleX(0)}30%{transform:rotate(-14deg) scaleX(1)}100%{transform:rotate(-14deg) scaleX(1);opacity:0}}
+#hnote{position:absolute;left:max(16px,env(safe-area-inset-left));top:calc(max(14px,env(safe-area-inset-top)) + 64px);display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:14px;background:rgba(20,10,40,.62);opacity:0;transform:translateX(-30px)}
+#hnote.on{animation:nt 2.4s ease forwards}
+#hnote i{font-style:normal;font-size:26px;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#ffd23a;color:#2a1652;font-weight:900}
+#hnote b{font-size:18px;font-weight:900;letter-spacing:.04em}
+#hnote.hot i{background:#ff3a5a;color:#fff}
+@keyframes nt{0%{opacity:0;transform:translateX(-30px)}10%,80%{opacity:1;transform:none}100%{opacity:0}}
+body.touch #hnote{top:calc(max(10px,env(safe-area-inset-top)) + 168px)}
 #hcutin{position:absolute;left:0;right:0;top:30%;height:130px;pointer-events:none;opacity:0}
 #hcutin.on{animation:cut 2.1s cubic-bezier(.2,.9,.3,1) forwards}
 @keyframes cut{0%{opacity:1;transform:translateX(100%)}14%{transform:translateX(0)}80%{opacity:1;transform:translateX(-3%)}100%{opacity:0;transform:translateX(-110%)}}
@@ -260,7 +267,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
   <canvas id="hmap" width="170" height="170"></canvas>
   <div id="hmtw"><div id="hmt"></div></div>
   <div id="hflow"><span>ノリノリ</span><i><b id="hflowb"></b></i></div>
-  <div id="hcutin"></div><div id="hfun"></div><div id="hmagic" title="M キーで魔法"><i></i><span>魔法 <kbd>M</kbd></span><b id="hmagicN"></b></div><div id="hgas"></div><div id="hdrops"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
+  <div id="hnote"></div><div id="hcutin"></div><div id="hfun"></div><div id="hmagic" title="M キーで魔法"><i></i><span>魔法 <kbd>M</kbd></span><b id="hmagicN"></b></div><div id="hgas"></div><div id="hdrops"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
   <div id="hmsg"></div><div id="hink"></div><div id="hflash"></div><div id="hbanner"></div><div id="htoasts"></div>
 </div>
 <button id="btnPause">Ⅱ</button>
@@ -370,6 +377,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
     🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
     🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
+    🏁 <b>コース</b>：周回ではなくスタートからゴールまでの一本道（3〜5km）。ヘアピン・崖からの空中ダイブ・道なき大自然を切り裂くラリー区間あり。左上にコ・ドライバーの指示（「右3」「ジャンプ！」など）が出る。<br>
     ✨ <b>魔法</b>：キャラごとに固有の魔法あり。走る・アイテム箱・ミニターボでゲージが溜まり、満タンで「魔法」ボタン（キーボードはM）。紫のレアキャラ「おむにえさん」は全能の魔法を使える。<br>
     📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その上＝ジャンプ（罠や地雷をとび越える。ジャンプ台から飛んだ空中で押すと着地で加速）、左＝アイテム、左上＝ブレーキ（長押しでバック）。キーボードはJでジャンプ。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>

@@ -12,25 +12,30 @@ class Track {
     const cmds = r.cmds;
     let pts = r.pts;
     const n0 = pts.length;
+    const open = this.open = !!def.open;
+    const W = (k, n) => open ? Math.max(0, Math.min(n - 1, k)) : ((k % n) + n) % n;   // 端の扱い（周回は巻き戻し・一本道は端で止める）
+    this.W = W;
+    if (open) pts.unshift({ x: 0, y: 0, z: 0, ci: 0, tt: 0, loop: false });
     // クローズ誤差を分散
     const E = r.end;
-    pts.forEach((p, k) => { const t = (k + 1) / n0; p.x -= E[0] * t; p.y -= E[1] * t; p.z -= E[2] * t; });
+    if (!open) pts.forEach((p, k) => { const t = (k + 1) / n0; p.x -= E[0] * t; p.y -= E[1] * t; p.z -= E[2] * t; });
     // 平滑化
     for (let pass = 0; pass < 2; pass++) {
       const q = pts.map(p => ({ x: p.x, y: p.y, z: p.z }));
-      for (let k = 0; k < n0; k++) {
+      for (let k = 0; k < pts.length; k++) {
         let sx = 0, sy = 0, sz = 0;
-        for (let o = -2; o <= 2; o++) { const p = q[(k + o + n0) % n0]; sx += p.x; sy += p.y; sz += p.z; }
+        for (let o = -2; o <= 2; o++) { const p = q[W(k + o, pts.length)]; sx += p.x; sy += p.y; sz += p.z; }
         pts[k].x = sx / 5; pts[k].y = sy / 5; pts[k].z = sz / 5;
       }
     }
     // 等間隔リサンプル
     const cum = [0];
-    for (let k = 0; k < n0; k++) {
-      const a = pts[k], b = pts[(k + 1) % n0];
+    const nseg = open ? pts.length - 1 : n0;
+    for (let k = 0; k < nseg; k++) {
+      const a = pts[k], b = pts[(k + 1) % pts.length];
       cum.push(cum[k] + Math.hypot(b.x - a.x, b.y - a.y, b.z - a.z));
     }
-    const total = cum[n0];
+    const total = cum[nseg];
     const N = Math.round(total);
     const ds = total / N;
     this.N = N; this.ds = ds; this.L = total;
@@ -42,8 +47,8 @@ class Track {
     let seg = 0;
     for (let j = 0; j < N; j++) {
       const target = j * ds;
-      while (cum[seg + 1] < target && seg < n0 - 1) seg++;
-      const a = pts[seg], b = pts[(seg + 1) % n0];
+      while (cum[seg + 1] < target && seg < nseg - 1) seg++;
+      const a = pts[seg], b = pts[(seg + 1) % pts.length];
       const f = (target - cum[seg]) / Math.max(1e-6, cum[seg + 1] - cum[seg]);
       P[j * 3] = a.x + (b.x - a.x) * f; P[j * 3 + 1] = a.y + (b.y - a.y) * f; P[j * 3 + 2] = a.z + (b.z - a.z) * f;
       const nb = f < 0.5 ? a : b;
@@ -61,10 +66,11 @@ class Track {
       sh[j] = c.sh ?? def.sh;
       const wall = c.wall === false ? false : !!def.wall;
       if (!wall) flags[j] |= 2;
+      if (c.wild) flags[j] |= 32;
       if (c.gap) flags[j] |= 1;
       if (c.tunnel === 'arch') flags[j] |= 4;
       if (c.tunnel === 'tube') flags[j] |= 8;
-      const sf = c.surf || def.surf;
+      const sf = c.wild ? (def.wildSurf || def.shSurf) : (c.surf || def.surf);
       let si = surfList.indexOf(sf); if (si < 0) { surfList.push(sf); si = surfList.length - 1; }
       surfI[j] = si;
       const len = cmdLength(c);
@@ -86,7 +92,7 @@ class Track {
     // 平滑化（幅・バンク）
     const smooth = (arr, w) => {
       const out = F(N);
-      for (let j = 0; j < N; j++) { let s = 0; for (let o = -w; o <= w; o++) s += arr[(j + o + N) % N]; out[j] = s / (2 * w + 1); }
+      for (let j = 0; j < N; j++) { let s = 0; for (let o = -w; o <= w; o++) s += arr[W(j + o, N)]; out[j] = s / (2 * w + 1); }
       return out;
     };
     const hwS = smooth(hw, 10), shS = smooth(sh, 10);
@@ -96,7 +102,7 @@ class Track {
     const v = new THREE.Vector3(), t = new THREE.Vector3(), u = new THREE.Vector3(), rr = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     let prevU = new THREE.Vector3(0, 1, 0);
     for (let j = 0; j < N; j++) {
-      const a = (j - 1 + N) % N, b = (j + 1) % N;
+      const a = W(j - 1, N), b = W(j + 1, N);
       t.set(P[b * 3] - P[a * 3], P[b * 3 + 1] - P[a * 3 + 1], P[b * 3 + 2] - P[a * 3 + 2]).normalize();
       if (flags[j] & 16) {
         u.copy(prevU).addScaledVector(t, -prevU.dot(t)).normalize();
@@ -112,7 +118,7 @@ class Track {
       T.set([t.x, t.y, t.z], j * 3); Uv.set([u.x, u.y, u.z], j * 3); R.set([rr.x, rr.y, rr.z], j * 3);
     }
     for (let j = 0; j < N; j++) {
-      const a = (j - 1 + N) % N, b = (j + 1) % N;
+      const a = W(j - 1, N), b = W(j + 1, N);
       const dx = T[b * 3] - T[a * 3], dy = T[b * 3 + 1] - T[a * 3 + 1], dz = T[b * 3 + 2] - T[a * 3 + 2];
       kap[j] = (dx * R[j * 3] + dy * R[j * 3 + 1] + dz * R[j * 3 + 2]) / (2 * ds);
     }
@@ -120,7 +126,7 @@ class Track {
     // AIライン（インを突く）
     const raw = F(N);
     for (let j = 0; j < N; j++) {
-      let k = 0; for (let o = -6; o <= 26; o += 2) k += kap[(j + o + N) % N];
+      let k = 0; for (let o = -6; o <= 26; o += 2) k += kap[W(j + o, N)];
       k /= 17;
       raw[j] = U.clamp(k * 28, -1, 1) * hwS[j] * 0.62;
       if (off[j] > 0.5 || (flags[j] & 1)) raw[j] *= 0.2;
@@ -145,6 +151,7 @@ class Track {
     }
     this.bounds = { minX, maxX, minY, maxY, minZ, maxZ };
     // 空間グリッド
+    if (open) { this.startS = 70; this.finishS = this.L - 45; }
     this.cell = 24; this.grid = new Map();
     for (let j = 0; j < N; j += 2) {
       const key = Math.floor(P[j * 3] / this.cell) + ',' + Math.floor(P[j * 3 + 2] / this.cell);
@@ -154,11 +161,13 @@ class Track {
   }
 
   // ---- クエリ ----
-  wrap(s) { s %= this.L; if (s < 0) s += this.L; return s; }
-  idx(s) { const x = this.wrap(s) / this.ds; const i = Math.floor(x); return [i % this.N, x - i]; }
-  lerpArr(a, s) { const [i, f] = this.idx(s); const j = (i + 1) % this.N; return a[i] + (a[j] - a[i]) * f; }
+  wrap(s) { if (this.open) return s < 0 ? 0 : s > this.L - 0.01 ? this.L - 0.01 : s; s %= this.L; if (s < 0) s += this.L; return s; }
+  idx(s) { const x = this.wrap(s) / this.ds; const i = Math.floor(x); return [Math.min(i, this.N - 1) % this.N, x - i]; }
+  baseY(s) { const [i, f] = this.idx(s); const j = this.nxt(i); return this.P[i * 3 + 1] + (this.P[j * 3 + 1] - this.P[i * 3 + 1]) * f; }
+  nxt(i) { return this.open ? Math.min(i + 1, this.N - 1) : (i + 1) % this.N; }
+  lerpArr(a, s) { const [i, f] = this.idx(s); const j = this.nxt(i); return a[i] + (a[j] - a[i]) * f; }
   frame(s, o) {
-    const [i, f] = this.idx(s); const j = (i + 1) % this.N;
+    const [i, f] = this.idx(s); const j = this.nxt(i);
     const A = (arr, v) => v.set(arr[i * 3] + (arr[j * 3] - arr[i * 3]) * f, arr[i * 3 + 1] + (arr[j * 3 + 1] - arr[i * 3 + 1]) * f, arr[i * 3 + 2] + (arr[j * 3 + 2] - arr[i * 3 + 2]) * f);
     A(this.P, o.p); A(this.T, o.t).normalize(); A(this.Uv, o.u).normalize(); A(this.R, o.r).normalize();
     return o;
@@ -221,6 +230,7 @@ class Track {
     const G = this.group;
     this._buildRoad(G);
     this._buildWalls(G);
+    this._buildRallyFlags(G);
     this._buildTunnels(G);
     this._buildStart(G);
     this._buildSigns(G);
@@ -263,7 +273,7 @@ class Track {
       pos.length = 0; uv.length = 0; idx.length = 0; vcount = 0;
     };
     let open = false;
-    for (let jj = 0; jj <= N; jj++) {
+    for (let jj = 0; jj <= (this.open ? N - 1 : N); jj++) {
       const j = jj % N;
       const ok = runTest(j) && !(skipGap && (this.flags[j] & 1));
       if (!ok) { if (open) { emit(); open = false; } continue; }
@@ -316,7 +326,7 @@ class Track {
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), ry = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
     const step = def.battle ? 7 : 4;
     for (let j = 0; j < this.N; j += step) {
-      if (this.flags[j] & (1 | 8 | 16)) continue;
+      if (this.flags[j] & (1 | 8 | 16 | 32)) continue;
       this.frame(j * this.ds, fr);
       for (const side of [-1, 1]) {
         if (rng() < 0.15) continue;
@@ -337,6 +347,29 @@ class Track {
         G.add(im);
       }
     });
+  }
+
+  _buildRallyFlags(G) {
+    const list = [];
+    for (let j = 0; j < this.N; j += 45) if ((this.flags[j] & 32) && !(this.flags[j] & 1)) list.push(j);
+    if (!list.length) return;
+    const pole = new THREE.CylinderGeometry(0.09, 0.09, 3.2, 5); pole.translate(0, 1.6, 0);
+    const flag = new THREE.PlaneGeometry(1.3, 0.85); flag.translate(0.65, 2.75, 0);
+    const imP = new THREE.InstancedMesh(pole, U.mat(0xf4f4f4), list.length * 2);
+    const imF = new THREE.InstancedMesh(flag, new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.6 }), list.length * 2);
+    const fr = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
+    const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1);
+    let c = 0;
+    list.forEach((j, n) => {
+      this.frame(j * this.ds, fr);
+      for (const side of [-1, 1]) {
+        const p = fr.p.clone().addScaledVector(fr.r, side * (this.hw[j] + 0.5));
+        m4.makeBasis(fr.r, fr.u, fr.t.clone().negate()); q.setFromRotationMatrix(m4);
+        m4.compose(p, q, one); imP.setMatrixAt(c, m4); imF.setMatrixAt(c, m4);
+        imF.setColorAt(c, new THREE.Color(side < 0 ? 0xff3a3a : 0x2a6aff)); c++;
+      }
+    });
+    G.add(imP); G.add(imF);
   }
 
   _buildWalls(G) {
@@ -377,7 +410,7 @@ class Track {
         pos.length = idx.length = uv.length = 0; rows = 0;
       };
       const lights = [];
-      for (let jj = 0; jj <= N; jj++) {
+      for (let jj = 0; jj <= (this.open ? N - 1 : N); jj++) {
         const j = jj % N;
         if (!(this.flags[j] & flag)) { if (open) { emit(); open = false; } continue; }
         const rad = this.hw[j] + this.sh[j] + 1.2;
@@ -419,8 +452,14 @@ class Track {
   }
 
   _buildStart(G) {
-    const fr = this.frame(0.5, { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() });
-    const w = this.hw[0] * 2;
+    const S0 = this.startS || 0;
+    if (this.open) { this._gantry(G, Math.floor(this.finishS / this.ds), 'GOAL', 0xffffff, 0x2a1652, true); this._line(G, this.finishS); }
+    this._line(G, S0 + 0.5);
+    this._gantry(G, Math.floor(S0 / this.ds) + 2, 'START', 0xfff4d0, 0x8a4a20, true);
+  }
+  _line(G, s) {
+    const fr = this.frame(s, { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() });
+    const w = this.hw[this.idx(s)[0]] * 2;
     const geo = new THREE.PlaneGeometry(w, 2.4);
     const tex = U.checkerTex(); tex.wrapS = THREE.RepeatWrapping; tex.repeat.set(w / 3, 1);
     const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex }));
@@ -428,7 +467,6 @@ class Track {
     m.quaternion.setFromRotationMatrix(mat);
     m.position.copy(fr.p).addScaledVector(fr.u, 0.04);
     G.add(m);
-    this._gantry(G, 2, 'START', 0xfff4d0, 0x8a4a20, true);
   }
 
   _gantry(G, j, text, fg, bg, checker) {
@@ -487,7 +525,7 @@ class Track {
     const b = this.bounds, th = this.theme;
     const margin = 420;
     const W = b.maxX - b.minX + margin * 2, D = b.maxZ - b.minZ + margin * 2;
-    const seg = 150;
+    const seg = Math.round(U.clamp(Math.max(b.maxX - b.minX, b.maxZ - b.minZ) / 9, 150, 280));
     const geo = new THREE.PlaneGeometry(W, D, seg, seg);
     geo.rotateX(-Math.PI / 2);
     const cx = (b.minX + b.maxX) / 2, cz = (b.minZ + b.maxZ) / 2;
@@ -530,7 +568,9 @@ class Track {
   _buildDeco(G) {
     const def = this.def, rng = U.rng(def.id.length * 999 + 7);
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
-    for (const [type, count] of def.deco || []) {
+    const scale = Math.max(1, this.N / 1400);
+    for (const [type, count0] of def.deco || []) {
+      const count = Math.round(count0 * scale);
       const parts = DECO[type] ? DECO[type]() : null; if (!parts) continue;
       const far = ['mountain', 'mesa', 'cloud', 'asteroid', 'satellite', 'ferris', 'tentacle', 'floatrock', 'cloudpuff', 'rainbow', 'bigtree'].includes(type);
       const mats = [];

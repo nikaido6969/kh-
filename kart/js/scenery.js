@@ -156,7 +156,7 @@ Object.assign(Game.prototype, {
       const fr = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
       const base = [];
       for (let i = 0; i < n; i++) {
-        const s = 6 + rng() * 46, side = i % 2 ? 1 : -1;
+        const s = (tr.open ? (i % 4 < 2 ? tr.startS - 10 : tr.finishS - 30) : 6) + rng() * 46, side = i % 2 ? 1 : -1;
         tr.frame(s, fr); const ed = tr.hw[Math.floor(s / tr.ds)] + tr.sh[Math.floor(s / tr.ds)];
         const d = side * (ed + 3 + rng() * 9);
         const x = fr.p.x + fr.r.x * d, z = fr.p.z + fr.r.z * d;
@@ -224,7 +224,7 @@ Object.assign(Game.prototype, {
     // 観客：跳ねて手を振る
     if (S.crowd) {
       const { imB, imH, base } = S.crowd, m4 = this.tmp.m, q = this.tmp.q, sc = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
-      const near = kp.distanceTo(new THREE.Vector3(base[0].x, base[0].y, base[0].z)) < 160;
+      const near = base.some((b, i) => i < 4 && kp.distanceTo(new THREE.Vector3(b.x, b.y, b.z)) < 180);
       if (near || !S.crowdInit) {
         S.crowdInit = true;
         const hype = this.started ? 1 : 0.4;
