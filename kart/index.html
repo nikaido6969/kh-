@@ -117,7 +117,7 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #hmagic.full{box-shadow:0 0 0 2px #e0b0ff,0 0 18px #b05aff;animation:mg 0.8s infinite alternate}
 @keyframes mg{to{box-shadow:0 0 0 2px #fff,0 0 28px #d08aff}}
 body.touch #hmagic{display:none}
-#bMagic{left:auto;right:calc(max(18px,env(safe-area-inset-right)) + 236px);bottom:30px;width:78px;height:78px;--p:0%;background:conic-gradient(#b05aff var(--p),rgba(20,16,30,.42) var(--p))}
+#bMagic{left:auto;right:max(14px,env(safe-area-inset-right));bottom:calc(46% + 96px);width:76px;height:76px;--p:0%;background:conic-gradient(#b05aff var(--p),rgba(20,16,30,.42) var(--p))}
 #bMagic.full{border-color:#f0d0ff;box-shadow:0 0 22px #b05aff;animation:mg 0.8s infinite alternate}
 #hfun{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #hfun .eraser{position:absolute;top:30%;left:-40%;width:38%;height:34%;border-radius:14px;background:linear-gradient(90deg,#fff 0 62%,#2a5ad8 62% 100%);box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:flex-start;padding-left:6%;font-family:"Dela Gothic One",sans-serif;font-size:60px;color:#2a1652;text-shadow:none}
@@ -179,14 +179,9 @@ body.touch.racing #touch{display:block!important}
 .tbtn b{font-size:30px;line-height:1}
 .tbtn small{font-size:11px;font-weight:900;line-height:1.15}
 .tbtn.on{background:rgba(255,79,122,.75);transform:scale(.94)}
-#bDrift{right:max(18px,env(safe-area-inset-right));bottom:24px;width:118px;height:118px}
-#bItem{right:calc(max(18px,env(safe-area-inset-right)) + 128px);bottom:84px;width:92px;height:92px}
-#bJump{right:calc(max(18px,env(safe-area-inset-right)) + 22px);bottom:152px;width:84px;height:84px}
 #bBrake{right:calc(max(18px,env(safe-area-inset-right)) + 128px);bottom:176px;width:60px;height:60px}
 #bBrake b{font-size:22px}
 #trot{display:none;position:absolute;left:50%;top:40%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:10px 16px;border-radius:14px;font-weight:800;font-size:14px;pointer-events:none;white-space:nowrap}
-@media (orientation:portrait){#trot{display:block}#tpad{width:46vw}#bItem{right:calc(max(14px,env(safe-area-inset-right)) + 116px);bottom:30px;width:84px;height:84px}#bDrift{bottom:30px;width:104px;height:104px}#bJump{bottom:146px;right:calc(max(14px,env(safe-area-inset-right)) + 14px)}#bBrake{bottom:124px;right:calc(max(14px,env(safe-area-inset-right)) + 118px)}}
-body.touch #hmap{left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 58px);bottom:auto;width:104px;height:104px}
 body.touch #hpos{top:max(8px,env(safe-area-inset-top));bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px);font-size:46px}
 body.touch #hpos small{font-size:18px}
 body.touch #hspeed{top:calc(max(8px,env(safe-area-inset-top)) + 52px);bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px);font-size:16px}
@@ -194,6 +189,17 @@ body.touch #hflow{top:calc(max(8px,env(safe-area-inset-top)) + 76px);bottom:auto
 body.touch #hmtw{bottom:150px}
 body.touch #htoasts{bottom:auto;top:calc(max(10px,env(safe-area-inset-top)) + 90px)}
 body.touch #thint{bottom:auto;top:46%;font-size:13px}
+#bItem{right:max(14px,env(safe-area-inset-right));bottom:46%;width:86px;height:86px}
+#tpad{width:46vw!important;height:30vh!important;bottom:max(14px,env(safe-area-inset-bottom))!important}
+#tjump{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));width:46vw;height:30vh;border-radius:24px;border:2px dashed rgba(255,255,255,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900;pointer-events:none;opacity:.75;transition:opacity .2s,background .1s}
+#tjump b{font-size:44px;line-height:1}#tjump span{font-size:12px}
+#tjump.on{background:rgba(255,255,255,.18)}
+body.racing.started #tpad,body.racing.started #tjump{opacity:0}
+body.racing.started #tjump.on{opacity:1;border-color:transparent}
+#landwarn{display:none;position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,#2a1652,#7a2ad8);color:#fff;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;font-weight:900}
+#landwarn b{font-family:"Dela Gothic One",sans-serif;font-size:28px}#landwarn i{font-style:normal;font-size:64px;animation:rot 1.6s ease-in-out infinite}
+@keyframes rot{0%,100%{transform:rotate(-90deg)}50%{transform:rotate(0)}}
+@media (orientation:landscape) and (max-height:540px){body.touch #landwarn{display:flex}}
 #tind{position:absolute;bottom:18%;width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.85);background:rgba(255,255,255,.15);opacity:0;transition:opacity .15s;pointer-events:none}
 #tind i{position:absolute;left:50%;top:4px;width:6px;height:18px;margin-left:-3px;border-radius:3px;background:#ff4f7a}
 #tzL,#tzR{position:absolute;top:0;bottom:0;width:50%;transition:background .1s}
@@ -300,13 +306,13 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 <button id="btnPause">Ⅱ</button>
 <div id="touch">
   <div id="tstick" hidden><div id="tknob"></div></div>
-  <div id="tpad"><span>ここに左手の親指を置いて<br>左右にスライド＝ハンドル</span></div>
-  <button class="tbtn" id="bItem"><b id="bItemI">🎁</b><small>アイテム</small></button>
-  <button class="tbtn" id="bDrift"><b>↪︎</b><small>ドリフト<br>(長押し)</small></button>
+  <div id="tpad"><span>左下：親指を置いて<br>左右にスライド＝ハンドル</span></div>
+  <div id="tjump"><b>⤴︎</b><span>右下をタップ＝ジャンプ</span></div>
   <button class="tbtn" id="bMagic"><b>✨</b><small>魔法</small></button>
-  <button class="tbtn" id="bJump"><b>⤴︎</b><small>ジャンプ</small></button>
-  <div id="thint">左手：親指を置いて左右にスライドでハンドル<br>右手：ドリフト（曲がりながら長押し→離すと加速）／ジャンプ（罠をとび越える・空中で押すと着地加速）<br>アイテムボタンで使う<br>📱 iPhoneを傾けても少し曲がります</div>
+  <button class="tbtn" id="bItem"><b id="bItemI">🎁</b><small>アイテム</small></button>
+  <div id="thint">左下：親指を置いて左右にスライドでハンドル<br>右下：タップでジャンプ<br>ジャンプの着地でハンドルを切るとドリフト<br>切ったままでミニターボが溜まり、戻すと加速！</div>
 </div>
+<div id="landwarn"><i>📱</i><b>スマホを縦にしてね</b><span>おむにえカートは縦向き専用です</span></div>
 <div id="loading">コース生成中…</div>
 
 <!-- タイトル -->
@@ -409,7 +415,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
     🏁 <b>コース</b>：周回ではなくスタートからゴールまでの一本道（3〜5km）。ヘアピン・崖からの空中ダイブ・道なき大自然を切り裂くラリー区間あり。左上にコ・ドライバーの指示（「右3」「ジャンプ！」など）が出る。<br>
     ✨ <b>魔法</b>：キャラごとに固有の魔法あり。走る・アイテム箱・ミニターボでゲージが溜まり、満タンで「魔法」ボタン（キーボードはM）。紫のレアキャラ「おむにえさん」は全能の魔法を使える。<br>
-    📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その上＝ジャンプ（罠や地雷をとび越える。ジャンプ台から飛んだ空中で押すと着地で加速）、左＝アイテム。キーボードはJでジャンプ。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
+    📱 iPhone（縦向き専用）：左下に親指を置いて左右にスライドでハンドル。右下をタップでジャンプ。ジャンプの着地でハンドルを切るとドリフト、切ったままでミニターボが溜まり、まっすぐに戻すと加速。右側のボタンでアイテム・魔法。アクセルは自動。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
     <p><b>重火器（レース・バトル共通）</b>：🔫機関銃（前方に連射）　💥バズーカ（一直線のロケット弾・大爆発）　⚠️地雷（後ろに3個・踏むと爆発）　🚀ミサイル（前の相手を追尾）</p>
     <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>

@@ -447,8 +447,14 @@ class Game {
     if (!locked && !ufo && inp.drift && !k.drift && Math.abs(steer) > 0.35 && k.v > 15 && (k.grounded || k.hop)) {
       k.drift = Math.sign(steer); k.driftCharge = 0; k.mt = 0;
     }
+    if (k.landT > 0) {   // ジャンプ着地から0.3秒以内にハンドルを切るとドリフト
+      k.landT -= dt;
+      if (k.grounded && !k.drift && !locked && !ufo && Math.abs(inp.steer || 0) > 0.3 && k.v > 14) { k.drift = Math.sign(inp.steer); k.driftCharge = 0; k.mt = 0; k.autoDrift = true; k.landT = 0; if (k.isPlayer) { SND.play('hop'); this.dust(k, 0xd8c8a8); } }
+    }
     if (k.drift) {
-      if (!inp.drift || k.v < 10 || locked || ufo) {
+      const held = inp.drift || (k.autoDrift && Math.abs(steer) > 0.15 && steer * k.drift > -0.25);
+      if (!held || k.v < 10 || locked || ufo) {
+        k.autoDrift = false;
         if (k.mt > 0 && !locked) { this.chargeMagic(k, 0.04 * k.mt); k.boostT = Math.max(k.boostT, MT_TIME[k.mt]); k.boostCol = k.mt; if (k.isPlayer) SND.play('boost'); }
         k.drift = 0; k.mt = 0; k.driftCharge = 0;
       } else {
@@ -528,6 +534,8 @@ class Game {
         if (k.fromGap && k.h < sOff - 1.6) { this.fallOut(k, true); return; }
         if (k.airT > 0.3) k.squash = 1;
         k.h = sOff; k.grounded = true; k.vh = 0; k.fromGap = false;
+        if (k.hop || k.jumped) k.landT = 0.3;
+        k.jumped = false;
         if (k.airT > 0.6 && k.isPlayer) { HUD.shake(Math.min(0.5, k.airT * 0.25)); this.dust(k, 0xd8c8a8); this.dust(k, 0xd8c8a8); }
         if (k.airT > 0.35 && k.isPlayer) SND.play('land');
         if (k.trick) { this.chargeMagic(k, 0.06); k.boostT = Math.max(k.boostT, 0.9); k.boostCol = 1; if (k.isPlayer) SND.play('boost'); }

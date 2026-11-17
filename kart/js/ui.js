@@ -40,6 +40,7 @@ const UI = {
     const loop = (t) => {
       const dt = Math.min(0.05, (t - last) / 1000); last = t;
       const racing = GAME.running && !this.cur; if (racing !== this._racingCls) { this._racingCls = racing; document.body.classList.toggle('racing', racing); }
+      const st = !!(GAME.running && GAME.started); if (st !== this._startedCls) { this._startedCls = st; document.body.classList.toggle('started', st); }
       if (GAME.running) {
         if (GAME.cfg.waitGo) GAME.raceT = -4;
         GAME.update(dt); GAME.render();
@@ -211,7 +212,8 @@ const UI = {
       if (e.target.closest && e.target.closest('.tbtn,#hitem,#btnPause')) return;
       SND.init();
       for (const t of e.changedTouches) {
-        if (!this._stick && t.clientX < innerWidth * 0.6) this._stick = { id: t.identifier, ox: t.clientX, oy: t.clientY, x: t.clientX };
+        if (t.clientX >= innerWidth * 0.5 && t.clientY > innerHeight * 0.5) { Input.touch.jump = true; setTimeout(() => Input.touch.jump = false, 120); const tj = this.$('tjump'); tj.classList.add('on'); setTimeout(() => tj.classList.remove('on'), 160); continue; }
+        if (!this._stick && t.clientX < innerWidth * 0.5) this._stick = { id: t.identifier, ox: t.clientX, oy: t.clientY, x: t.clientX };
       }
       stickUpd(); this.$('thint').style.opacity = 0; e.preventDefault();
     };
@@ -230,7 +232,8 @@ const UI = {
       el.addEventListener('mousedown', () => { ids.add('m'); if (pulse) { Input.touch[key] = true; setTimeout(() => Input.touch[key] = false, 120); } set(); });
       el.addEventListener('mouseup', () => { ids.delete('m'); set(); }); el.addEventListener('mouseleave', () => { ids.delete('m'); set(); });
     };
-    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bJump', 'jump'); btn('bMagic', 'magic', true);
+    btn('bItem', 'item', true); btn('bMagic', 'magic', true);
+    try { if (U.isTouch && screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => { }); } catch (e) { }
     this.$('hmagic').addEventListener('mousedown', () => { Input.touch.magic = true; setTimeout(() => Input.touch.magic = false, 120); });
     const itemTap = (e) => { e.preventDefault(); Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); };
     this.$('hitem').addEventListener('touchstart', itemTap, { passive: false });
