@@ -13,10 +13,58 @@ function mk(g, geo, col, x, y, z, o = {}) {
   if (o.s) m.scale.set(o.s[0], o.s[1], o.s[2]);
   g.add(m); return m;
 }
-function eyes(g, x, y, z, sp, r = 0.08, white = true) {
+// アニメ調の目：白目＋大きな色付き瞳＋瞳孔＋キラッとしたハイライト＋ほっぺ
+const EYE_HI = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const EYE_PU = new THREE.MeshBasicMaterial({ color: 0x0a0614 });
+const BLUSH = new THREE.MeshBasicMaterial({ color: 0xff7a9a, transparent: true, opacity: 0.55, depthWrite: false });
+function eyes(g, x, y, z, sp, r = 0.08, white = true, iris = 0x4a2a8a) {
   for (const s of [-1, 1]) {
-    if (white) mk(g, GEO.sph(r, 10, 8), 0xffffff, x + s * sp, y, z);
-    mk(g, GEO.sph(r * 0.55, 8, 6), 0x111111, x + s * sp, y, z + r * (white ? 0.6 : 0));
+    const ex = x + s * sp;
+    if (white) {
+      mk(g, GEO.sph(r * 1.18, 16, 12), 0xffffff, ex, y, z, { s: [0.95, 1.25, 0.5], mo: { r: 0.2 } }).userData.noOutline = true;
+      mk(g, GEO.sph(r * 0.86, 16, 12), iris, ex, y - r * 0.08, z + r * 0.32, { s: [1, 1.25, 0.45], mo: { r: 0.25 } }).userData.noOutline = true;
+      mk(g, GEO.sph(r * 0.46, 12, 8), 0, ex, y - r * 0.08, z + r * 0.5, { s: [1, 1.2, 0.4], mat: EYE_PU });
+      mk(g, GEO.sph(r * 0.27, 10, 8), 0, ex - s * r * 0.28, y + r * 0.34, z + r * 0.66, { mat: EYE_HI });
+      mk(g, GEO.sph(r * 0.13, 8, 6), 0, ex + s * r * 0.3, y - r * 0.42, z + r * 0.64, { mat: EYE_HI });
+      mk(g, GEO.sph(r * 0.75, 10, 6), 0, ex + s * r * 0.55, y - r * 1.75, z + r * 0.1, { s: [1.3, 0.55, 0.3], mat: BLUSH });
+    } else {
+      mk(g, GEO.sph(r * 0.62, 12, 8), 0, ex, y, z, { s: [1, 1.25, 0.6], mat: EYE_PU });
+      mk(g, GEO.sph(r * 0.22, 8, 6), 0, ex - s * r * 0.15, y + r * 0.25, z + r * 0.3, { mat: EYE_HI });
+    }
+  }
+}
+
+// ===== アニメ調シェーディング（トゥーン＋輪郭線） =====
+const TOON = (() => {
+  const d = new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]);
+  const t = new THREE.DataTexture(d, 3, 1, THREE.RGBAFormat); t.minFilter = t.magFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true;
+  return t;
+})();
+const TOON_CACHE = new Map();
+const OUTLINE_MAT = (() => {
+  const m = new THREE.MeshBasicMaterial({ color: 0x1e1030, side: THREE.BackSide });
+  m.onBeforeCompile = (sh) => { sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n transformed += normalize(normal) * 0.022;'); };
+  return m;
+})();
+function toonify(root) {
+  const list = [];
+  root.traverse(o => { if (o.isMesh) list.push(o); });
+  for (const o of list) {
+    const m = o.material;
+    if (m && m.isMeshStandardMaterial) {
+      const key = [m.color.getHex(), m.emissive.getHex(), m.emissiveIntensity, m.transparent, m.opacity, m.side, m.map ? m.map.uuid : ''].join('|');
+      let t = TOON_CACHE.get(key);
+      if (!t) {
+        t = new THREE.MeshToonMaterial({ color: m.color.clone().multiplyScalar(1.08), emissive: m.emissive, emissiveIntensity: m.emissiveIntensity * 0.9, map: m.map, transparent: m.transparent, opacity: m.opacity, side: m.side, gradientMap: TOON });
+        TOON_CACHE.set(key, t);
+      }
+      o.material = t;
+    }
+    if (o.userData.noOutline || !o.material || o.material.transparent || o.material.isMeshBasicMaterial || o.material.isSpriteMaterial) continue;
+    if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+    const sc = o.getWorldScale ? 1 : 1;
+    if (o.geometry.boundingSphere.radius * Math.max(o.scale.x, o.scale.y, o.scale.z) < 0.09) continue;
+    const ol = new THREE.Mesh(o.geometry, OUTLINE_MAT); ol.userData.outline = true; o.add(ol);
   }
 }
 function shibaHead(g, y, sc = 1) {
@@ -315,41 +363,114 @@ const CHARS = [
 ];
 
 // ===== カート =====
-function buildKart(col) {
+// ===== キャラ専用カート：5種類の車体×塗装パターン×ゼッケン =====
+const KART_STYLE = {
+  kunekune: ['hover', 'galaxy', 0x8affd8], shiba: ['retro', 'dots', 0xffffff], shibaman: ['formula', 'stripe', 0xffd23a],
+  shibafu: ['buggy', 'camo', 0x8a5a2a], kamemushi: ['buggy', 'camo', 0x3a2a1a], natto: ['retro', 'checker', 0xffffff],
+  denchu: ['truck', 'hazard', 0x1a1a1a], konnyaku: ['formula', 'flame', 0xff3a3a], chikuwa: ['formula', 'flame', 0xffa020],
+  bonsai: ['retro', 'gradient', 0xd8b07a], shingou: ['formula', 'checker', 0xff3a3a], mochi: ['truck', 'dots', 0xd8323a],
+  kurage: ['hover', 'gradient', 0xffffff], keshigomu: ['retro', 'stripe', 0xffffff], gacha: ['truck', 'dots', 0xffe04a],
+  hiyashi: ['retro', 'zebra', 0x3a8aff], namazu: ['buggy', 'camo', 0xd8d0b0], dogu: ['formula', 'flame', 0xffd23a],
+  omunie: ['hover', 'galaxy', 0xffd23a],
+};
+const PAINT_CACHE = {};
+function paintTex(pat, c1, c2, num) {
+  const key = [pat, c1, c2, num].join('_'); if (PAINT_CACHE[key]) return PAINT_CACHE[key];
+  const S = 256, cv = document.createElement('canvas'); cv.width = cv.height = S; const g = cv.getContext('2d');
+  const h1 = '#' + c1.toString(16).padStart(6, '0'), h2 = '#' + c2.toString(16).padStart(6, '0'), r = U.rng(c1 + c2);
+  g.fillStyle = h1; g.fillRect(0, 0, S, S);
+  switch (pat) {
+    case 'stripe': g.fillStyle = h2; g.fillRect(S * 0.36, 0, S * 0.1, S); g.fillRect(S * 0.54, 0, S * 0.1, S); break;
+    case 'flame': g.fillStyle = h2; for (let i = 0; i < 7; i++) { const x = i * S / 6; g.beginPath(); g.moveTo(x - 30, S); g.quadraticCurveTo(x - 10, S * 0.5, x + 10, S * (0.15 + r() * 0.3)); g.quadraticCurveTo(x + 4, S * 0.55, x + 34, S); g.fill(); } g.fillStyle = 'rgba(255,240,120,0.7)'; for (let i = 0; i < 7; i++) { const x = i * S / 6; g.beginPath(); g.moveTo(x - 12, S); g.quadraticCurveTo(x, S * 0.7, x + 6, S * 0.5); g.quadraticCurveTo(x + 4, S * 0.75, x + 16, S); g.fill(); } break;
+    case 'dots': for (let y = 0; y < S; y += 42) for (let x = (y / 42 % 2) * 21; x < S; x += 42) { g.fillStyle = pat === 'dots' && c2 === 0xffe04a ? ['#ff5a8a', '#5ad8ff', '#ffe04a', '#7aff6a'][(x + y) % 4] : h2; g.beginPath(); g.arc(x, y, 12, 0, 7); g.fill(); } break;
+    case 'checker': for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if ((x + y) % 2) { g.fillStyle = h2; g.fillRect(x * 32, y * 32, 32, 32); } break;
+    case 'camo': for (let i = 0; i < 40; i++) { g.fillStyle = [h2, 'rgba(0,0,0,0.25)', 'rgba(255,255,255,0.18)'][i % 3]; g.beginPath(); g.ellipse(r() * S, r() * S, 18 + r() * 30, 10 + r() * 20, r() * 3, 0, 7); g.fill(); } break;
+    case 'galaxy': { const gr = g.createLinearGradient(0, 0, S, S); gr.addColorStop(0, '#120030'); gr.addColorStop(0.5, h1); gr.addColorStop(1, '#100828'); g.fillStyle = gr; g.fillRect(0, 0, S, S); for (let i = 0; i < 120; i++) { g.fillStyle = r() < 0.2 ? h2 : '#ffffff'; g.fillRect(r() * S, r() * S, 2, 2); } g.strokeStyle = h2; g.lineWidth = 3; g.beginPath(); g.arc(S * 0.5, S * 0.5, S * 0.3, 0.3, 2.6); g.stroke(); break; }
+    case 'zebra': g.fillStyle = h2; for (let i = -2; i < 10; i++) { g.beginPath(); g.moveTo(i * 32, 0); g.quadraticCurveTo(i * 32 + 30, S / 2, i * 32, S); g.lineTo(i * 32 + 12, S); g.quadraticCurveTo(i * 32 + 42, S / 2, i * 32 + 12, 0); g.fill(); } break;
+    case 'gradient': { const gr = g.createLinearGradient(0, 0, 0, S); gr.addColorStop(0, h2); gr.addColorStop(1, h1); g.fillStyle = gr; g.fillRect(0, 0, S, S); g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(0, S * 0.18, S, 10); break; }
+    case 'hazard': g.fillStyle = h2; for (let i = -8; i < 16; i++) { g.beginPath(); g.moveTo(i * 32, 0); g.lineTo(i * 32 + 16, 0); g.lineTo(i * 32 + 16 + S, S); g.lineTo(i * 32 + S, S); g.fill(); } break;
+  }
+  if (num != null) { g.fillStyle = '#fff'; g.beginPath(); g.arc(S / 2, S / 2, 44, 0, 7); g.fill(); g.lineWidth = 6; g.strokeStyle = '#1e1030'; g.stroke(); g.fillStyle = '#1e1030'; g.font = 'bold 56px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(num), S / 2, S / 2 + 3); }
+  const t = new THREE.CanvasTexture(cv); return (PAINT_CACHE[key] = t);
+}
+
+function buildKart(ch) {
+  const col = ch.color, [style, pat, acc] = KART_STYLE[ch.id] || ['formula', 'stripe', 0xffffff];
+  const num = CHARS.indexOf(ch) + 1;
   const g = new THREE.Group();
-  const body = U.mat(col, { m: 0.35, r: 0.35 });
+  const paint = new THREE.MeshStandardMaterial({ map: paintTex(pat, col, acc), roughness: 0.3, metalness: 0.25 });
+  const paintN = new THREE.MeshStandardMaterial({ map: paintTex(pat, col, acc, num), roughness: 0.3, metalness: 0.25 });
+  const accM = U.mat(acc, { m: 0.4, r: 0.3 });
   const dark = U.mat(0x22252c, { r: 0.6 });
   const chrome = U.mat(0xdfe4ea, { m: 0.9, r: 0.2 });
-  mk(g, GEO.box(1.35, 0.32, 2.1), 0, 0, 0.34, 0, { mat: body });
-  mk(g, GEO.box(1.1, 0.25, 0.7), 0, 0, 0.4, 1.2, { mat: body, r: [0.25, 0, 0] });
-  mk(g, GEO.box(1.6, 0.08, 0.35), 0, 0, 0.3, 1.45, { mat: dark });
-  mk(g, GEO.box(1.4, 0.1, 0.4), 0, 0, 0.95, -1.0, { mat: body });
-  for (const s of [-1, 1]) mk(g, GEO.box(0.08, 0.5, 0.3), 0, s * 0.55, 0.7, -1.0, { mat: dark });
-  mk(g, GEO.box(0.9, 0.5, 0.25), 0, 0, 0.7, -0.45, { mat: dark });
-  mk(g, GEO.tor(0.18, 0.03), 0, 0, 0.75, 0.55, { mat: dark, r: [-0.8, 0, 0] });
-  const flames = [];
-  for (const s of [-1, 1]) {
-    mk(g, GEO.cyl(0.08, 0.1, 0.4, 8), 0, s * 0.3, 0.45, -1.15, { mat: chrome, r: [1.57, 0, 0] });
-    const fl = new THREE.Mesh(GEO.cone(0.12, 0.6, 8), new THREE.MeshBasicMaterial({ color: 0x5ad8ff, transparent: true, opacity: 0.85 }));
-    fl.rotation.x = -Math.PI / 2; fl.position.set(s * 0.3, 0.45, -1.55); fl.visible = false; g.add(fl); flames.push(fl);
+  const glass = U.mat(0x9ad8ff, { op: 0.55, r: 0.05, m: 0.3 });
+  let seatY = 0.5, wheelR = 0.32, wheelW = 0.32, track = 0.8, glowCol = null, exY = 0.45;
+  if (style === 'formula') {
+    mk(g, GEO.box(1.0, 0.3, 2.3), 0, 0, 0.34, 0.05, { mat: paint });
+    mk(g, GEO.box(0.7, 0.24, 0.9), 0, 0, 0.36, 1.45, { mat: paintN, r: [0.12, 0, 0] });
+    mk(g, GEO.box(1.9, 0.06, 0.36), 0, 0, 0.24, 1.75, { mat: accM });
+    for (const sd of [-1, 1]) { mk(g, GEO.box(0.06, 0.22, 0.4), 0, sd * 0.94, 0.3, 1.75, { mat: accM }); mk(g, GEO.box(0.38, 0.3, 1.1), 0, sd * 0.68, 0.36, -0.15, { mat: paint }); mk(g, GEO.cyl(0.13, 0.13, 0.05, 12), 0, sd * 0.86, 0.38, 0.05, { mat: dark, r: [0, 0, Math.PI / 2] }); }
+    mk(g, GEO.box(1.6, 0.08, 0.45), 0, 0, 1.12, -1.1, { mat: accM });
+    for (const sd of [-1, 1]) mk(g, GEO.box(0.06, 0.6, 0.3), 0, sd * 0.5, 0.8, -1.05, { mat: dark });
+    mk(g, GEO.box(0.7, 0.45, 0.4), 0, 0, 0.65, -0.55, { mat: paint });
+  } else if (style === 'buggy') {
+    seatY = 0.75; wheelR = 0.44; wheelW = 0.38; track = 0.92; exY = 0.7;
+    mk(g, GEO.box(1.2, 0.22, 2.0), 0, 0, 0.62, 0, { mat: paint });
+    mk(g, GEO.box(1.1, 0.12, 0.5), 0, 0, 0.5, 1.15, { mat: dark, r: [0.4, 0, 0] });
+    mk(g, GEO.box(1.0, 0.3, 0.55), 0, 0, 0.82, 0.75, { mat: paintN, r: [-0.15, 0, 0] });
+    const bar = (x1, y1, z1, x2, y2, z2) => { const a = new THREE.Vector3(x1, y1, z1), b = new THREE.Vector3(x2, y2, z2), m = new THREE.Mesh(GEO.cyl(0.05, 0.05, a.distanceTo(b), 6), accM); m.position.copy(a).add(b).multiplyScalar(0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); g.add(m); };
+    for (const sd of [-1, 1]) { bar(sd * 0.55, 0.7, 0.35, sd * 0.45, 1.75, -0.2); bar(sd * 0.55, 0.7, -0.85, sd * 0.45, 1.75, -0.2); }
+    bar(-0.45, 1.75, -0.2, 0.45, 1.75, -0.2);
+    for (const sd of [-1, 1]) mk(g, GEO.cyl(0.11, 0.11, 0.08, 10), 0xffffa0, sd * 0.35, 1.0, 1.0, { r: [Math.PI / 2, 0, 0], mo: { e: 0xffffa0, ei: 1 } });
+    mk(g, GEO.box(0.9, 0.35, 0.35), 0, 0, 0.85, -0.95, { mat: dark });
+  } else if (style === 'retro') {
+    seatY = 0.55;
+    mk(g, GEO.sph(0.75, 20, 14), 0, 0, 0.5, 0.15, { mat: paintN, s: [0.95, 0.42, 1.65] });
+    mk(g, GEO.box(1.6, 0.12, 0.2), 0, 0, 0.32, 1.35, { mat: chrome });
+    mk(g, GEO.box(1.5, 0.12, 0.2), 0, 0, 0.36, -1.1, { mat: chrome });
+    for (const sd of [-1, 1]) { mk(g, GEO.sph(0.14, 12, 10), 0xfff6c0, sd * 0.42, 0.6, 1.1, { mo: { e: 0xfff0a0, ei: 1 } }); mk(g, GEO.cone(0.16, 0.6, 3), 0, sd * 0.5, 0.75, -0.95, { mat: accM, r: [-Math.PI / 2 - 0.4, 0, 0] }); }
+    mk(g, GEO.box(0.9, 0.35, 0.06), 0, 0, 0.88, 0.6, { mat: glass, r: [-0.4, 0, 0] });
+  } else if (style === 'hover') {
+    seatY = 0.62; wheelR = 0.22; wheelW = 0.2; glowCol = acc === 0xffd23a ? 0xb05aff : acc;
+    mk(g, GEO.cyl(1.0, 0.85, 0.32, 28), 0, 0, 0.52, 0, { mat: paintN, s: [1, 1, 1.35] });
+    mk(g, GEO.tor(0.98, 0.07, Math.PI * 2), 0, 0, 0.6, 0, { mat: new THREE.MeshBasicMaterial({ color: glowCol }), r: [Math.PI / 2, 0, 0], s: [1, 1.35, 1] });
+    mk(g, GEO.cone(0.32, 0.9, 16), 0, 0, 0.55, 1.35, { mat: paint, r: [Math.PI / 2, 0, 0], s: [1.5, 1, 0.5] });
+    for (const sd of [-1, 1]) mk(g, GEO.box(0.06, 0.55, 0.6), 0, sd * 0.6, 0.85, -1.0, { mat: accM, r: [-0.4, 0, sd * 0.3] });
+    mk(g, GEO.sph(0.62, 18, 10, ), 0, 0, 0.9, -0.1, { mat: glass, s: [1, 0.55, 1.1] });
+  } else { // truck
+    seatY = 0.62; wheelR = 0.36; track = 0.84;
+    mk(g, GEO.box(1.4, 0.3, 2.3), 0, 0, 0.45, 0, { mat: paint });
+    mk(g, GEO.box(1.4, 0.75, 0.75), 0, 0, 0.95, 0.75, { mat: paintN });
+    mk(g, GEO.box(1.3, 0.4, 0.05), 0, 0, 1.12, 1.13, { mat: glass });
+    for (const sd of [-1, 1]) { mk(g, GEO.box(0.06, 0.32, 1.1), 0, sd * 0.68, 0.75, -0.55, { mat: accM }); mk(g, GEO.sph(0.12, 10, 8), 0xffffa0, sd * 0.5, 0.7, 1.16, { mo: { e: 0xffffa0, ei: 1 } }); }
+    mk(g, GEO.box(1.4, 0.32, 0.06), 0, 0, 0.75, -1.12, { mat: accM });
   }
+  const flames = [];
+  for (const sd of [-1, 1]) {
+    mk(g, GEO.cyl(0.08, 0.11, 0.4, 10), 0, sd * 0.3, exY, -1.2, { mat: chrome, r: [1.57, 0, 0] });
+    const fl = new THREE.Mesh(GEO.cone(0.13, 0.65, 8), new THREE.MeshBasicMaterial({ color: 0x5ad8ff, transparent: true, opacity: 0.85 }));
+    fl.rotation.x = -Math.PI / 2; fl.position.set(sd * 0.3, exY, -1.62); fl.visible = false; g.add(fl); flames.push(fl);
+  }
+  if (glowCol) { const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: U.glowTex(), color: glowCol, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })); gl.position.y = 0.12; gl.scale.set(3.6, 1.2, 1); g.add(gl); }
   const wheels = [];
-  const wg = GEO.cyl(0.32, 0.32, 0.32, 14);
-  const hg = GEO.cyl(0.16, 0.16, 0.34, 8);
-  for (const [x, z, f] of [[-0.78, 0.8, 1], [0.78, 0.8, 1], [-0.8, -0.75, 0], [0.8, -0.75, 0]]) {
-    const w = new THREE.Group(); w.position.set(x, 0.32, z);
+  const wg = GEO.cyl(wheelR, wheelR, wheelW, 16), hg = GEO.cyl(wheelR * 0.55, wheelR * 0.55, wheelW + 0.02, 10);
+  const rim = U.mat(acc === 0xffffff ? 0xdfe4ea : acc, { m: 0.7, r: 0.25 });
+  for (const [sx, z, f] of [[-1, 0.85, 1], [1, 0.85, 1], [-1, -0.78, 0], [1, -0.78, 0]]) {
+    const w = new THREE.Group(); w.position.set(sx * (track + (f ? 0 : 0.02)), wheelR, z);
     const t = mk(w, wg, 0, 0, 0, 0, { mat: dark, r: [0, 0, Math.PI / 2] });
-    mk(w, hg, 0, 0, 0, 0, { mat: chrome, r: [0, 0, Math.PI / 2] });
+    mk(w, hg, 0, 0, 0, 0, { mat: rim, r: [0, 0, Math.PI / 2] });
+    if (style === 'buggy') for (let i = 0; i < 8; i++) mk(t, GEO.box(0.06, wheelW + 0.04, 0.1), 0, Math.cos(i * 0.785) * wheelR, 0, Math.sin(i * 0.785) * wheelR, { mat: dark, r: [0, -i * 0.785, 0] });
     g.add(w); wheels.push({ g: w, front: !!f, tire: t });
   }
-  const anchor = new THREE.Group(); anchor.position.set(0, 0.5, -0.25); g.add(anchor);
+  const anchor = new THREE.Group(); anchor.position.set(0, seatY, -0.25); g.add(anchor);
   return { g, wheels, flames, anchor };
 }
 
 function buildRacerModel(ch) {
-  const k = buildKart(ch.color);
+  const k = buildKart(ch);
   const drv = new THREE.Group();
   const anim = ch.build(drv) || (() => {});
   k.anchor.add(drv);
+  toonify(k.g);
   return { root: k.g, kart: k, drv, anim };
 }

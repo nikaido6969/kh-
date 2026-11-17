@@ -33,6 +33,7 @@ const UI = {
     HUD.init(); Input.init();
     this.buildMenuScene();
     this.makeThumbs();
+    this.$('lgChar').src = this.thumbs.omunie;
     this.bind();
     this.show('s-title');
     let last = performance.now();
@@ -88,7 +89,7 @@ const UI = {
     this.menuRacers = [];
     const pool = CHARS.slice().sort(() => Math.random() - 0.5).slice(0, 4);
     pool.forEach((ch, i) => {
-      const m = buildRacerModel(ch); m.root.traverse(o => { if (o.isMesh) o.castShadow = true; }); s.add(m.root);
+      const m = buildRacerModel(ch); m.root.traverse(o => { if (o.isMesh && !o.userData.outline) o.castShadow = true; }); s.add(m.root);
       this.menuRacers.push({ m, a: i * Math.PI / 2, r: 10.3 + (i % 2) * 2, v: 0.42 + i * 0.035, wob: rng() * 6 });
     });
     this.menuScene = s; this.menuPed = ped;
@@ -109,7 +110,7 @@ const UI = {
     if (this.menuModel) this.menuPed.remove(this.menuModel.root);
     const ch = CHARS.find(c => c.id === id) || CHARS[0];
     this.menuModel = buildRacerModel(ch);
-    this.menuModel.root.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    this.menuModel.root.traverse(o => { if (o.isMesh && !o.userData.outline) o.castShadow = true; });
     this.menuModel.root.position.y = 0.72; this.menuModel.root.scale.setScalar(1.25);
     this.menuPed.add(this.menuModel.root);
   },
@@ -141,8 +142,8 @@ const UI = {
     const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: true });
     r.setSize(160, 160); r.outputEncoding = THREE.sRGBEncoding;
     const s = new THREE.Scene();
-    s.add(new THREE.HemisphereLight(0xffffff, 0x8a7a6a, 1.0));
-    const d = new THREE.DirectionalLight(0xffffff, 0.8); d.position.set(4, 8, 6); s.add(d);
+    s.add(new THREE.HemisphereLight(0xffffff, 0x6a5a7a, 0.5));
+    const d = new THREE.DirectionalLight(0xffffff, 0.75); d.position.set(4, 8, 6); s.add(d);
     const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 50); cam.position.set(2.2, 2.4, 4.6); cam.lookAt(0, 0.9, 0);
     this.thumbs = {};
     for (const ch of CHARS) {
@@ -317,6 +318,74 @@ const UI = {
     if (def.open) { const q0 = p[0], q1 = p[p.length - 1]; c.fillStyle = '#2ab060'; c.beginPath(); c.arc(X(q0), Y(q0), 6, 0, 7); c.fill(); c.fillStyle = '#ff3a5a'; c.beginPath(); c.arc(X(q1), Y(q1), 6, 0, 7); c.fill(); }
     return cv.toDataURL();
   },
+  // ===== コースの絵はがき（世界ごとの景色＋ルート＋高低差） =====
+  courseStats(def) {
+    const r = turtle(def), p = r.pts, cmds = r.cmds;
+    let minY = 1e9, maxY = -1e9; for (const q of p) { minY = Math.min(minY, q.y); maxY = Math.max(maxY, q.y); }
+    const n = (f) => cmds.filter(f).length;
+    return { km: p.length / 1000, rise: Math.round(maxY - minY), jumps: n(c => c.gap || c.ramp), wild: n(c => c.wild), tunnel: n(c => c.tunnel), loop: n(c => c.t === 'l' || c.cork), hairpin: n(c => c.t === 'c' && Math.abs(c.ang) >= 150), pts: p, minY, maxY };
+  },
+  courseArt(def) {
+    this._art = this._art || {};
+    const key = def.id + (def.battle ? 'b' : '');
+    if (this._art[key]) return this._art[key];
+    const W = 320, H = 200, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const c = cv.getContext('2d'), th = def.theme, R = U.rng(def.id.length * 31 + 7);
+    const hx = (n) => '#' + n.toString(16).padStart(6, '0');
+    const sky = c.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, hx(th.skyTop)); sky.addColorStop(1, hx(th.skyBot)); c.fillStyle = sky; c.fillRect(0, 0, W, H);
+    const biome = BIOME[def.baseId || def.id] || 'meadow';
+    const hills = (y0, amp, col, n = 5) => { c.fillStyle = col; c.beginPath(); c.moveTo(0, H); for (let x = 0; x <= W; x += 8) c.lineTo(x, y0 - Math.abs(Math.sin(x / W * Math.PI * n * 0.5 + y0)) * amp); c.lineTo(W, H); c.fill(); };
+    const tri = (x, y, w, h, col) => { c.fillStyle = col; c.beginPath(); c.moveTo(x, y - h); c.lineTo(x + w / 2, y); c.lineTo(x - w / 2, y); c.fill(); };
+    const stars = (k) => { c.fillStyle = '#fff'; for (let i = 0; i < k; i++) c.fillRect(R() * W, R() * H * 0.7, 1.5, 1.5); };
+    const circ = (x, y, rad, col) => { c.fillStyle = col; c.beginPath(); c.arc(x, y, rad, 0, 7); c.fill(); };
+    switch (biome) {
+      case 'meadow': hills(150, 30, '#7ac850', 3); hills(170, 18, '#5aa83a', 5); for (let i = 0; i < 9; i++) { const x = R() * W; tri(x, 160 + R() * 20, 18, 34, '#2f7a3a'); } c.fillStyle = '#5ab0ff'; c.fillRect(0, 186, W, 14); break;
+      case 'swamp': hills(160, 14, '#4a5a2a', 4); c.fillStyle = '#3a4a2a'; c.fillRect(0, 168, W, 32); for (let i = 0; i < 26; i++) { c.fillStyle = '#7a8a3a'; c.fillRect(R() * W, 150 + R() * 30, 2, 18); } for (let i = 0; i < 5; i++) { c.strokeStyle = '#3a2a1a'; c.lineWidth = 3; const x = R() * W; c.beginPath(); c.moveTo(x, 170); c.lineTo(x + 6, 120); c.lineTo(x - 10, 110); c.stroke(); } break;
+      case 'mountain': for (let i = 0; i < 4; i++) { const x = 40 + i * 80 + R() * 20, h = 90 + R() * 60; tri(x, 190, 150, h, '#6a7a8a'); tri(x, 190 - h + 36, 50, 36, '#ffffff'); } hills(185, 14, '#4f7a3a', 6); for (let i = 0; i < 10; i++) tri(R() * W, 196, 14, 30, '#1f5f30'); break;
+      case 'forest': for (let i = 0; i < 18; i++) { const x = R() * W; c.fillStyle = '#5a3a20'; c.fillRect(x - 3, 110, 7, 90); circ(x, 100 + R() * 20, 22 + R() * 12, ['#2f7a3a', '#3a8a3a', '#4fae46'][i % 3]); } for (let i = 0; i < 5; i++) { const x = R() * W; c.fillStyle = '#f4ead8'; c.fillRect(x - 2, 170, 4, 20); c.fillStyle = '#e04a6a'; c.beginPath(); c.ellipse(x, 170, 12, 7, 0, Math.PI, 0); c.fill(); } break;
+      case 'gas': circ(W * 0.7, H * 0.95, 160, '#d8904a'); for (let i = 0; i < 7; i++) { c.fillStyle = ['#e8c49a', '#c9844e', '#f4e2c4', '#b0603a'][i % 4]; c.fillRect(0, 110 + i * 14, W, 7); } circ(W * 0.62, 150, 14, '#c0402a'); break;
+      case 'volcano': tri(W * 0.55, 200, 260, 140, '#3a2a22'); c.fillStyle = '#ff7a1a'; c.beginPath(); c.moveTo(W * 0.55 - 14, 64); c.lineTo(W * 0.55 + 14, 64); c.lineTo(W * 0.55 + 40, 200); c.lineTo(W * 0.55 + 20, 200); c.fill(); for (let i = 0; i < 12; i++) circ(W * 0.55 + (R() - 0.5) * 60, 40 + R() * 30, 3 + R() * 4, '#ffb040'); c.fillStyle = '#ff5a12'; c.fillRect(0, 188, W, 12); break;
+      case 'moon': stars(90); circ(W * 0.2, 46, 26, '#3a8af0'); circ(W * 0.2 + 6, 40, 10, '#2ea05a'); hills(160, 16, '#9a9aa4', 4); c.fillStyle = '#8a8a94'; c.fillRect(0, 168, W, 32); for (let i = 0; i < 6; i++) { c.strokeStyle = '#6a6a74'; c.lineWidth = 3; c.beginPath(); c.ellipse(R() * W, 178 + R() * 14, 16, 5, 0, 0, 7); c.stroke(); } break;
+      case 'sea': c.fillStyle = 'rgba(30,120,200,0.55)'; c.fillRect(0, 70, W, 130); for (let i = 0; i < 20; i++) { c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineWidth = 1.5; c.beginPath(); c.arc(R() * W, 90 + R() * 100, 2 + R() * 4, 0, 7); c.stroke(); } for (let i = 0; i < 8; i++) tri(R() * W, 200, 14, 30 + R() * 20, ['#ff7a8a', '#ffb03a', '#b05aff'][i % 3]); for (let i = 0; i < 5; i++) { c.fillStyle = '#ffa030'; c.beginPath(); c.ellipse(R() * W, 100 + R() * 60, 8, 4, 0, 0, 7); c.fill(); } break;
+      case 'cave': c.fillStyle = '#1a0806'; c.fillRect(0, 0, W, H); c.fillStyle = '#2a1410'; for (let i = 0; i < 12; i++) tri(R() * W, 0, 20, -50 - R() * 30, '#3a2420'); c.fillStyle = '#ff5a12'; c.fillRect(0, 180, W, 20); for (let i = 0; i < 8; i++) tri(R() * W, 180, 12, 30 + R() * 20, i % 2 ? '#b06aff' : '#5ae8ff'); break;
+      case 'sky': for (let i = 0; i < 6; i++) { const x = R() * W, y = 60 + R() * 100; circ(x, y, 20, '#fff'); circ(x + 18, y + 4, 16, '#fff'); circ(x - 16, y + 6, 14, '#fff'); } for (let i = 0; i < 3; i++) { const x = 50 + i * 110, y = 150 + R() * 20; c.fillStyle = '#5ab04a'; c.fillRect(x - 30, y, 60, 8); tri(x, y + 40, 60, -32, '#8a7060'); } ['#ff4a4a', '#ffa03a', '#ffe03a', '#5ad86a', '#4a9aff', '#9a5aff'].forEach((col, i) => { c.strokeStyle = col; c.lineWidth = 4; c.beginPath(); c.arc(W * 0.8, 200, 110 - i * 5, Math.PI, 0); c.stroke(); }); break;
+      case 'crystal': stars(60); for (let i = 0; i < 14; i++) { const x = R() * W, h = 40 + R() * 80; c.fillStyle = `hsl(${260 + R() * 70},80%,${55 + R() * 20}%)`; c.beginPath(); c.moveTo(x, 200 - h); c.lineTo(x + 12, 200); c.lineTo(x - 12, 200); c.fill(); } break;
+      case 'alien': stars(60); circ(W * 0.8, 40, 30, '#ff8ad8'); for (let i = 0; i < 6; i++) { c.strokeStyle = '#7dffb0'; c.lineWidth = 6; c.beginPath(); const x = R() * W; c.moveTo(x, 200); c.quadraticCurveTo(x + 30, 150, x - 10, 110 + R() * 30); c.stroke(); } c.fillStyle = '#3a0a5a'; c.fillRect(0, 185, W, 15); break;
+      case 'candy': hills(160, 24, '#ffc0dc', 4); for (let i = 0; i < 7; i++) { const x = R() * W; c.fillStyle = '#fff'; c.fillRect(x - 2, 120, 4, 50); circ(x, 116, 14, ['#ff5aa8', '#5ad8ff', '#ffe04a'][i % 3]); } break;
+    }
+    // ルート（上から見た形）
+    const st = this.courseStats(def), p = st.pts;
+    let a = 1e9, b = -1e9, e = 1e9, f = -1e9; for (const q of p) { a = Math.min(a, q.x); b = Math.max(b, q.x); e = Math.min(e, q.z); f = Math.max(f, q.z); }
+    const box = { x: 16, y: 14, w: W - 32, h: H - 70 }, sc = Math.min(box.w / (b - a || 1), box.h / (f - e || 1));
+    const X = (q) => box.x + (q.x - a) * sc + (box.w - (b - a) * sc) / 2, Y = (q) => box.y + (q.z - e) * sc + (box.h - (f - e) * sc) / 2;
+    c.lineCap = c.lineJoin = 'round';
+    for (const [lw, col] of [[9, 'rgba(30,10,60,0.65)'], [4.5, '#ffffff']]) { c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); p.forEach((q, i) => { if (i % 3) return; i ? c.lineTo(X(q), Y(q)) : c.moveTo(X(q), Y(q)); }); if (!def.open) c.closePath(); c.stroke(); }
+    if (def.open && !def.battle) { const q0 = p[0], q1 = p[p.length - 1]; circ(X(q0), Y(q0), 7, '#2ab060'); circ(X(q1), Y(q1), 7, '#ff3a5a'); c.fillStyle = '#fff'; c.font = 'bold 9px sans-serif'; c.fillText('S', X(q0) - 3, Y(q0) + 3); c.fillText('G', X(q1) - 3, Y(q1) + 3); }
+    // 高低差グラフ
+    const gy = H - 44, gh = 36;
+    c.fillStyle = 'rgba(20,10,40,0.55)'; c.fillRect(0, gy - 4, W, gh + 8);
+    const rng = Math.max(20, st.maxY - st.minY);
+    c.beginPath(); c.moveTo(0, gy + gh);
+    for (let i = 0; i < p.length; i += 6) c.lineTo(i / (p.length - 1) * W, gy + gh - (p[i].y - st.minY) / rng * gh);
+    c.lineTo(W, gy + gh); c.closePath();
+    const eg = c.createLinearGradient(0, gy, 0, gy + gh); eg.addColorStop(0, '#ffd23a'); eg.addColorStop(1, 'rgba(255,120,60,0.4)'); c.fillStyle = eg; c.fill();
+    c.fillStyle = '#fff'; c.font = 'bold 11px sans-serif'; c.fillText(`高低差 ${st.rise}m`, 8, gy + 12);
+    return (this._art[key] = cv.toDataURL('image/jpeg', 0.85));
+  },
+  courseChips(def) {
+    const st = this.courseStats(def), ch = [];
+    if (def.open) ch.push(`<span>📏 ${st.km.toFixed(1)}km</span>`); else ch.push(`<span>📏 1周${Math.round(st.km * 1000)}m</span>`);
+    ch.push(`<span class="${st.rise > 100 ? 'hot' : ''}">⛰ ${st.rise}m</span>`);
+    if (st.jumps) ch.push(`<span class="hot">⤴ ジャンプ${st.jumps}</span>`);
+    if (st.wild) ch.push(`<span class="ok">🏁 ラリー</span>`);
+    if (st.hairpin) ch.push(`<span>↩ ヘアピン${st.hairpin}</span>`);
+    if (st.tunnel) ch.push(`<span>🕳 トンネル</span>`);
+    if (st.loop) ch.push(`<span class="hot">🎢 ループ</span>`);
+    if (def.water != null) ch.push(`<span class="cool">💧 水</span>`);
+    if (def.gravity < 25) ch.push(`<span class="cool">🪶 低重力</span>`);
+    if (def.gravity > 35) ch.push(`<span class="hot">⬇ 高重力</span>`);
+    return ch.join('');
+  },
   openCourse() {
     const box = this.$('courseList'); box.innerHTML = '';
     this.$('courseTitle').textContent = this.sel.mode === 'gp' ? 'カップをえらぶ' : 'コースをえらぶ';
@@ -325,7 +394,7 @@ const UI = {
       const cs = COURSES.filter(c => c.cup === ci);
       if (this.sel.mode === 'gp') {
         const b = document.createElement('button'); b.className = 'cupbtn';
-        b.innerHTML = `<div class="cupic">${cup.icon}</div><div><h3>${cup.name}</h3><p>${cs.map(c => c.name).join('・')}</p></div>`;
+        b.innerHTML = `<div class="cupic">${cup.icon}</div><div><h3>${cup.name}</h3><p>${cs.map(c => c.name).join('・')}</p><div class="cupmini">${cs.map(c => `<img src="${this.courseArt(c)}" alt="">`).join('')}</div></div>`;
         b.onclick = () => { SND.play('select'); this.startGP(ci); };
         sec.appendChild(b);
       } else {
@@ -334,7 +403,7 @@ const UI = {
         cs.forEach(c => {
           const b = document.createElement('button'); b.className = 'course';
           const best = this.store.get('tt_' + c.id + '_' + this.sel.cc, null);
-          b.innerHTML = `<img src="${this.courseThumb(c)}" alt=""><b>${c.name}</b><small>${c.desc}</small>${this.sel.mode === 'tt' && best ? `<em>BEST ${HUD.fmt(best)}</em>` : ''}`;
+          b.innerHTML = `<img src="${this.courseArt(c)}" alt=""><div class="cinfo"><b>${c.name}</b><small>${c.desc}</small><div class="chips">${this.courseChips(c)}</div>${this.sel.mode === 'tt' && best ? `<em>BEST ${HUD.fmt(best)}</em>` : ''}</div>`;
           b.onclick = () => { SND.play('select'); this.sel.course = c.id; this.startRace(); };
           row.appendChild(b);
         });
@@ -353,7 +422,7 @@ const UI = {
       const row = document.createElement('div'); row.className = 'crow';
       list.forEach(([id, def, sub]) => {
         const b = document.createElement('button'); b.className = 'course';
-        b.innerHTML = `<img src="${this.courseThumb(def)}" alt=""><b>${def.name}</b><small>${sub}</small>`;
+        b.innerHTML = `<img src="${this.courseArt(def)}" alt=""><div class="cinfo"><b>${def.name}</b><small>${sub}</small></div>`;
         b.onclick = () => { SND.play('select'); this.sel.course = id; this.startBattle(); };
         row.appendChild(b);
       });

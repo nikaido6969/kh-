@@ -208,13 +208,40 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 .tune .tl{display:flex;justify-content:space-between;font-size:12px;color:var(--sub)}
 .tune small{color:var(--sub);font-size:12px;text-align:center}
 /* ===== タイトル ===== */
+.lgburst{position:absolute;left:50%;top:48%;width:min(120vh,90vw);height:min(120vh,90vw);transform:translate(-50%,-50%);border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,240,180,.55) 0 7deg,rgba(255,255,255,0) 7deg 18deg);-webkit-mask:radial-gradient(circle,#000 18%,transparent 62%);mask:radial-gradient(circle,#000 18%,transparent 62%);animation:spin 40s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.lgplate{position:relative;padding:.18em .5em .26em;border-radius:.42em;background:linear-gradient(160deg,#8a3aff 0%,#c64ad8 45%,#ff6a9a 100%);border:.07em solid #fff;box-shadow:0 .07em 0 #2a1652,0 .14em 0 #2a1652,0 .24em .3em rgba(30,10,60,.45),inset 0 .08em 0 rgba(255,255,255,.45),inset 0 -.1em 0 rgba(0,0,0,.18);font-size:clamp(46px,9.5vw,118px)}
+.lgplate::before{content:"";position:absolute;inset:.06em .12em 52% .12em;border-radius:.36em .36em 1em 1em;background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,0));pointer-events:none}
+.lgplate .tl1{font-size:1em}.lgplate .tl2{font-size:1.24em}
+.lgplate .tl1 span,.lgplate .tl2 span{filter:drop-shadow(0 .035em 0 #2a1652) drop-shadow(0 .035em 0 #2a1652) drop-shadow(0 .035em 0 #2a1652) drop-shadow(0 .1em .08em rgba(20,0,40,.5))}
+.lgribbon{position:relative;margin-top:-.2em;font-size:clamp(12px,1.8vw,20px);z-index:1}
+.lgribbon span{position:relative;display:block;font-family:"Dela Gothic One",sans-serif;letter-spacing:.42em;color:#2a1652;background:linear-gradient(180deg,#ffe86a,#ffb020);padding:.38em 1.2em .34em 1.62em;border:3px solid #fff;box-shadow:0 4px 0 #a06010,0 8px 16px rgba(30,10,60,.35)}
+.lgribbon::before,.lgribbon::after{content:"";position:absolute;top:.5em;width:1.6em;height:100%;background:#e08a10;z-index:-1;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,.6em 50%)}
+.lgribbon::before{left:-1.1em}.lgribbon::after{right:-1.1em;transform:scaleX(-1)}
+.lgchar{position:absolute;right:-4%;top:-6%;width:clamp(90px,17vw,200px);filter:drop-shadow(0 8px 10px rgba(30,10,60,.45));animation:fly 3s ease-in-out infinite;transform:rotate(8deg)}
+@keyframes fly{0%,100%{transform:rotate(8deg) translateY(0)}50%{transform:rotate(2deg) translateY(-10px)}}
+.lgspeed{position:absolute;left:-6%;top:30%;width:30%;height:40%;pointer-events:none}
+.lgspeed i{position:absolute;right:0;height:5px;border-radius:5px;background:linear-gradient(90deg,transparent,#fff);animation:spd 1.1s ease-in infinite}
+.lgspeed i:nth-child(1){top:0;width:70%}.lgspeed i:nth-child(2){top:22%;width:100%;animation-delay:.2s}.lgspeed i:nth-child(3){top:44%;width:60%;animation-delay:.45s}.lgspeed i:nth-child(4){top:66%;width:90%;animation-delay:.1s}.lgspeed i:nth-child(5){top:88%;width:50%;animation-delay:.6s}
+@keyframes spd{0%{opacity:0;transform:translateX(40%)}30%{opacity:.9}100%{opacity:0;transform:translateX(-60%)}}
+@media (orientation:landscape) and (max-height:500px){.lgplate{font-size:12.5vh}.lgchar{width:24vh}}
+/* コース選択カード */
+.course{padding:0!important;overflow:hidden;gap:0!important;border:3px solid #fff;box-shadow:0 5px 0 rgba(42,22,82,.22),0 10px 22px rgba(30,10,60,.16)!important}
+.course img{width:100%!important;aspect-ratio:16/10!important;display:block;object-fit:cover}
+.course .cinfo{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px;width:100%;text-align:left}
+.course .cinfo b{font-size:15px;font-weight:900;color:#2a1652}
+.course .chips{display:flex;flex-wrap:wrap;gap:4px}
+.course .chips span{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:999px;background:#f0e8ff;color:#5a2aa8}
+.course .chips span.hot{background:#ffe0e8;color:#c0204a}.course .chips span.cool{background:#dff2ff;color:#1a6ab0}.course .chips span.ok{background:#e4f8e0;color:#2a8a3a}
+.cupbtn .cupmini{display:flex;gap:6px;margin-top:8px}.cupbtn .cupmini img{width:64px;height:40px;border-radius:8px;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+
 #s-title{padding:0;overflow:hidden;justify-content:center;align-items:stretch;flex-direction:row;gap:0}
 .tvig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 120% 90% at 50% 40%,transparent 45%,rgba(20,10,40,.45)),linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(20,10,40,.35))}
 .tlogo{position:relative;align-self:center;flex:1 1 50%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4vh 2vw;transform:rotate(-4deg);animation:lgin .9s cubic-bezier(.2,1.5,.4,1) both}
 @keyframes lgin{from{transform:rotate(-4deg) scale(.2) translateY(-60px);opacity:0}to{transform:rotate(-4deg) scale(1);opacity:1}}
 .tl1,.tl2{font-family:"Dela Gothic One","Hiragino Sans",sans-serif;line-height:.95;display:flex;gap:.02em;white-space:nowrap}
 .tl1{font-size:clamp(52px,10.5vw,128px)}
-.tl2{font-size:clamp(64px,13vw,160px);margin-top:-.04em}
+.tl2{font-size:clamp(64px,13vw,160px);margin-top:-.08em}
 .tl1 span,.tl2 span{display:inline-block;-webkit-text-stroke:.16em #2a1652;paint-order:stroke fill;color:transparent;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 .06em 0 #2a1652) drop-shadow(0 .14em .12em rgba(30,10,60,.45));animation:wave 2.4s ease-in-out infinite}
 .tl1 span:nth-child(1){background-image:linear-gradient(180deg,#fff6a8,#ffb020);animation-delay:0s}
 .tl1 span:nth-child(2){background-image:linear-gradient(180deg,#ffd0e8,#ff4f9a);animation-delay:.12s}
@@ -251,7 +278,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 .mchip{padding:8px 16px;border-radius:999px;background:rgba(42,22,82,.72);color:#fff;font-family:inherit;font-weight:800;font-size:13px;border:2px solid rgba(255,255,255,.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .tver{position:absolute;left:max(12px,env(safe-area-inset-left));bottom:8px;font-size:11px;font-weight:800;color:rgba(255,255,255,.75);letter-spacing:.1em}
 @media (orientation:portrait){#s-title{flex-direction:column;justify-content:flex-start}.tlogo{flex:none;padding-top:8vh}.tmenu{flex:none;width:100%;max-width:520px;align-self:center;padding:10px 16px 24px}}
-@media (orientation:landscape) and (max-height:500px){.tl1{font-size:13vh}.tl2{font-size:16.5vh}.mbtn{padding:6px 12px 6px 7px;gap:10px}.mic{width:40px;height:40px;font-size:22px}.mbtn.big .mic{width:46px;height:46px;font-size:26px}.mtx b{font-size:16px}.mbtn.big .mtx b{font-size:19px}.mtx small{font-size:10.5px}.tmenu{gap:6px}}
+@media (orientation:landscape) and (max-height:500px){.mbtn{padding:6px 12px 6px 7px;gap:10px}.mic{width:40px;height:40px;font-size:22px}.mbtn.big .mic{width:46px;height:46px;font-size:26px}.mtx b{font-size:16px}.mbtn.big .mtx b{font-size:19px}.mtx small{font-size:10.5px}.tmenu{gap:6px}}
 @media (prefers-reduced-motion:reduce){.tl1 span,.tl2 span,.tsp,.tpress,.tlogo::after{animation:none}}
 #s-pause,#s-results{justify-content:center;background:rgba(246,239,228,.4)}
 </style>
@@ -288,10 +315,15 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 <div class="screen" id="s-title">
   <div class="tvig"></div>
   <div class="tlogo" aria-label="おむにえカート">
-    <div class="tl1"><span>お</span><span>む</span><span>に</span><span>え</span></div>
-    <div class="tl2"><span>カ</span><span>ー</span><span>ト</span></div>
-    <div class="tsub">OMUNIE KART</div>
-    <i class="tsp" style="left:8%;top:12%"></i><i class="tsp" style="left:88%;top:28%;animation-delay:.7s"></i><i class="tsp" style="left:62%;top:86%;animation-delay:1.4s"></i>
+    <div class="lgburst"></div>
+    <div class="lgspeed"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="lgplate">
+      <div class="tl1"><span>お</span><span>む</span><span>に</span><span>え</span></div>
+      <div class="tl2"><span>カ</span><span>ー</span><span>ト</span></div>
+    </div>
+    <div class="lgribbon"><span>OMUNIE KART</span></div>
+    <img class="lgchar" id="lgChar" alt="">
+    <i class="tsp" style="left:6%;top:14%"></i><i class="tsp" style="left:90%;top:24%;animation-delay:.7s"></i><i class="tsp" style="left:64%;top:88%;animation-delay:1.4s"></i><i class="tsp" style="left:20%;top:80%;animation-delay:.35s"></i>
   </div>
   <button class="tpress" id="tPress"><span>タップしてスタート</span><small>TAP TO START</small></button>
   <nav class="tmenu" id="tMenu">

@@ -70,7 +70,7 @@ Object.assign(Game.prototype, {
       if (o.isInstancedMesh) { o.castShadow = true; o.receiveShadow = false; }
       else if (o.isMesh) o.receiveShadow = true;
     });
-    for (const k of this.karts) k.model.root.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    for (const k of this.karts) k.model.root.traverse(o => { if (o.isMesh && !o.userData.outline) o.castShadow = true; });
     // ---- 太陽 ----
     if (!['cave'].includes(biome)) {
       const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: U.glowTex(), color: ['moon', 'crystal', 'alien'].includes(biome) ? 0xfff8f0 : biome === 'volcano' ? 0xffc060 : 0xfff2c8, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
