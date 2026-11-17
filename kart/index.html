@@ -299,15 +299,13 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 </div>
 <button id="btnPause">Ⅱ</button>
 <div id="touch">
-  <div id="tstick"><div id="tknob">⬅︎ ハンドル ➡︎</div></div>
+  <div id="tstick" hidden><div id="tknob"></div></div>
   <div id="tpad"><span>ここに左手の親指を置いて<br>左右にスライド＝ハンドル</span></div>
   <button class="tbtn" id="bItem"><b id="bItemI">🎁</b><small>アイテム</small></button>
   <button class="tbtn" id="bDrift"><b>↪︎</b><small>ドリフト<br>(長押し)</small></button>
   <button class="tbtn" id="bMagic"><b>✨</b><small>魔法</small></button>
   <button class="tbtn" id="bJump"><b>⤴︎</b><small>ジャンプ</small></button>
-  <button class="tbtn" id="bBrake"><b>⏪</b><small>ブレーキ</small></button>
-  <div id="thint">左手：親指を置いて左右にスライドでハンドル<br>右手：ドリフト（曲がりながら長押し→離すと加速）／ジャンプ（罠をとび越える・空中で押すと着地加速）<br>アイテムボタンで使う／ブレーキ長押しでバック<br>📱 iPhoneを傾けても少し曲がります</div>
-  <div id="trot">📱↻ 横向きにすると遊びやすいです</div>
+  <div id="thint">左手：親指を置いて左右にスライドでハンドル<br>右手：ドリフト（曲がりながら長押し→離すと加速）／ジャンプ（罠をとび越える・空中で押すと着地加速）<br>アイテムボタンで使う<br>📱 iPhoneを傾けても少し曲がります</div>
 </div>
 <div id="loading">コース生成中…</div>
 
@@ -343,7 +341,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
   <div class="ccs">
     <button class="btn" data-cc="100">100cc<small>のんびり（それでも速い）</small></button>
     <button class="btn pri" data-cc="150">150cc<small>標準。ノーミスで走るほど速くなる</small></button>
-    <button class="btn" data-cc="200">200cc<small>狂気。ブレーキを覚えよう</small></button>
+    <button class="btn" data-cc="200">200cc<small>狂気のスピード。ドリフト必須</small></button>
   </div>
 </div>
 
@@ -411,7 +409,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
     🏁 <b>コース</b>：周回ではなくスタートからゴールまでの一本道（3〜5km）。ヘアピン・崖からの空中ダイブ・道なき大自然を切り裂くラリー区間あり。左上にコ・ドライバーの指示（「右3」「ジャンプ！」など）が出る。<br>
     ✨ <b>魔法</b>：キャラごとに固有の魔法あり。走る・アイテム箱・ミニターボでゲージが溜まり、満タンで「魔法」ボタン（キーボードはM）。紫のレアキャラ「おむにえさん」は全能の魔法を使える。<br>
-    📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その上＝ジャンプ（罠や地雷をとび越える。ジャンプ台から飛んだ空中で押すと着地で加速）、左＝アイテム、左上＝ブレーキ（長押しでバック）。キーボードはJでジャンプ。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
+    📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その上＝ジャンプ（罠や地雷をとび越える。ジャンプ台から飛んだ空中で押すと着地で加速）、左＝アイテム。キーボードはJでジャンプ。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
     <p><b>重火器（レース・バトル共通）</b>：🔫機関銃（前方に連射）　💥バズーカ（一直線のロケット弾・大爆発）　⚠️地雷（後ろに3個・踏むと爆発）　🚀ミサイル（前の相手を追尾）</p>
     <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>

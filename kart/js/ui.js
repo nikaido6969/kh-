@@ -230,7 +230,7 @@ const UI = {
       el.addEventListener('mousedown', () => { ids.add('m'); if (pulse) { Input.touch[key] = true; setTimeout(() => Input.touch[key] = false, 120); } set(); });
       el.addEventListener('mouseup', () => { ids.delete('m'); set(); }); el.addEventListener('mouseleave', () => { ids.delete('m'); set(); });
     };
-    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bBrake', 'b'); btn('bJump', 'jump'); btn('bMagic', 'magic', true);
+    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bJump', 'jump'); btn('bMagic', 'magic', true);
     this.$('hmagic').addEventListener('mousedown', () => { Input.touch.magic = true; setTimeout(() => Input.touch.magic = false, 120); });
     const itemTap = (e) => { e.preventDefault(); Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); };
     this.$('hitem').addEventListener('touchstart', itemTap, { passive: false });
