@@ -45,6 +45,8 @@ const Input = {
     steer = U.clamp(steer, -1, 1);
     this.itemEdge = item && !this.prevItem; this.prevItem = item;
     this.driftEdge = drift && !this.prevDrift; this.prevDrift = drift;
+    const jump = !!(k.KeyJ || k.KeyV) || t.jump;
+    this.jumpEdge = jump && !this.prevJump; this.prevJump = jump;
     Object.assign(this.st, { steer, accel, brake, drift, item, back: brake, look });
     return this.st;
   },
@@ -132,8 +134,8 @@ class Game {
     const th = this.def.theme;
     scene.fog = new THREE.Fog(th.fog, 60, th.fogFar);
     this.baseFog = { c: new THREE.Color(th.fog), near: 60, far: th.fogFar };
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, th.amb));
-    const sun = new THREE.DirectionalLight(0xffffff, th.sun); sun.position.set(200, 400, 120); scene.add(sun);
+    scene.add(new THREE.HemisphereLight(new THREE.Color(th.skyBot).lerp(new THREE.Color(0xffffff), 0.45), th.ground != null ? new THREE.Color(th.ground).multiplyScalar(0.6) : 0x302838, th.amb * 0.8));
+    const sun = new THREE.DirectionalLight(0xfff0d8, th.sun * 1.15); sun.position.set(200, 400, 120); scene.add(sun); scene.add(sun.target); this.sun = sun;
     this.track = new Track(this.def); this.track.buildScene(scene);
     this.camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.3, 4000);
     this.camPos = new THREE.Vector3(); this.camUp = new THREE.Vector3(0, 1, 0); this.camLook = new THREE.Vector3(); this.camInit = false;
@@ -189,6 +191,7 @@ class Game {
       }
     }
     this.setupGimmicks();
+    this.setupScenery();
     // UFO
     this.ufoMesh = new THREE.Group();
     mk(this.ufoMesh, GEO.sph(1.6, 16, 8), 0xc0c8d8, 0, 0, 0, { s: [1.6, 0.35, 1.6], mo: { m: 0.8, r: 0.2 } });
@@ -272,7 +275,7 @@ class Game {
       const inp = this.started ? Input.poll() : { steer: 0, accel: false, brake: false, drift: false };
       if (this.started) {
         Object.assign(this.player.input, inp);
-        this.player.input.driftEdge = Input.driftEdge; this.player.input.itemEdge = Input.itemEdge;
+        this.player.input.driftEdge = Input.driftEdge; this.player.input.itemEdge = Input.itemEdge; this.player.input.jumpEdge = Input.jumpEdge;
       }
       if (this.player.finished) this.aiInput(this.player, dt);
     }
@@ -292,6 +295,7 @@ class Game {
     for (const k of this.karts) this.visual(k, dt);
     this.particles.update(dt);
     this.updateCamera(dt);
+    this.updateScenery(dt);
     HUD.update(this, dt);
     if (this.player) SND.setEngine(this.player.v, this.player.boostT > 0);
     if (window.NET && NET.active) NET.tick(this, dt);
@@ -419,6 +423,11 @@ class Game {
     if (k.slick) turnRate *= 0.75;
     if (k.windT > 0) k.d += (k.windDir || -Math.sign(k.d || 1)) * 9 * dt;
     // ジャンプ & ドリフト
+    if (!locked && !ufo && inp.jumpEdge) {
+      if (k.grounded) { k.vh = 10.5 * Math.sqrt(def.gravity / 30); k.grounded = false; k.airT = 0; k.hop = false; k.jumped = true; if (k.isPlayer) SND.play('hop'); }
+      else if (!k.trick && k.airT < 0.7) { k.trick = true; k.trickT = 0; if (k.isPlayer) { SND.play('hop'); HUD.toast('🤸 ジャンプアクション！着地で加速'); } }
+      inp.jumpEdge = false;
+    }
     if (!locked && !ufo && inp.driftEdge && k.grounded) {
       k.vh = 5.2; k.grounded = false; k.airT = 0; k.hop = true; if (k.isPlayer) SND.play('hop');
     }
@@ -557,7 +566,7 @@ class Game {
   finish(k) {
     k.finished = true; k.finishTime = this.raceT;
     if (k.isPlayer) {
-      SND.play('finish'); HUD.msg('FINISH!', 3, 'go');
+      SND.play('finish'); HUD.msg('FINISH!', 3, 'go'); this.fireworks(k.model.root.position);
       if (SND.bgm) { SND.bgm.fast = 0.9; SND.bgm.trans = 0; } SND.setMode('goal'); this.horror(false);
       setTimeout(() => this.showResults(), 3500);
     }

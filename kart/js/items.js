@@ -406,7 +406,7 @@ Object.assign(Game.prototype, {
           if (k.isRemote || k.respawnT > 0 || k.out) continue;
           if (k.id === p.owner && p.age < (zone ? 99 : T === 'natto' || T === 'banana' || T === 'mine' ? 1.2 : 0.5)) continue;
           const kr = k.giantT > 0 ? 4 : 0;
-          if (Math.abs(this.dDist(k.dist, p.dist)) < rad + kr && Math.abs(k.d - p.d) < rad - 0.2 + kr && k.h < 2.5 + kr) {
+          if (Math.abs(this.dDist(k.dist, p.dist)) < rad + kr && Math.abs(k.d - p.d) < rad - 0.2 + kr && k.h < (['mine', 'banana', 'natto', 'eda', 'fire'].includes(T) ? 0.7 : 2.5) + kr) {
             if (zone) {
               if (T === 'gas') { k.gasT = 1.0; if (k.isPlayer && Math.random() < 0.05) SND.play('cough'); }
               else if (k.invT <= 0) { this.damage(k, 'burn', { balloons: 1 }); if (k.isPlayer) this.toast(k, '🔥 風船が溶ける〜！'); }

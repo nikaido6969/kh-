@@ -50,7 +50,8 @@ Object.assign(Game.prototype, {
     if (alive.length <= 1 || this.battleT <= 0 || (this.player && this.player.out)) {
       this.battleEnd = true;
       const win = alive.length === 1 ? alive[0] : null;
-      HUD.msg(this.player && !this.player.out && (win === this.player || this.player.rank === 0) ? '勝利！🎉' : 'しゅうりょう！', 3, 'go');
+      const iWon = this.player && !this.player.out && (win === this.player || this.player.rank === 0);
+      HUD.msg(iWon ? '勝利！🎉' : 'しゅうりょう！', 3, 'go'); if (iWon) this.fireworks(this.player.model.root.position);
       SND.play('finish'); if (SND.bgm) SND.bgm.fast = 1;
       setTimeout(() => this.showResults(), this.player && this.player.out ? 2000 : 3200);
     }

@@ -136,10 +136,11 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 .tbtn.on{background:rgba(255,79,122,.75);transform:scale(.94)}
 #bDrift{right:max(18px,env(safe-area-inset-right));bottom:24px;width:118px;height:118px}
 #bItem{right:calc(max(18px,env(safe-area-inset-right)) + 128px);bottom:84px;width:92px;height:92px}
-#bBrake{right:calc(max(18px,env(safe-area-inset-right)) + 30px);bottom:154px;width:72px;height:72px}
+#bJump{right:calc(max(18px,env(safe-area-inset-right)) + 22px);bottom:152px;width:84px;height:84px}
+#bBrake{right:calc(max(18px,env(safe-area-inset-right)) + 128px);bottom:176px;width:60px;height:60px}
 #bBrake b{font-size:22px}
 #trot{display:none;position:absolute;left:50%;top:40%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:10px 16px;border-radius:14px;font-weight:800;font-size:14px;pointer-events:none;white-space:nowrap}
-@media (orientation:portrait){#trot{display:block}#tpad{width:46vw}#bItem{right:calc(max(14px,env(safe-area-inset-right)) + 116px);bottom:30px;width:84px;height:84px}#bDrift{bottom:30px;width:104px;height:104px}#bBrake{bottom:146px;right:calc(max(14px,env(safe-area-inset-right)) + 18px)}}
+@media (orientation:portrait){#trot{display:block}#tpad{width:46vw}#bItem{right:calc(max(14px,env(safe-area-inset-right)) + 116px);bottom:30px;width:84px;height:84px}#bDrift{bottom:30px;width:104px;height:104px}#bJump{bottom:146px;right:calc(max(14px,env(safe-area-inset-right)) + 14px)}#bBrake{bottom:124px;right:calc(max(14px,env(safe-area-inset-right)) + 118px)}}
 body.touch #hmap{left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 58px);bottom:auto;width:104px;height:104px}
 body.touch #hpos{top:max(8px,env(safe-area-inset-top));bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px);font-size:46px}
 body.touch #hpos small{font-size:18px}
@@ -185,8 +186,9 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
   <div id="tpad"><span>ここに左手の親指を置いて<br>左右にスライド＝ハンドル</span></div>
   <button class="tbtn" id="bItem"><b id="bItemI">🎁</b><small>アイテム</small></button>
   <button class="tbtn" id="bDrift"><b>↪︎</b><small>ドリフト<br>(長押し)</small></button>
+  <button class="tbtn" id="bJump"><b>⤴︎</b><small>ジャンプ</small></button>
   <button class="tbtn" id="bBrake"><b>⏪</b><small>ブレーキ</small></button>
-  <div id="thint">左手：親指を置いて左右にスライドでハンドル<br>右手：ドリフト（曲がりながら長押し→離すと加速）<br>アイテムボタンで使う／ブレーキ長押しでバック<br>📱 iPhoneを傾けても少し曲がります</div>
+  <div id="thint">左手：親指を置いて左右にスライドでハンドル<br>右手：ドリフト（曲がりながら長押し→離すと加速）／ジャンプ（罠をとび越える・空中で押すと着地加速）<br>アイテムボタンで使う／ブレーキ長押しでバック<br>📱 iPhoneを傾けても少し曲がります</div>
   <div id="trot">📱↻ 横向きにすると遊びやすいです</div>
 </div>
 <div id="loading">コース生成中…</div>
@@ -278,7 +280,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
     🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
     🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
-    📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その左＝アイテム、上＝ブレーキ（長押しでバック）。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
+    📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その上＝ジャンプ（罠や地雷をとび越える。ジャンプ台から飛んだ空中で押すと着地で加速）、左＝アイテム、左上＝ブレーキ（長押しでバック）。キーボードはJでジャンプ。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
     <p><b>重火器（レース・バトル共通）</b>：🔫機関銃（前方に連射）　💥バズーカ（一直線のロケット弾・大爆発）　⚠️地雷（後ろに3個・踏むと爆発）　🚀ミサイル（前の相手を追尾）</p>
     <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>
@@ -337,6 +339,7 @@ body.touch #thint{bottom:auto;top:46%;font-size:13px}
 <script src="js/battle.js"></script>
 <script src="js/npc.js"></script>
 <script src="js/gimmick.js"></script>
+<script src="js/scenery.js"></script>
 <script src="js/net.js"></script>
 <script src="js/ui.js"></script>
 </body>

@@ -22,6 +22,8 @@ const UI = {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, U.isTouch ? 1.5 : 2));
     this.renderer.setSize(innerWidth, innerHeight);
     this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 0.82;
     addEventListener('resize', () => {
       this.renderer.setSize(innerWidth, innerHeight);
       if (GAME && GAME.camera) { GAME.camera.aspect = innerWidth / innerHeight; GAME.camera.updateProjectionMatrix(); }
@@ -172,7 +174,7 @@ const UI = {
       el.addEventListener('mousedown', () => { ids.add('m'); if (pulse) { Input.touch[key] = true; setTimeout(() => Input.touch[key] = false, 120); } set(); });
       el.addEventListener('mouseup', () => { ids.delete('m'); set(); }); el.addEventListener('mouseleave', () => { ids.delete('m'); set(); });
     };
-    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bBrake', 'b');
+    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bBrake', 'b'); btn('bJump', 'jump');
     const itemTap = (e) => { e.preventDefault(); Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); };
     this.$('hitem').addEventListener('touchstart', itemTap, { passive: false });
     this.$('hitem').addEventListener('mousedown', itemTap);

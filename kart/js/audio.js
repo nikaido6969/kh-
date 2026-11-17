@@ -126,6 +126,8 @@ const SND = {
       case 'bazooka': N(0.12, 0.9, 400, 0.6, 0.3, 0, 'lowpass'); T(70, 0.35, 'sine', 0.6, 0.4); N(0.9, 0.35, 2500, 0.8, 0.25, 0.05); break;
       case 'launch': N(0.25, 0.5, 600, 0.6, 3); N(1.2, 0.3, 1800, 0.7, 0.4, 0.1); T(300, 1.0, 'sawtooth', 0.06, 2.5, 0.05); break;
       case 'clank': T(1800, 0.08, 'square', 0.12, 0.6); T(900, 0.1, 'square', 0.1, 0.7, 0.07); N(0.08, 0.3, 3000, 1, 1, 0.14); break;
+      case 'firework': T(400 + Math.random() * 300, 0.5, 'sine', 0.05, 3); N(0.6, 0.35, 900, 0.5, 0.3, 0.45); N(0.9, 0.12, 5000, 1, 1, 0.55, 'highpass'); break;
+      case 'chirp': [0, 0.09, 0.2].forEach(d => T(3200 + Math.random() * 900, 0.06, 'sine', 0.05, 1.3, d)); break;
       case 'heart': T(55, 0.15, 'sine', 0.7, 0.6); T(50, 0.15, 'sine', 0.55, 0.6, 0.18); break;
     }
   },
