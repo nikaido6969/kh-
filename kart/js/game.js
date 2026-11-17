@@ -129,7 +129,7 @@ class Game {
   setup(cfg) {
     this.dispose();
     this.cfg = cfg;
-    this.def = COURSES.concat(ARENAS).find(c => c.id === cfg.course);
+    this.def = stageDef(cfg.course);
     this.battle = cfg.mode === 'battle';
     this.ccBase = CC_BASE[cfg.cc] || 34.5;
     this.laps = cfg.laps || 3;

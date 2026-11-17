@@ -326,7 +326,7 @@ class Track {
     const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), ry = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
     const step = def.battle ? 7 : 4;
     for (let j = 0; j < this.N; j += step) {
-      if (this.flags[j] & (1 | 8 | 16 | 32)) continue;
+      if ((this.flags[j] & (1 | 8 | 16)) || ((this.flags[j] & 32) && !def.battle)) continue;
       this.frame(j * this.ds, fr);
       for (const side of [-1, 1]) {
         if (rng() < 0.15) continue;
@@ -351,6 +351,7 @@ class Track {
 
   _buildRallyFlags(G) {
     const list = [];
+    if (this.def.battle) return;
     for (let j = 0; j < this.N; j += 45) if ((this.flags[j] & 32) && !(this.flags[j] & 1)) list.push(j);
     if (!list.length) return;
     const pole = new THREE.CylinderGeometry(0.09, 0.09, 3.2, 5); pole.translate(0, 1.6, 0);
@@ -452,10 +453,16 @@ class Track {
   }
 
   _buildStart(G) {
+    if (this.def.battle && this.open) { this._endWall(G, 3); this._endWall(G, this.L - 3); return; }
     const S0 = this.startS || 0;
     if (this.open) { this._gantry(G, Math.floor(this.finishS / this.ds), 'GOAL', 0xffffff, 0x2a1652, true); this._line(G, this.finishS); }
     this._line(G, S0 + 0.5);
     this._gantry(G, Math.floor(S0 / this.ds) + 2, 'START', 0xfff4d0, 0x8a4a20, true);
+  }
+  _endWall(G, s) {
+    const fr = this.frame(s, { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() });
+    const ed = this.hw[this.idx(s)[0]] + this.sh[this.idx(s)[0]] + 2, m = U.mat(0x8a7a68, { flat: true });
+    for (let d = -ed; d <= ed; d += 4.5) { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(2.6 + Math.random() * 1.4, 0), m); r.position.copy(fr.p).addScaledVector(fr.r, d).addScaledVector(fr.u, 1.6); r.rotation.set(Math.random() * 3, Math.random() * 3, 0); r.castShadow = true; G.add(r); }
   }
   _line(G, s) {
     const fr = this.frame(s, { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() });

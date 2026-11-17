@@ -398,6 +398,11 @@ Object.assign(Game.prototype, {
           this.removeProj(p, false); continue;
         }
       }
+      // 障害物に当たる弾
+      if (this.obstacles && ['cap', 'dango', 'bullet', 'rocket', 'missile', 'moufu'].includes(T) && this.hitObstacle(p.dist, p.d, 0.4)) {
+        if (T === 'rocket' || T === 'missile') { SND.play('boom'); this.explode(p, 6, 'knock', { balloons: 2 }); }
+        this.removeProj(p, T !== 'bullet'); continue;
+      }
       // 当たり判定（ローカルのカートのみ）
       if (!['tv', 'paper', 'bomb'].includes(T) && !(T === 'waterb' || T === 'tako')) {
         const zone = T === 'gas' || T === 'fire';

@@ -348,15 +348,19 @@ const UI = {
   openArena() {
     const box = this.$('courseList'); box.innerHTML = '';
     this.$('courseTitle').textContent = 'バトルステージをえらぶ';
-    const sec = document.createElement('div'); sec.className = 'cup';
-    const row = document.createElement('div'); row.className = 'crow';
-    ARENAS.forEach(a => {
-      const b = document.createElement('button'); b.className = 'course';
-      b.innerHTML = `<img src="${this.courseThumb(a)}" alt=""><b>${a.name}</b><small>風船10個×8人</small>`;
-      b.onclick = () => { SND.play('select'); this.sel.course = a.id; this.startBattle(); };
-      row.appendChild(b);
-    });
-    sec.appendChild(row); box.appendChild(sec);
+    const section = (title, list) => {
+      const sec = document.createElement('div'); sec.className = 'cup'; sec.innerHTML = `<h4>${title}</h4>`;
+      const row = document.createElement('div'); row.className = 'crow';
+      list.forEach(([id, def, sub]) => {
+        const b = document.createElement('button'); b.className = 'course';
+        b.innerHTML = `<img src="${this.courseThumb(def)}" alt=""><b>${def.name}</b><small>${sub}</small>`;
+        b.onclick = () => { SND.play('select'); this.sel.course = id; this.startBattle(); };
+        row.appendChild(b);
+      });
+      sec.appendChild(row); box.appendChild(sec);
+    };
+    section('🎈 バトル専用ステージ（大平原）', ARENAS.map(a => [a.id, a, a.n === 2 ? '往復の一本道・障害物あり' : '広い大自然・障害物あり']));
+    section('🏁 レースコースで戦う（幅を広げた一本道）', COURSES.map(c => ['bc_' + c.id, c, '1.3km区間・両端は岩の壁']));
     this.show('s-course');
   },
   startBattle() {

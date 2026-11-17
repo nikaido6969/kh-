@@ -22,6 +22,35 @@ Object.assign(Game.prototype, {
       k.model.root.add(g);
     });
     this.battleT = BATTLE_TIME; this.battleEnd = false;
+    this.setupObstacles();
+  },
+
+  setupObstacles() {
+    const tr = this.track, def = this.def, types = def.obstacles || ['rock'], rng = U.rng(def.id.length * 13 + 5);
+    const OB = { rock: [2.3, 1.4], bigtree: [2.8, 0.5], bush: [1.8, 1.3], moonrock: [2.2, 1.7], coral: [1.9, 1.5], pillar: [2.8, 0.6], lavarock: [2.1, 1.5], crystal: [1.9, 1.7], lollipop: [1.3, 1], mushroom: [2.3, 0.7], flowerclump: [1.3, 1.3], asteroid: [3, 0.45], tentacle_s: [1.5, 1.5], tree: [1.5, 1], pine: [1.5, 1], coralbig: [2, 1], palm: [1.2, 1], cloudlet: [2, 1.4], crater: null };
+    const n = Math.round(U.clamp(tr.L * tr.hw[0] * 2 / 1900, 12, 60));
+    this.obstacles = [];
+    let tries = 0;
+    while (this.obstacles.length < n && tries++ < n * 20) {
+      const type = types[Math.floor(rng() * types.length)], spec = OB[type]; if (spec === null) continue;
+      const [r, sc] = spec || [2, 1];
+      const j = Math.floor(rng() * tr.N); if (tr.flags[j] & (1 | 8 | 16)) continue;
+      const s = j * tr.ds, d = (rng() * 2 - 1) * (tr.hw[j] - 6);
+      if (tr.itemRows.some(ir => Math.abs(ir * tr.ds - s) < 9)) continue;
+      if (this.karts.some(k => Math.abs(this.dDist(k.dist, s)) < 10 && Math.abs(k.d - d) < 8)) continue;
+      if (this.obstacles.some(o => Math.abs(this.dDist(o.s, s)) < 9 && Math.abs(o.d - d) < 9)) continue;
+      const g = new THREE.Group(); const parts = DECO[type] ? DECO[type]() : DECO.rock();
+      for (const p of parts) { const m = new THREE.Mesh(p.geo, p.mat); m.applyMatrix4(p.m); m.castShadow = true; g.add(m); }
+      g.scale.setScalar(sc * (0.9 + rng() * 0.3)); this.scene.add(g);
+      this.placeOnTrack(g, s, d, tr.lerpArr(tr.off, s) * 0, 0); g.rotateY(rng() * 6.28);
+      this.obstacles.push({ s, d, r, g });
+    }
+  },
+
+  hitObstacle(dist, d, pad = 0) {
+    if (!this.obstacles) return null;
+    for (const o of this.obstacles) { const dx = this.dDist(dist, o.s), dd = d - o.d; if (Math.abs(dx) < o.r + pad && Math.abs(dd) < o.r + pad && dx * dx + dd * dd < (o.r + pad) * (o.r + pad)) return o; }
+    return null;
   },
 
   updateBalloons(k) { if (k.bal) k.bal.forEach((b, j) => b.visible = j < k.balloons); },
@@ -43,6 +72,15 @@ Object.assign(Game.prototype, {
   },
 
   updateBattle(dt) {
+    if (this.obstacles) for (const k of this.karts) {
+      if (k.isRemote || k.out || k.h > 3) continue;
+      const pad = 1.1 * (k.giantT > 0 ? 4 : 1);
+      const o = this.hitObstacle(k.dist, k.d, pad); if (!o) continue;
+      const dx = this.dDist(k.dist, o.s), dd = k.d - o.d, len = Math.hypot(dx, dd) || 1, pen = o.r + pad - len;
+      k.dist += dx / len * pen; k.d += dd / len * pen;
+      const into = (Math.cos(k.yaw) * dx + Math.sin(k.yaw) * dd) / len;
+      if (into < -0.2) { k.v *= 0.93; k.yaw += (Math.sin(k.yaw) * dx - Math.cos(k.yaw) * dd > 0 ? -1 : 1) * 1.6 * dt; if (k.isPlayer && k.v > 10 && this.time - (this.obAt || 0) > 0.5) { this.obAt = this.time; SND.play('wall'); } }
+    }
     if (!this.started || this.battleEnd) return;
     this.battleT -= dt;
     const alive = this.karts.filter(k => !k.out);
@@ -81,6 +119,7 @@ Object.assign(Game.prototype, {
     } else if (tgt) { ds = this.dDist(tgt.dist, k.dist); dl = tgt.d - k.d; }
     if (k.balloons <= 2 && tgt && tDist < 25) { ds = -ds; dl = -dl; } // 逃げる
     if (Math.abs(ds) < 0.5) ds = 0.5;
+    if (this.obstacles) { const fwd = Math.cos(k.yaw) >= 0 ? 1 : -1; for (const o of this.obstacles) { const ox = this.dDist(o.s, k.dist) * fwd, od = o.d - k.d; if (ox > 0 && ox < 16 && Math.abs(od) < o.r + 2.5) { dl += (od > 0 ? -1 : 1) * (o.r + 4) * 2; ds = Math.max(Math.abs(ds), 8) * Math.sign(ds || 1); break; } } }
     let des = Math.atan2(dl, ds);
     const edge = tr.hw[Math.floor(s / tr.ds) % tr.N] + tr.sh[0] - 5;
     if (Math.abs(k.d) > edge && Math.sign(Math.sin(des)) === Math.sign(k.d)) des = Math.atan2(-k.d * 0.5, Math.cos(des) >= 0 ? 10 : -10);

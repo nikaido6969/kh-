@@ -182,24 +182,25 @@ COURSES.forEach((c, i) => {
 });
 
 // ===== 風船バトル ステージ（正多角形リング：自動で閉じる） =====
-const ARENA_BASE = { w: 56, sh: 2, gravity: 28, laps: 0, edge: ['rock', 'bush'] };
+const ARENA_BASE = { w: 110, sh: 6, gravity: 28, laps: 0, edge: ['rock', 'bush'] };
 const ARENAS = [
-  { id: 'b_niwa', name: '柴犬の庭ドーナツ', n: 4, side: 70, r: 36, hill: 6, surf: 'meadow', shSurf: 'meadow', wall: 'none', theme: { skyTop: 0x5aa8ff, skyBot: 0xe0f4ff, fog: 0xd8ecff, fogFar: 600, ground: 0x6cbf4a, groundTex: 'meadow', sun: 1, amb: 0.8 }, deco: [['bigtree', 20], ['mushroom', 20], ['glowflower', 40]] },
-  { id: 'b_tsuki', name: '月面リング', n: 6, side: 50, r: 34, hill: 0, bumps: 1.2, surf: 'moon', shSurf: 'moon2', wall: 'none', edge: ['moonrock'], gravity: 12, noGround: true, space: true, theme: { skyTop: 0x000006, skyBot: 0x101028, fog: 0x080818, fogFar: 900, ground: null, sun: 1, amb: 0.6 }, deco: [['crater', 20], ['asteroid', 20]] },
-  { id: 'b_kaitei', name: '海底神殿', n: 4, side: 60, r: 40, hill: 0, surf: 'seabed', shSurf: 'sand', wall: 'none', edge: ['coral'], water: 30, theme: { skyTop: 0x39a6ff, skyBot: 0xc8f2ff, fog: 0xbfe8ff, fogFar: 650, ground: 0xe0cf98, groundTex: 'sand', sun: 1.1, amb: 0.8 }, deco: [['coral', 40], ['seaweed', 50], ['pillar', 16]] },
-  { id: 'b_magma', name: 'マグマ大鍋', n: 3, side: 70, r: 40, hill: 0, bumps: 0.6, surf: 'cave', shSurf: 'rock2', wall: 'none', edge: ['crystal'], noGround: true, lava: true, theme: { skyTop: 0x0a0508, skyBot: 0x3a0d06, fog: 0x2a0806, fogFar: 420, ground: null, sun: 0.4, amb: 0.5 }, deco: [['crystal', 40], ['stalag', 20]] },
-  { id: 'b_okashi', name: 'お菓子の城', n: 4, side: 56, r: 38, hill: 8, surf: 'candy2', shSurf: 'candy2', wall: 'none', edge: ['lollipop_s'], theme: { skyTop: 0xff9ad8, skyBot: 0xfff0f8, fog: 0xffe0f0, fogFar: 600, ground: 0xffc8e0, groundTex: 'candy2', sun: 1.05, amb: 0.85 }, deco: [['lollipop', 40], ['mushroom', 20]] },
-  { id: 'b_kumo', name: '雲の上リング', n: 5, side: 50, r: 36, hill: 0, surf: 'islandgrass', shSurf: 'meadow', wall: 'none', edge: ['bush', 'flowerclump'], gravity: 20, noGround: true, theme: { skyTop: 0x5ab0ff, skyBot: 0xfff0f8, fog: 0xf0f4ff, fogFar: 800, ground: null, sun: 1.1, amb: 0.85 }, deco: [['cloudpuff', 40], ['floatrock', 30], ['rainbow', 3]] },
-  { id: 'b_jupiter', name: '木星の大渦', n: 6, side: 46, r: 36, hill: 0, bumps: 0.5, surf: 'jupiter', shSurf: 'jupiter2', wall: 'none', edge: ['cloudlet'], gravity: 40, noGround: true, theme: { skyTop: 0x3a1a10, skyBot: 0xe0904a, fog: 0xd08a50, fogFar: 520, ground: null, sun: 1, amb: 0.7 }, deco: [['cloud', 40]] },
-  { id: 'b_bosen', name: '母船格納庫', n: 4, side: 64, r: 34, hill: 5, surf: 'alien', shSurf: 'neon2', wall: 'none', edge: ['tentacle_s'], gravity: 22, noGround: true, space: true, theme: { skyTop: 0x0a0018, skyBot: 0x2a0a3a, fog: 0x1a0828, fogFar: 800, ground: null, sun: 0.9, amb: 0.65 }, deco: [['tentacle', 20], ['asteroid', 20]] },
+  { id: 'b_niwa', name: '大草原ロング（往復の一本道）', n: 2, side: 400, r: 78, hill: 10, obstacles: ['bigtree', 'rock', 'bush'], surf: 'meadow', shSurf: 'meadow', wall: 'none', theme: { skyTop: 0x5aa8ff, skyBot: 0xe0f4ff, fog: 0xd8ecff, fogFar: 600, ground: 0x6cbf4a, groundTex: 'meadow', sun: 1, amb: 0.8 }, deco: [['bigtree', 20], ['mushroom', 20], ['glowflower', 40]] },
+  { id: 'b_tsuki', name: '月面クレーター平原', n: 6, side: 95, r: 85, hill: 0, bumps: 1.2, obstacles: ['moonrock', 'crater'], surf: 'moon', shSurf: 'moon2', wall: 'none', edge: ['moonrock'], gravity: 12, noGround: true, space: true, theme: { skyTop: 0x000006, skyBot: 0x101028, fog: 0x080818, fogFar: 900, ground: null, sun: 1, amb: 0.6 }, deco: [['crater', 20], ['asteroid', 20]] },
+  { id: 'b_kaitei', name: '海底の大平原', n: 4, side: 120, r: 80, hill: 0, obstacles: ['coral', 'pillar'], surf: 'seabed', shSurf: 'sand', wall: 'none', edge: ['coral'], water: 30, theme: { skyTop: 0x39a6ff, skyBot: 0xc8f2ff, fog: 0xbfe8ff, fogFar: 650, ground: 0xe0cf98, groundTex: 'sand', sun: 1.1, amb: 0.8 }, deco: [['coral', 40], ['seaweed', 50], ['pillar', 16]] },
+  { id: 'b_magma', name: 'マグマ大地', n: 3, side: 150, r: 85, hill: 0, bumps: 0.6, obstacles: ['lavarock', 'crystal'], surf: 'cave', shSurf: 'rock2', wall: 'none', edge: ['crystal'], noGround: true, lava: true, theme: { skyTop: 0x0a0508, skyBot: 0x3a0d06, fog: 0x2a0806, fogFar: 420, ground: null, sun: 0.4, amb: 0.5 }, deco: [['crystal', 40], ['stalag', 20]] },
+  { id: 'b_okashi', name: 'お菓子の大陸', n: 4, side: 110, r: 78, hill: 8, obstacles: ['lollipop', 'mushroom'], surf: 'candy2', shSurf: 'candy2', wall: 'none', edge: ['lollipop_s'], theme: { skyTop: 0xff9ad8, skyBot: 0xfff0f8, fog: 0xffe0f0, fogFar: 600, ground: 0xffc8e0, groundTex: 'candy2', sun: 1.05, amb: 0.85 }, deco: [['lollipop', 40], ['mushroom', 20]] },
+  { id: 'b_kumo', name: '雲の上の大平原', n: 5, side: 105, r: 80, hill: 0, obstacles: ['rock', 'bush', 'flowerclump'], surf: 'islandgrass', shSurf: 'meadow', wall: 'none', edge: ['bush', 'flowerclump'], gravity: 20, noGround: true, theme: { skyTop: 0x5ab0ff, skyBot: 0xfff0f8, fog: 0xf0f4ff, fogFar: 800, ground: null, sun: 1.1, amb: 0.85 }, deco: [['cloudpuff', 40], ['floatrock', 30], ['rainbow', 3]] },
+  { id: 'b_jupiter', name: '木星の大渦平原', n: 6, side: 95, r: 85, hill: 0, bumps: 0.5, obstacles: ['crystal', 'lavarock'], surf: 'jupiter', shSurf: 'jupiter2', wall: 'none', edge: ['cloudlet'], gravity: 40, noGround: true, theme: { skyTop: 0x3a1a10, skyBot: 0xe0904a, fog: 0xd08a50, fogFar: 520, ground: null, sun: 1, amb: 0.7 }, deco: [['cloud', 40]] },
+  { id: 'b_bosen', name: '母船の大格納庫（往復の一本道）', n: 2, side: 380, r: 75, hill: 6, obstacles: ['asteroid', 'tentacle_s'], surf: 'alien', shSurf: 'neon2', wall: 'none', edge: ['tentacle_s'], gravity: 22, noGround: true, space: true, theme: { skyTop: 0x0a0018, skyBot: 0x2a0a3a, fog: 0x1a0828, fogFar: 800, ground: null, sun: 0.9, amb: 0.65 }, deco: [['tentacle', 20], ['asteroid', 20]] },
 ].map(a => {
   const cmds = [];
   for (let i = 0; i < a.n; i++) {
     const dy = a.hill && a.n % 2 === 0 ? (i % 2 ? -a.hill : a.hill) : 0;
-    cmds.push(S(a.side, { items: 0.5, dy, bumps: a.bumps }));
-    cmds.push(C(360 / a.n, a.r, { items: i % 2 ? 0.5 : undefined }));
+    const parts = a.side > 200 ? 3 : 1;
+    for (let q = 0; q < parts; q++) cmds.push(S(a.side / parts, { items: 0.5, dy: dy / parts, bumps: a.bumps, wild: true }));
+    cmds.push(C(360 / a.n, a.r, { items: i % 2 ? 0.5 : undefined, wild: true }));
   }
-  return Object.assign({}, ARENA_BASE, a, { battle: true, cmds, music: { bpm: 156, root: 57 + (a.n % 3), scale: 'minor', seed: 200 + a.n * 7 + a.side, classic: null } });
+  return Object.assign({}, ARENA_BASE, a, { battle: true, cmds, wildSurf: a.surf, music: { bpm: 156, root: 57 + (a.n % 3), scale: 'minor', seed: 200 + a.n * 7 + a.side, classic: null } });
 });
 
 const CUPS = [
@@ -343,3 +344,19 @@ function turtle(def) {
 }
 
 if (typeof module !== 'undefined') module.exports = { COURSES, ARENAS, turtle, cmdLength };
+
+const BATTLE_COURSES = {};
+function stageDef(id) {
+  const d = COURSES.find(c => c.id === id) || ARENAS.find(c => c.id === id);
+  if (d) return d;
+  if (id.startsWith('bc_')) return BATTLE_COURSES[id] || (BATTLE_COURSES[id] = battleFromCourse(COURSES.find(c => c.id === id.slice(3))));
+}
+// レースコースをバトル会場にする（幅を広げた1.3kmの一本道区間）
+function battleFromCourse(def) {
+  return Object.assign({}, def, {
+    id: 'bc_' + def.id, baseId: def.id, name: def.name.replace(/（.*?）/, '') + '（バトル）', battle: true, open: true, cmds: undefined,
+    w: Math.max(52, def.w * 2.6), sh: 6, wildSurf: def.wildSurf || def.surf,
+    gen: Object.assign({}, def.gen, { length: 1300, seed: def.gen.seed + 7 }),
+    obstacles: def.edge || ['rock'], music: Object.assign({}, def.music, { seed: def.music.seed + 3 }),
+  });
+}
