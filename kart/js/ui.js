@@ -16,6 +16,8 @@ const UI = {
   init() {
     this.sel.ch = this.store.get('ch', 'kunekune');
     Input.autoAccel = this.store.get('auto', U.isTouch);
+    Input.sens = this.store.get('sens', 0.85);
+    Input.gyroOn = this.store.get('gyro', true);
     this.renderer = new THREE.WebGLRenderer({ canvas: this.$('cv'), antialias: !U.isTouch, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, U.isTouch ? 1.5 : 2));
     this.renderer.setSize(innerWidth, innerHeight);
@@ -98,7 +100,7 @@ const UI = {
   bind() {
     const on = (id, f) => this.$(id).addEventListener('click', (e) => { SND.init(); SND.play('select'); f(e); });
     document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => {
-      SND.init(); SND.play('select');
+      SND.init(); SND.play('select'); this.gyroStart();
       this.sel.mode = b.dataset.mode;
       if (this.sel.mode === 'online' || this.sel.mode === 'battle') { this.sel.cc = 150; this.openChar(); return; }
       this.openCC();
@@ -108,6 +110,16 @@ const UI = {
     on('btnChar', () => { this.store.set('ch', this.sel.ch); if (this.sel.mode === 'online') this.openOnline(); else if (this.sel.mode === 'battle') this.openArena(); else this.openCourse(); });
     on('btnHelp', () => this.show('s-help'));
     on('btnSet', () => this.openSettings());
+    // 感度・ジャイロ（設定画面とポーズ画面の両方）
+    document.querySelectorAll('.tune .sens').forEach(r => {
+      r.value = Input.sens;
+      r.addEventListener('input', () => { Input.sens = +r.value; this.store.set('sens', Input.sens); this.syncTune(); });
+    });
+    document.querySelectorAll('.tune .gyro').forEach(b => b.addEventListener('click', () => {
+      SND.play('select'); Input.gyroOn = !Input.gyroOn; this.store.set('gyro', Input.gyroOn);
+      if (Input.gyroOn) this.gyroStart(); this.syncTune();
+    }));
+    this.syncTune();
     on('optAuto', () => { Input.autoAccel = !Input.autoAccel; this.store.set('auto', Input.autoAccel); this.openSettings(); });
     on('resNext', () => this.resultsNext());
     on('resRetry', () => this.retry());
@@ -120,39 +132,52 @@ const UI = {
     on('netJoin', () => this.netJoin());
     on('netGo', () => this.netGo());
     on('netCopy', () => { try { navigator.clipboard.writeText(NET.code || ''); NET.status('コードをコピーしました：' + NET.code); } catch (e) { } });
-    // タッチ：画面左右でハンドル
-    // 指の位置＝ハンドルの切れ角（無段階）。画面中央が直進、指を置いた方向へ切る
-    const zones = () => {
-      const ts = this._touches || {}; const ids = Object.keys(ts);
-      const ind = this.$('tind');
-      if (!ids.length) { Input.touch.ax = null; Input.touch.b = false; ind.style.opacity = 0; return; }
-      Input.touch.b = ids.length >= 2;
-      const x = ts[ids[ids.length - 1]];
-      const half = Math.min(innerWidth * 0.5, Math.max(120, innerWidth * 0.3));
-      let v = U.clamp((x - innerWidth / 2) / half, -1, 1);
-      const dead = 0.05; v = Math.abs(v) < dead ? 0 : Math.sign(v) * (Math.abs(v) - dead) / (1 - dead);
-      Input.touch.ax = Math.sign(v) * Math.pow(Math.abs(v), 1.25);
-      ind.style.opacity = 1; ind.style.left = x + 'px';
-      ind.style.transform = `translateX(-50%) rotate(${Input.touch.ax * 35}deg)`;
-    };
-    this._touches = {};
+    // ===== iPhone操作 =====
+    // 左手：ハンドル（親指を置いた所が中心。そこから左右に動かした分だけ切れる）
+    // 右手：ドリフト／アイテム／ブレーキの3ボタン
+    this._stick = null;
     const active = () => GAME.running && !GAME.paused && !this.cur;
+    const stickUpd = () => {
+      const st = this._stick, ring = this.$('tstick'), knob = this.$('tknob');
+      this.$('tpad').style.opacity = st ? 0 : '';
+      if (!st) { Input.touch.ax = null; ring.classList.remove('on'); knob.style.transform = 'translate(-50%,-50%)'; return; }
+      const range = 70 / Input.sens;
+      let v = U.clamp((st.x - st.ox) / range, -1, 1);
+      const dead = 0.06; v = Math.abs(v) < dead ? 0 : Math.sign(v) * (Math.abs(v) - dead) / (1 - dead);
+      Input.touch.ax = Math.sign(v) * Math.min(1, Math.pow(Math.abs(v), 1.35));
+      ring.classList.add('on'); ring.style.left = st.ox + 'px'; ring.style.top = st.oy + 'px';
+      knob.style.transform = `translate(calc(-50% + ${U.clamp(st.x - st.ox, -range, range)}px),-50%) rotate(${Input.touch.ax * 40}deg)`;
+    };
     const tstart = (e) => {
       if (!active()) return;
-      if (e.target.closest && e.target.closest('#hitem,#btnPause')) return;
+      if (e.target.closest && e.target.closest('.tbtn,#hitem,#btnPause')) return;
       SND.init();
-      for (const t of e.changedTouches) this._touches[t.identifier] = t.clientX;
-      zones(); this.$('thint').style.opacity = 0; e.preventDefault();
+      for (const t of e.changedTouches) {
+        if (!this._stick && t.clientX < innerWidth * 0.6) this._stick = { id: t.identifier, ox: t.clientX, oy: t.clientY, x: t.clientX };
+      }
+      stickUpd(); this.$('thint').style.opacity = 0; e.preventDefault();
     };
-    const tmove = (e) => { if (!active()) return; for (const t of e.changedTouches) if (t.identifier in this._touches) this._touches[t.identifier] = t.clientX; zones(); };
-    const tend = (e) => { for (const t of e.changedTouches) delete this._touches[t.identifier]; zones(); };
+    const tmove = (e) => { if (!this._stick) return; for (const t of e.changedTouches) if (t.identifier === this._stick.id) this._stick.x = t.clientX; stickUpd(); };
+    const tend = (e) => { for (const t of e.changedTouches) if (this._stick && t.identifier === this._stick.id) this._stick = null; stickUpd(); };
     document.addEventListener('touchstart', tstart, { passive: false });
     document.addEventListener('touchmove', tmove, { passive: true });
     document.addEventListener('touchend', tend); document.addEventListener('touchcancel', tend);
+    // 右手ボタン（同時押しOK）
+    const btn = (id, key, pulse) => {
+      const el = this.$(id); const ids = new Set();
+      const set = () => { const on = ids.size > 0; el.classList.toggle('on', on); if (!pulse) Input.touch[key] = on; };
+      el.addEventListener('touchstart', (e) => { e.preventDefault(); SND.init(); for (const t of e.changedTouches) ids.add(t.identifier); if (pulse) { Input.touch[key] = true; setTimeout(() => Input.touch[key] = false, 120); } set(); this.$('thint').style.opacity = 0; }, { passive: false });
+      const up = (e) => { for (const t of e.changedTouches) ids.delete(t.identifier); set(); };
+      el.addEventListener('touchend', up); el.addEventListener('touchcancel', up);
+      el.addEventListener('mousedown', () => { ids.add('m'); if (pulse) { Input.touch[key] = true; setTimeout(() => Input.touch[key] = false, 120); } set(); });
+      el.addEventListener('mouseup', () => { ids.delete('m'); set(); }); el.addEventListener('mouseleave', () => { ids.delete('m'); set(); });
+    };
+    btn('bDrift', 'drift'); btn('bItem', 'item', true); btn('bBrake', 'b');
     const itemTap = (e) => { e.preventDefault(); Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); };
     this.$('hitem').addEventListener('touchstart', itemTap, { passive: false });
     this.$('hitem').addEventListener('mousedown', itemTap);
     this.$('touch').style.display = U.isTouch ? 'block' : 'none';
+    if (U.isTouch) document.body.classList.add('touch');
     document.addEventListener('keydown', (e) => {
       if (!GAME.running && this.cur && (e.code === 'Escape' || e.code === 'Backspace')) {
         const b = document.querySelector('#' + this.cur + ' [data-back]'); if (b) b.click();
@@ -162,6 +187,40 @@ const UI = {
   back(to) {
     if (to === 'title') { NET.leave(); this.show('s-title'); }
     else this.show(to);
+  },
+  syncTune() {
+    const lab = Input.sens < 0.7 ? 'おだやか' : Input.sens < 0.95 ? 'ふつう' : Input.sens < 1.25 ? 'やや鋭い' : 'クイック';
+    document.querySelectorAll('.tune .sens').forEach(r => { if (+r.value !== Input.sens) r.value = Input.sens; });
+    document.querySelectorAll('.tune .sensv').forEach(e => e.textContent = lab + '（' + Math.round(Input.sens * 100) + '）');
+    document.querySelectorAll('.tune .gyro').forEach(b => b.textContent = '📱 傾けて曲がる：' + (Input.gyroOn ? 'ON' : 'OFF'));
+    const st = !Input.gyroOn ? '' : Input.gyroLive ? '傾きを検出中。レース開始時の持ち方がまっすぐになります' : U.isTouch ? 'この画面では傾きが届いていません（ブラウザで直接開くと使えます）' : 'スマホで使えます';
+    document.querySelectorAll('.tune .gyros').forEach(e => e.textContent = st);
+  },
+  // ジャイロ：iPhoneは許可が必要（タップ時に要求）
+  gyroStart() {
+    if (!Input.gyroOn || this.gyroBound) return;
+    const bind = () => {
+      if (this.gyroBound) return; this.gyroBound = true;
+      // 画面の面内で重力がどちら向きか＝ハンドルの回転角（持ち方・iOS/Androidの符号差に関係なく、開始時を基準に差分を取る）
+      let gx = 0, gy = 0, init = false;
+      addEventListener('devicemotion', (e) => {
+        const g = e.accelerationIncludingGravity; if (!g || g.x == null || g.y == null) return;
+        if (!init) { gx = g.x; gy = g.y; init = true; } else { gx += (g.x - gx) * 0.25; gy += (g.y - gy) * 0.25; }
+        if (!Input.gyroLive) { Input.gyroLive = true; this.syncTune(); }
+        if (Math.hypot(gx, gy) < 2.5) { Input.tilt = 0; return; }   // 平置き：無効
+        const a = Math.atan2(gy, gx) * 180 / Math.PI;
+        if (Input.gyroZero == null) Input.gyroZero = a;
+        let d = a - Input.gyroZero;
+        if (d > 180) d -= 360; if (d < -180) d += 360;
+        d = Math.abs(d) < 3 ? 0 : d - Math.sign(d) * 3;            // 3°の遊び
+        Input.tilt = U.clamp(d / 28, -1, 1) * 0.55;                 // 「やや」曲がる：最大55%
+      });
+    };
+    try {
+      const D = window.DeviceMotionEvent;
+      if (D && typeof D.requestPermission === 'function') D.requestPermission().then(r => { if (r === 'granted' || !/iPhone|iPad|iPod/.test(navigator.userAgent)) bind(); else { Input.gyroOn = false; this.store.set('gyro', false); this.syncTune(); } }).catch(() => bind());
+      else if (D) bind();
+    } catch (e) { }
   },
   openSettings() {
     this.$('optAuto').textContent = 'オートアクセル：' + (Input.autoAccel ? 'ON' : 'OFF');
@@ -280,6 +339,7 @@ const UI = {
         if (ITEMS[sp]) { GAME.player.item = sp; GAME.player.itemN = 1; setTimeout(() => HUD.toast(`🎁 スペシャル持ち込み：${ITEMS[sp].icon}${ITEMS[sp].name}`), 1500); }
       }
       this.$('loading').classList.remove('on');
+      Input.gyroZero = null; Input.tilt = 0;
       this.$('btnPause').style.display = 'block'; this.$('thint').style.opacity = 1;
       if (extra.onReady) extra.onReady();
     }, 30);

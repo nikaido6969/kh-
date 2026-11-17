@@ -18,7 +18,10 @@ const ITEMS = {
   karaage: { icon: '🍗', name: 'からあげ君', line: '食べて大加速。アツアツ注意' },
   // バトル用
   hammer: { icon: '🔨', name: '特大バナナ叩き', line: '巨大バナナで周りをぶっ叩く' },
-  mgun: { icon: '🔫', name: 'マシンガン連打', line: 'ダダダダダ！' },
+  mgun: { icon: '🔫', name: '機関銃', line: 'ダダダダダ！前方に連射' },
+  bazooka: { icon: '💥', name: 'バズーカ', line: '一直線にロケット弾。当たると大爆発' },
+  mine: { icon: '⚠️', name: '地雷', line: '後ろに3個埋める。踏んだら大爆発', n: 1 },
+  missile: { icon: '🚀', name: 'ミサイル', line: '前の相手をどこまでも追尾して爆発' },
   gasoline: { icon: '⛽', name: 'ガソリン垂れ流しファイヤー', line: '走った跡が燃える。風船が溶ける' },
   waterb: { icon: '🎈', name: '大量特大水風船', line: '6発まとめてぶん投げ' },
   eda: { icon: '🫛', name: '枝豆コロコロ', line: '枝豆100個ばらまき。食べた相手は10倍デカくなる' },
@@ -33,11 +36,11 @@ const ITEMS = {
 };
 const SPECIALS = Object.keys(ITEMS).filter(k => ITEMS[k].sp);
 const RACE_TABLE = [
-  [0.2, { banana: 22, cap: 20, dango: 16, shippu: 14, megusuri: 10, ichoyaku: 10, fan: 8 }],
-  [0.6, { dango: 10, cap: 10, bomb: 12, moufu: 12, fan: 10, gas: 10, karaage: 12, ichoyaku: 8, zabuton: 8, megusuri: 6, banana: 6 }],
-  [1.01, { rifle: 14, tv: 12, paper: 10, karaage: 16, zabuton: 14, bomb: 10, moufu: 12, gas: 6, ichoyaku: 6 }],
+  [0.2, { banana: 20, cap: 16, dango: 14, shippu: 12, megusuri: 8, ichoyaku: 8, fan: 6, mine: 14 }],
+  [0.6, { dango: 8, cap: 8, bomb: 10, moufu: 10, fan: 8, gas: 8, karaage: 10, ichoyaku: 6, zabuton: 6, banana: 5, mgun: 10, bazooka: 10, missile: 8, mine: 8 }],
+  [1.01, { rifle: 10, tv: 10, paper: 8, karaage: 14, zabuton: 10, bomb: 6, moufu: 8, gas: 4, missile: 14, bazooka: 10, mgun: 8 }],
 ];
-const BATTLE_TABLE = { hammer: 16, mgun: 14, gasoline: 14, waterb: 16, eda: 14, tako: 14, natto: 12 };
+const BATTLE_TABLE = { hammer: 13, mgun: 13, gasoline: 11, waterb: 12, eda: 11, tako: 11, natto: 9, bazooka: 13, mine: 11, missile: 13 };
 
 Object.assign(Game.prototype, {
   toast(k, text) { if (k.isPlayer) HUD.toast(text); },
@@ -163,6 +166,17 @@ Object.assign(Game.prototype, {
         break;
       }
       case 'mgun': k.gunT = 2.4; k.gunCd = 0; break;
+      case 'bazooka':
+        P(Object.assign(fwd(96), { type: 'rocket', h: 0.9, bounces: 0 })); k.v *= 0.82; SND.play('bazooka'); if (k.isPlayer) HUD.shake(0.25); break;
+      case 'mine':
+        for (let i = 0; i < 3; i++) P({ type: 'mine', dist: k.dist - 3.5 - i * 3, d: k.d + (i - 1) * 2.4, v: 0 });
+        SND.play('clank'); break;
+      case 'missile': {
+        const t = this.targetAhead(k, 400);
+        P(Object.assign(fwd(70), { type: 'missile', target: t ? t.id : null, h: 1.2 })); SND.play('launch');
+        if (t && t.isPlayer) HUD.toast('🚀 ミサイル接近！');
+        break;
+      }
       case 'gasoline': k.fireT = 4.5; k.fireCd = 0; SND.play('gurgle'); break;
       case 'waterb':
         for (let i = 0; i < 6; i++) P({ type: 'waterb', dist: k.dist + 2, d: k.d + (i - 2.5) * 1.2, yaw: k.yaw + (i - 2.5) * 0.12, v: 34 + Math.random() * 22 + Math.max(0, k.v), h: 2, vh: 9 + Math.random() * 5 });
@@ -269,7 +283,7 @@ Object.assign(Game.prototype, {
   spawnProj(o) {
     const p = Object.assign({ id: o.id || (this.cfg.netId || 'L') + '_' + (this.projId++), h: 0.6, vh: 0, bounces: 3, age: 0, alive: true, yaw: 0, v: 0, d: 0 }, o);
     o.id = p.id;
-    p.life = { banana: 70, natto: 999, eda: 40, gas: 6, fire: 6, bullet: 1.3, tv: 9, paper: 9, bomb: 6, waterb: 4, tako: 4, moufu: 11 }[p.type] || 8;
+    p.life = { rocket: 4, mine: 120, missile: 12, banana: 70, natto: 999, eda: 40, gas: 6, fire: 6, bullet: 1.3, tv: 9, paper: 9, bomb: 6, waterb: 4, tako: 4, moufu: 11 }[p.type] || 8;
     const m = new THREE.Group();
     const T = p.type;
     if (T === 'cap') { mk(m, GEO.cyl(0.45, 0.45, 0.2, 14), 0xff4a3a, 0, 0, 0, { mo: { m: 0.6, r: 0.3 } }); mk(m, GEO.cyl(0.47, 0.47, 0.05, 14), 0xffd23a, 0, 0.12, 0); }
@@ -279,6 +293,16 @@ Object.assign(Game.prototype, {
     else if (T === 'banana') { mk(m, GEO.tor(0.4, 0.14, Math.PI), 0xffd83a, 0, 0.15, 0, { r: [Math.PI / 2, 0, 0] }); }
     else if (T === 'natto') { for (let q = 0; q < 9; q++) mk(m, GEO.sph(0.22, 7, 5), 0xb0803a, Math.cos(q) * 0.5 * (q % 3 / 2), 0.15, Math.sin(q) * 0.5 * (q % 3 / 2), { s: [1, 0.8, 1.3] }); mk(m, GEO.cyl(1.4, 1.4, 0.05, 14), 0xe8e0c0, 0, 0.02, 0, { mo: { op: 0.55 } }); }
     else if (T === 'eda') { mk(m, this.edaGeo || (this.edaGeo = new THREE.SphereGeometry(0.2, 6, 4)), 0x7ac83a, 0, 0.2, 0, { s: [2.2, 1, 1] }); }
+    else if (T === 'rocket' || T === 'missile') {
+      mk(m, GEO.cyl(0.28, 0.28, 1.8, 10), T === 'rocket' ? 0x4a5a3a : 0xe8e8ee, 0, 0, 0, { r: [Math.PI / 2, 0, 0], mo: { m: 0.6, r: 0.3 } });
+      mk(m, GEO.cone(0.28, 0.6, 10), 0xd8323a, 0, 0, 1.2, { r: [Math.PI / 2, 0, 0] });
+      for (let q = 0; q < 4; q++) mk(m, GEO.box(0.05, 0.5, 0.4), 0x333333, Math.cos(q * 1.57) * 0.3, Math.sin(q * 1.57) * 0.3, -0.7, { r: [0, 0, q * 1.57] });
+      const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: U.glowTex(), color: 0xffa030, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false })); fl.position.z = -1.2; fl.scale.set(1.6, 1.6, 1.6); m.add(fl);
+    }
+    else if (T === 'mine') {
+      mk(m, GEO.cyl(0.8, 0.9, 0.3, 14), 0x4a5038, 0, 0.12, 0, { mo: { m: 0.5, r: 0.5 } });
+      const led = mk(m, GEO.sph(0.14, 8, 6), 0xff2020, 0, 0.35, 0, { mat: new THREE.MeshBasicMaterial({ color: 0xff2020 }) }); led.name = 'led';
+    }
     else if (T === 'moufu') { mk(m, GEO.box(2.2, 0.25, 1.8), 0x5a8ad8, 0, 0, 0); mk(m, GEO.box(2.25, 0.27, 0.3), 0xffffff, 0, 0, 0.5); }
     else if (T === 'waterb') { mk(m, GEO.sph(0.9), 0x5ab8ff, 0, 0, 0, { mo: { op: 0.75, r: 0.1 } }); }
     else if (T === 'tako') { mk(m, GEO.sph(0.45), 0xd88a3a, 0, 0, 0); mk(m, GEO.sph(0.46, 10, 6), 0x5a2a10, 0, 0.12, 0, { s: [1, 0.5, 1] }); }
@@ -328,7 +352,7 @@ Object.assign(Game.prototype, {
       const edge = tr.hw[i] + tr.sh[i] - 0.6;
       const off = tr.off[i];
       // 移動
-      if (['cap', 'dango', 'bullet', 'eda', 'waterb', 'tako', 'bomb'].includes(T)) {
+      if (['cap', 'dango', 'bullet', 'eda', 'waterb', 'tako', 'bomb', 'rocket'].includes(T)) {
         const kap = tr.lerpArr(tr.kap, s);
         const ds = p.v * Math.cos(p.yaw) * dt;
         p.yaw -= kap * ds * Math.sign(p.v || 1);
@@ -345,13 +369,14 @@ Object.assign(Game.prototype, {
         }
         if (Math.abs(p.d) > edge) {
           if (tr.flags[i] & 2) { this.removeProj(p, false); continue; }
+          if (T === 'rocket') { SND.play('boom'); this.explode(p, 6, 'knock', { balloons: 2 }); this.removeProj(p, false); if (window.NET && NET.active) NET.send({ t: 'phit', id: p.id }); continue; }
           p.d = Math.sign(p.d) * edge; p.yaw = -p.yaw; p.bounces--;
           if (T === 'cap') SND.play('ping');
           if (p.bounces < 0 && T !== 'eda') { this.removeProj(p); continue; }
           if (T === 'eda') p.v *= 0.5;
         }
         if ((tr.flags[i] & 1) && !['waterb', 'tako', 'bomb'].includes(T)) { this.removeProj(p, false); continue; }
-      } else if (T === 'moufu') {
+      } else if (T === 'moufu' || T === 'missile') {
         const tgt = p.target && this.karts.find(k => k.id === p.target);
         p.dist += p.v * dt;
         let tD = tr.lerpArr(tr.ai, s + 10);
@@ -379,7 +404,7 @@ Object.assign(Game.prototype, {
         const rad = T === 'gas' ? 5 : T === 'fire' ? 2.6 : T === 'eda' ? 1.3 : 1.8;
         for (const k of this.karts) {
           if (k.isRemote || k.respawnT > 0 || k.out) continue;
-          if (k.id === p.owner && p.age < (zone ? 99 : T === 'natto' || T === 'banana' ? 1.0 : 0.5)) continue;
+          if (k.id === p.owner && p.age < (zone ? 99 : T === 'natto' || T === 'banana' || T === 'mine' ? 1.2 : 0.5)) continue;
           const kr = k.giantT > 0 ? 4 : 0;
           if (Math.abs(this.dDist(k.dist, p.dist)) < rad + kr && Math.abs(k.d - p.d) < rad - 0.2 + kr && k.h < 2.5 + kr) {
             if (zone) {
@@ -387,7 +412,14 @@ Object.assign(Game.prototype, {
               else if (k.invT <= 0) { this.damage(k, 'burn', { balloons: 1 }); if (k.isPlayer) this.toast(k, '🔥 風船が溶ける〜！'); }
               continue;
             }
-            if (k.hoverT > 0 && ['banana', 'natto', 'eda'].includes(T)) continue;
+            if (k.hoverT > 0 && ['banana', 'natto', 'eda', 'mine'].includes(T)) continue;
+            if (T === 'rocket' || T === 'missile' || T === 'mine') {
+              SND.play('boom'); if (this.player && this.player.model.root.position.distanceTo(p.mesh.position) < 20) HUD.shake(0.5);
+              this.explode(p, T === 'rocket' ? 6 : T === 'mine' ? 5 : 4.5, 'knock', { balloons: 2 });
+              this.removeProj(p, false);
+              if (window.NET && NET.active) NET.send({ t: 'phit', id: p.id });
+              break;
+            }
             const kind = { banana: 'slip', natto: 'natto', eda: 'slip', moufu: 'sleep', bullet: 'spin', cap: 'spin', dango: 'spin' }[T] || 'spin';
             if (T === 'moufu') { this.damage(k, 'blind', { t: 1.8, style: 'blanket' }); SND.play('fwash'); }
             if (T === 'eda' && k.starT <= 0 && k.invT <= 0 && k.shieldT <= 0) { k.giantT = 8; this.toast(k, '🫛 枝豆うまっ！体が10倍に…でも弱い！'); SND.play('eat'); }
@@ -400,7 +432,9 @@ Object.assign(Game.prototype, {
       }
       if (!p.alive) continue;
       // 見た目
-      const hh = ['tv', 'paper', 'gas', 'fire', 'natto', 'banana', 'eda'].includes(T) ? 0.05 : p.h;
+      const hh = ['tv', 'paper', 'gas', 'fire', 'natto', 'banana', 'eda', 'mine'].includes(T) ? 0.05 : p.h;
+      if ((T === 'rocket' || T === 'missile') && Math.random() < 0.8) this.particles.emit(p.mesh.position.clone(), new THREE.Vector3((Math.random() - 0.5) * 2, 1 + Math.random(), (Math.random() - 0.5) * 2), 0xd8d0c8, 0.7, 0.6, 2.2, 0, false);
+      if (T === 'mine') { const led = p.mesh.getObjectByName('led'); if (led) led.visible = Math.floor(p.age * (p.age < 0.8 ? 3 : 6)) % 2 === 0; }
       this.placeOnTrack(p.mesh, p.dist, p.d, hh, T === 'cap' || T === 'dango' ? this.time * 12 : 0);
       if (T === 'gas') p.mesh.scale.setScalar(1 + p.age * 0.15);
       if (T === 'fire') p.mesh.scale.setScalar(Math.min(1, p.life) * (0.8 + Math.random() * 0.3));

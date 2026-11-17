@@ -37,7 +37,7 @@ Object.assign(Game.prototype, {
     if (k.balloons <= 0 && !k.out) {
       k.out = true; k.outT = this.raceT;
       this.spark(k, 0xffffff, 40);
-      if (k.isPlayer) { HUD.msg('風船ゼロ…脱落！', 2.5, 'final'); SND.play('fall'); }
+      if (k.isPlayer) { HUD.msg('風船ゼロ…脱落！', 2.5, 'final'); SND.play('fate'); }
       else if (this.player) HUD.toast(`💥 ${k.name} 脱落！`);
     }
   },
@@ -97,7 +97,8 @@ Object.assign(Game.prototype, {
       let use = k.aiItemT < -6;
       switch (k.item) {
         case 'hammer': use = use || tDist < 8; break;
-        case 'mgun': case 'tako': case 'waterb': case 'eda': use = use || (facing && tDist < 45); break;
+        case 'mgun': case 'tako': case 'waterb': case 'eda': case 'bazooka': use = use || (facing && tDist < 45); break;
+        case 'mine': use = use || (tgt && this.dDist(tgt.dist, k.dist) < 0 && tDist < 30); break;
         case 'gasoline': case 'natto': use = use || (tgt && this.dDist(tgt.dist, k.dist) < 0 && tDist < 25); break;
         default: use = use || k.aiItemT < 0;
       }

@@ -176,7 +176,7 @@ const ARENAS = [
     cmds.push(S(a.side, { items: 0.5, dy, bumps: a.bumps }));
     cmds.push(C(360 / a.n, a.r, { items: i % 2 ? 0.5 : undefined }));
   }
-  return Object.assign({}, ARENA_BASE, a, { battle: true, cmds, music: { bpm: 156, root: 57 + (a.n % 3), scale: 'minor', seed: 200 + a.n * 7 + a.side } });
+  return Object.assign({}, ARENA_BASE, a, { battle: true, cmds, music: { bpm: 156, root: 57 + (a.n % 3), scale: 'minor', seed: 200 + a.n * 7 + a.side, classic: null } });
 });
 
 const CUPS = [

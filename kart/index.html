@@ -126,6 +126,28 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #touch{position:fixed;inset:0;pointer-events:none;z-index:12;display:none}
 #touch button{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.6);color:#fff;font-weight:900;font-size:22px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);touch-action:none}
 #touch button.on{background:rgba(255,255,255,.55)}
+#tstick{position:absolute;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(255,255,255,.1);opacity:0;transition:opacity .12s;pointer-events:none}
+#tstick.on{opacity:1}
+#tknob{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:86px;height:86px;border-radius:50%;background:rgba(255,79,122,.85);color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#tpad{position:absolute;left:max(18px,env(safe-area-inset-left));bottom:22px;width:min(44vw,320px);height:110px;border-radius:24px;border:2px dashed rgba(255,255,255,.45);display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;font-size:12px;font-weight:800;pointer-events:none;opacity:.75}
+.tbtn{position:absolute;pointer-events:auto;border-radius:50%;background:rgba(20,16,30,.42);border:3px solid rgba(255,255,255,.75);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;touch-action:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);font-family:inherit}
+.tbtn b{font-size:30px;line-height:1}
+.tbtn small{font-size:11px;font-weight:900;line-height:1.15}
+.tbtn.on{background:rgba(255,79,122,.75);transform:scale(.94)}
+#bDrift{right:max(18px,env(safe-area-inset-right));bottom:24px;width:118px;height:118px}
+#bItem{right:calc(max(18px,env(safe-area-inset-right)) + 128px);bottom:84px;width:92px;height:92px}
+#bBrake{right:calc(max(18px,env(safe-area-inset-right)) + 30px);bottom:154px;width:72px;height:72px}
+#bBrake b{font-size:22px}
+#trot{display:none;position:absolute;left:50%;top:40%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;padding:10px 16px;border-radius:14px;font-weight:800;font-size:14px;pointer-events:none;white-space:nowrap}
+@media (orientation:portrait){#trot{display:block}#tpad{width:46vw}#bItem{right:calc(max(14px,env(safe-area-inset-right)) + 116px);bottom:30px;width:84px;height:84px}#bDrift{bottom:30px;width:104px;height:104px}#bBrake{bottom:146px;right:calc(max(14px,env(safe-area-inset-right)) + 18px)}}
+body.touch #hmap{left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 58px);bottom:auto;width:104px;height:104px}
+body.touch #hpos{top:max(8px,env(safe-area-inset-top));bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px);font-size:46px}
+body.touch #hpos small{font-size:18px}
+body.touch #hspeed{top:calc(max(8px,env(safe-area-inset-top)) + 52px);bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px);font-size:16px}
+body.touch #hflow{top:calc(max(8px,env(safe-area-inset-top)) + 76px);bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px)}
+body.touch #hmtw{bottom:150px}
+body.touch #htoasts{bottom:auto;top:calc(max(10px,env(safe-area-inset-top)) + 90px)}
+body.touch #thint{bottom:auto;top:46%;font-size:13px}
 #tind{position:absolute;bottom:18%;width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.85);background:rgba(255,255,255,.15);opacity:0;transition:opacity .15s;pointer-events:none}
 #tind i{position:absolute;left:50%;top:4px;width:6px;height:18px;margin-left:-3px;border-radius:3px;background:#ff4f7a}
 #tzL,#tzR{position:absolute;top:0;bottom:0;width:50%;transition:background .1s}
@@ -135,6 +157,11 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #thint{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:#fff;padding:10px 16px;border-radius:16px;font-size:14px;line-height:1.6;text-align:center;transition:opacity .6s;pointer-events:none;width:max-content;max-width:90vw}
 #hitem{pointer-events:auto}
 @media (min-aspect-ratio:1/1){#s-title{align-items:flex-start;padding-left:7vw}#s-title .logo,#s-title .tag{text-align:left}#s-title>div[style]{height:3vh!important}}
+.tune{display:grid;gap:8px;padding:14px 16px}
+.tune label{display:flex;justify-content:space-between;font-weight:800}
+.tune input[type=range]{width:100%;accent-color:var(--acc);padding:0}
+.tune .tl{display:flex;justify-content:space-between;font-size:12px;color:var(--sub)}
+.tune small{color:var(--sub);font-size:12px;text-align:center}
 #s-pause,#s-results{justify-content:center;background:rgba(246,239,228,.4)}
 </style>
 </head>
@@ -154,8 +181,13 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 </div>
 <button id="btnPause">Ⅱ</button>
 <div id="touch">
-  <div id="tind"><i></i></div>
-  <div id="thint">画面を押したまま<b>指を左右に動かす</b>とハンドル<br>指を置いた方向へ、動かした分だけ切れます<br>大きく切ったまま＝ドリフト／2本指＝ブレーキ<br>上のアイテム枠をタップで使う</div>
+  <div id="tstick"><div id="tknob">⬅︎ ハンドル ➡︎</div></div>
+  <div id="tpad"><span>ここに左手の親指を置いて<br>左右にスライド＝ハンドル</span></div>
+  <button class="tbtn" id="bItem"><b id="bItemI">🎁</b><small>アイテム</small></button>
+  <button class="tbtn" id="bDrift"><b>↪︎</b><small>ドリフト<br>(長押し)</small></button>
+  <button class="tbtn" id="bBrake"><b>⏪</b><small>ブレーキ</small></button>
+  <div id="thint">左手：親指を置いて左右にスライドでハンドル<br>右手：ドリフト（曲がりながら長押し→離すと加速）<br>アイテムボタンで使う／ブレーキ長押しでバック<br>📱 iPhoneを傾けても少し曲がります</div>
+  <div id="trot">📱↻ 横向きにすると遊びやすいです</div>
 </div>
 <div id="loading">コース生成中…</div>
 
@@ -216,6 +248,13 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
     <button class="btn pri" id="pResume" style="justify-content:center">つづける</button>
     <button class="btn" id="pRetry" style="justify-content:center">やりなおす</button>
     <button class="btn" id="pQuit" style="justify-content:center">やめる</button>
+    <div class="tune panel">
+      <label>ハンドル感度 <b class="sensv">ふつう</b></label>
+      <input type="range" class="sens" min="0.5" max="1.6" step="0.05" aria-label="ハンドル感度">
+      <div class="tl"><span>おだやか</span><span>クイック</span></div>
+      <button class="btn gyro" style="justify-content:center">📱 傾けて曲がる：ON</button>
+      <small class="gyros"></small>
+    </div>
   </div>
 </div>
 
@@ -239,8 +278,9 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
     🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
     🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
-    📱 スマホ：画面を押したまま指を左右に動かすとハンドル（指を置いた方向へ無段階で切れる）。大きく切ったままでドリフト、2本指でブレーキ、上のアイテム枠をタップで使用（アクセルは自動）。</p>
+    📱 iPhone：左手の親指を画面左下に置いて左右にスライドでハンドル。右下の大きいボタン＝ドリフト（曲がりながら長押し）、その左＝アイテム、上＝ブレーキ（長押しでバック）。アクセルは自動。iPhoneを傾けても少し曲がれる（設定でON/OFF、ポーズ画面で感度調整）。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
+    <p><b>重火器（レース・バトル共通）</b>：🔫機関銃（前方に連射）　💥バズーカ（一直線のロケット弾・大爆発）　⚠️地雷（後ろに3個・踏むと爆発）　🚀ミサイル（前の相手を追尾）</p>
     <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>
     <p><b>乱入者</b>：ときどき画面が暗くなり、じじい・ばばあ・お化け18種が乱入。邪魔する者、応援する者、仲間になる者も…</p>
     <p><b>勝利賞品</b>：1位になるとスペシャルおもろアイテム（🦷👑🍬🪭🏠）をゲット。次の試合に持ち込める。</p>
@@ -250,7 +290,14 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 <div class="screen" id="s-set">
   <button class="back" data-back="s-title">← もどる</button>
   <h2>設定</h2>
-  <div class="menu"><button class="btn" id="optAuto" style="justify-content:center">オートアクセル</button></div>
+  <div class="menu"><button class="btn" id="optAuto" style="justify-content:center">オートアクセル</button>
+    <div class="tune panel">
+      <label>ハンドル感度 <b class="sensv">ふつう</b></label>
+      <input type="range" class="sens" min="0.5" max="1.6" step="0.05" aria-label="ハンドル感度">
+      <div class="tl"><span>おだやか</span><span>クイック</span></div>
+      <button class="btn gyro" style="justify-content:center">📱 傾けて曲がる：ON</button>
+      <small class="gyros"></small>
+    </div></div>
 </div>
 
 <div class="screen" id="s-online">

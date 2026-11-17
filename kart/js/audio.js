@@ -1,4 +1,19 @@
 // ===== サウンド（WebAudio合成） =====
+// ===== クラシック名曲（パブリックドメイン）: [MIDI音, 16分音符の長さ] / null=休符 =====
+const CLASSICS = {
+  // グリーグ「山の魔王の宮殿にて」：ループごとに速く・高くなる
+  grieg: { name: 'グリーグ「山の魔王の宮殿にて」', bpm: 96, accel: 0.07, maxFast: 1.9, octaveEvery: 2, bassBars: [47, 42, 47, 42],
+    mel: [[59,2],[61,2],[62,2],[64,2],[66,2],[62,2],[66,4], [65,2],[61,2],[65,4],[64,2],[60,2],[64,4],
+          [59,2],[61,2],[62,2],[64,2],[66,2],[62,2],[66,2],[71,2], [69,2],[66,2],[62,2],[66,2],[69,8]] },
+  // モーツァルト「トルコ行進曲」
+  mozart: { name: 'モーツァルト「トルコ行進曲」', bpm: 120, accel: 0.03, maxFast: 1.35, octaveEvery: 0, bassBars: [45, 45, 45, 45, 45, 40, 45, 45],
+    mel: [[71,1],[69,1],[68,1],[69,1],[72,2],[null,2], [74,1],[72,1],[71,1],[72,1],[76,2],[null,2],
+          [77,1],[76,1],[75,1],[76,1],[83,1],[81,1],[80,1],[81,1], [83,1],[81,1],[80,1],[81,1],[84,4],
+          [71,1],[69,1],[68,1],[69,1],[72,2],[null,2], [74,1],[72,1],[71,1],[72,1],[76,2],[null,2],
+          [77,1],[76,1],[75,1],[76,1],[83,1],[81,1],[80,1],[81,1], [83,1],[81,1],[80,1],[81,1],[84,2],[81,2],
+          [83,1],[84,1],[83,1],[81,1],[80,1],[81,1],[76,1],[77,1], [74,1],[72,1],[71,1],[69,1],[71,2],[69,2]] },
+};
+
 const SND = {
   ctx: null, master: null, music: null, sfx: null, engine: null, bgm: null, vol: { m: 0.33, s: 0.65 }, lastT: {},
   init() {
@@ -107,6 +122,10 @@ const SND = {
       case 'stinger': [55, 58.3, 82.4, 116.5, 233].forEach(f => T(f, 2.2, 'sawtooth', 0.12, 0.97)); N(1.5, 0.3, 200, 0.5, 6, 0, 'lowpass'); T(1760, 1.4, 'sine', 0.05, 0.94); T(1864, 1.4, 'sine', 0.05, 1.05); break;
       case 'whisper': for (let i = 0; i < 5; i++) N(0.3, 0.12, 2500 + Math.random() * 2000, 6, 0.8, i * 0.2); break;
       case 'laugh': for (let i = 0; i < 6; i++) { T(520 - i * 30, 0.12, 'sawtooth', 0.08, 1.3, i * 0.13); T(780 - i * 40, 0.12, 'triangle', 0.06, 1.2, i * 0.13); } break;
+      case 'fate': [[67, 0], [67, 0.16], [67, 0.32], [63, 0.48]].forEach(([n, d], i) => { const f = 440 * Math.pow(2, (n - 69) / 12); T(f, i < 3 ? 0.14 : 1.1, 'sawtooth', 0.16, 0, d); T(f / 2, i < 3 ? 0.14 : 1.1, 'square', 0.1, 0, d); }); [[65, 1.7], [65, 1.86], [65, 2.02], [62, 2.18]].forEach(([n, d], i) => { const f = 440 * Math.pow(2, (n - 69) / 12); T(f, i < 3 ? 0.14 : 1.3, 'sawtooth', 0.16, 0, d); T(f / 2, i < 3 ? 0.14 : 1.3, 'square', 0.1, 0, d); }); break;
+      case 'bazooka': N(0.12, 0.9, 400, 0.6, 0.3, 0, 'lowpass'); T(70, 0.35, 'sine', 0.6, 0.4); N(0.9, 0.35, 2500, 0.8, 0.25, 0.05); break;
+      case 'launch': N(0.25, 0.5, 600, 0.6, 3); N(1.2, 0.3, 1800, 0.7, 0.4, 0.1); T(300, 1.0, 'sawtooth', 0.06, 2.5, 0.05); break;
+      case 'clank': T(1800, 0.08, 'square', 0.12, 0.6); T(900, 0.1, 'square', 0.1, 0.7, 0.07); N(0.08, 0.3, 3000, 1, 1, 0.14); break;
       case 'heart': T(55, 0.15, 'sine', 0.7, 0.6); T(50, 0.15, 'sine', 0.55, 0.6, 0.18); break;
     }
   },
@@ -173,6 +192,25 @@ const SND = {
         if (bgm.mode === 'scary') this.scaryStep(bgm, t, spb, f, voice, kick);
         else if (bgm.mode === 'goal') this.goalStep(bgm, t, spb, f, voice, note);
         else if (bgm.mode === 'wait') { if (bgm.step % 16 === 0) voice(f(note(0, -1)), spb * 14, 'triangle', 0.12, t, 0.3); }
+        else if (m.classic && CLASSICS[m.classic]) {
+          const P = CLASSICS[m.classic];
+          if (!bgm.cl) { bgm.cl = { i: 0, wait: 0, loop: 0, step: 0 }; bgm.bpm = P.bpm; }
+          const c = bgm.cl, oct = P.octaveEvery ? Math.min(1, Math.floor(c.loop / P.octaveEvery)) * 12 : 0;
+          if (c.wait <= 0) {
+            const [n, len] = P.mel[c.i];
+            if (n != null) { voice(f(n + oct), spb * len * 0.95, 'square', 0.075, t); voice(f(n + oct + 12), spb * len * 0.7, 'triangle', 0.03, t); }
+            c.wait = len; c.i++;
+            if (c.i >= P.mel.length) { c.i = 0; c.loop++; bgm.bpm = P.bpm * Math.min(P.maxFast, 1 + P.accel * c.loop); }
+          }
+          c.wait--;
+          const b16 = c.step % 16, bar = Math.floor(c.step / 16) % P.bassBars.length, root = P.bassBars[bar];
+          if (b16 % 4 === 0) voice(f(root - 12), spb * 1.6, 'triangle', 0.42, t);
+          if (b16 % 4 === 2) voice(f(root + 7 - 12), spb * 1.2, 'triangle', 0.25, t);
+          if (b16 % 4 === 0) kick(t, 0.6 + Math.min(0.4, c.loop * 0.08));
+          if (b16 === 4 || b16 === 12) drum('s', t, 0.5 + Math.min(0.5, c.loop * 0.1));
+          if (b16 % 2 === 0 && c.loop >= 1) drum('h', t, 0.6);
+          c.step++;
+        }
         else {
           const name = order[bgm.sec % order.length], S = sections[name];
           const s = bgm.secStep, bar = Math.floor(s / 16), b16 = s % 16;

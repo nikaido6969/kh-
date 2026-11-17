@@ -5,7 +5,8 @@ const MT_TIME = [0, 0.55, 1.05, 1.65];
 
 // ---------- 入力 ----------
 const Input = {
-  keys: {}, touch: { ax: null, a: false, b: false, drift: false, item: false }, autoAccel: U.isTouch, tilt: 0,
+  keys: {}, sens: 0.85, gyroOn: true, gyroLive: false, gyroZero: null, tilt: 0,
+  touch: { ax: null, a: false, b: false, drift: false, item: false }, autoAccel: U.isTouch, tilt: 0,
   st: { steer: 0, accel: false, brake: false, drift: false, item: false, back: false, look: false },
   prevItem: false, prevDrift: false, itemEdge: false, driftEdge: false,
   init() {
@@ -19,6 +20,7 @@ const Input = {
     if (k.ArrowLeft || k.KeyA) steer -= 1;
     if (k.ArrowRight || k.KeyD) steer += 1;
     if (t.ax != null) steer += t.ax;
+    if (this.gyroOn && this.tilt) steer += this.tilt;
     let accel = !!(k.ArrowUp || k.KeyW || k.KeyX) || t.a;
     let brake = !!(k.ArrowDown || k.KeyS || k.KeyZ) || t.b;
     let drift = !!(k.Space || k.ShiftLeft || k.ShiftRight || k.KeyR) || t.drift;
@@ -39,7 +41,7 @@ const Input = {
     }
     if (this.autoAccel && !brake) accel = true;
     // タッチは押しっぱなしで自動ドリフト
-    if (t.ax != null && Math.abs(t.ax) > 0.72) { this.tHold = (this.tHold || 0) + 1 / 60; if (this.tHold > 0.35) drift = true; } else if (t.ax == null || Math.abs(t.ax) < 0.45) this.tHold = 0; else if (this.tHold > 0.35) drift = true;
+
     steer = U.clamp(steer, -1, 1);
     this.itemEdge = item && !this.prevItem; this.prevItem = item;
     this.driftEdge = drift && !this.prevDrift; this.prevDrift = drift;
@@ -197,7 +199,9 @@ class Game {
     this.finalLapShown = false; this.resultsShown = false; this.rocket = { first: null };
     this.running = true; this.paused = false;
     HUD.setup(this);
-    SND.startBGM(this.def.music); SND.setMode('wait');
+    const mus = Object.assign({}, this.def.music);
+    if (this.battle) { const keys = Object.keys(CLASSICS); mus.classic = keys[Math.floor(Math.random() * keys.length)]; this.classicName = CLASSICS[mus.classic].name; }
+    SND.startBGM(mus); SND.setMode('wait');
     SND.startEngine();
   }
 
@@ -254,6 +258,7 @@ class Game {
       if (this.player && !inp.accel) this.rocket.first = null;
       if (this.raceT >= 0) {
         this.started = true; HUD.msg('GO!', 1.0, 'go'); SND.play('go'); SND.setMode('normal');
+        if (this.classicName) setTimeout(() => HUD.toast('🎼 BGM：' + this.classicName), 900);
         if (this.player && this.rocket.first !== null) {
           const t = this.rocket.first;
           if (t > -1.7 && t < -0.9) { this.player.boostT = 1.0; this.player.v = this.player.vmax * 0.8; SND.play('boost'); HUD.msg('ロケットスタート！', 1.2, 'small'); }
@@ -845,6 +850,7 @@ const HUD = {
     if (k.rollT > 0) { const keys = Object.keys(g.battle ? BATTLE_TABLE : ITEMS).filter(x => !ITEMS[x].sp); this.el.hitemi.textContent = ITEMS[keys[Math.floor(g.time * 14) % keys.length]].icon; this.el.hitemn.textContent = ''; }
     else if (k.item) { this.el.hitemi.textContent = ITEMS[k.item].icon; this.el.hitemn.textContent = k.itemN > 1 ? '×' + k.itemN : ''; }
     else { this.el.hitemi.textContent = ''; this.el.hitemn.textContent = ''; }
+    const bi = document.getElementById('bItemI'); if (bi) { const ic = this.el.hitemi.textContent || '🎁'; if (bi.textContent !== ic) bi.textContent = ic; bi.parentNode.style.opacity = this.el.hitemi.textContent ? 1 : 0.55; }
     this.el.hlines.style.opacity = k.boostT > 0 || k.ufoT > 0 ? 1 : Math.max(0, (k.v - k.vmax * 1.2) / (k.vmax * 0.2));
     this.el.hmt.style.background = k.drift ? '#' + MT_COL[k.mt].toString(16).padStart(6, '0') : 'transparent';
     const fe = document.getElementById('hflowb'); if (fe) { fe.style.width = (k.flow * 100) + '%'; fe.parentNode.classList.toggle('max', k.flow >= 0.99); }
