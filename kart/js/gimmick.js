@@ -74,10 +74,66 @@ Object.assign(Game.prototype, {
         this.placeOnTrack(m, j * tr.ds, d, 0);
         this.gim.pads.push({ j, s: j * tr.ds, d, m, type: cfg.pads.mesh, t: 0 });
       }
+    }    this.setupShortcuts();
+  },
+
+  // ---- 隠し抜け道トンネル（カーブの内側の路肩に入口。入ると先へワープ）----
+  setupShortcuts() {
+    this.shortcuts = [];
+    const tr = this.track; if (this.battle || !tr.open) return;
+    const fa = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() }, fb = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
+    const cands = [];
+    for (let s0 = tr.startS + 250; s0 < tr.finishS - 350; s0 += 10) {
+      tr.frame(s0, fa); let best = null;
+      for (let span = 140; span <= 420; span += 20) {
+        tr.frame(s0 + span, fb);
+        const dx = fb.p.x - fa.p.x, dy = fb.p.y - fa.p.y, dz = fb.p.z - fa.p.z, chord = Math.hypot(dx, dz);
+        if (Math.abs(dy) > 18 || chord > span * 0.72) continue;
+        const gain = span - chord * 1.15; if (gain < 45) continue;
+        if (!best || gain > best.gain) best = { s0, s1: s0 + span, gain, side: Math.sign(dx * fa.r.x + dz * fa.r.z) || 1 };
+      }
+      if (best) cands.push(best);
+    }
+    cands.sort((a, b) => b.gain - a.gain);
+    for (const c of cands) {
+      if (this.shortcuts.length >= 2) break;
+      if (this.shortcuts.some(o => c.s0 < o.s1 + 150 && c.s1 > o.s0 - 150)) continue;
+      if (tr.flagAt(c.s0) & (1 | 8 | 16) || tr.flagAt(c.s1) & (1 | 8 | 16)) continue;
+      const j0 = tr.idx(c.s0)[0], j1 = tr.idx(c.s1)[0];
+      c.d0 = c.side * tr.hw[j0] * 0.82; c.d1 = c.side * tr.hw[j1] * 0.7;
+      c.m0 = this.tunnelMouth(c.s0, c.d0, false); c.m1 = this.tunnelMouth(c.s1, c.d1, true);
+      this.shortcuts.push(c);
+    }
+  },
+  tunnelMouth(s, d, exit) {
+    const g = new THREE.Group(), fr = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
+    const rock = new THREE.MeshToonMaterial({ color: 0x7a6a58 }), dark = new THREE.MeshBasicMaterial({ color: 0x0a0806, side: THREE.DoubleSide });
+    const arch = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.9, 7, 14, Math.PI), rock); g.add(arch);
+    const hole = new THREE.Mesh(new THREE.CircleGeometry(2.5, 16, 0, Math.PI), dark); hole.position.z = -0.3; g.add(hole);
+    for (const x of [-3.4, 3.4]) { const b = new THREE.Mesh(new THREE.DodecahedronGeometry(1.5, 0), rock); b.position.set(x, 0.6, -0.4); g.add(b); }
+    for (let i = 0; i < 5; i++) { const bu = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1, 0), new THREE.MeshToonMaterial({ color: 0x3f8a3a })); bu.position.set(-3 + i * 1.5, 2.8 + Math.random() * 0.8, -0.6); g.add(bu); }
+    if (!exit) { const cv = document.createElement('canvas'); cv.width = 128; cv.height = 64; const c = cv.getContext('2d'); c.fillStyle = '#ffd23a'; c.fillRect(0, 0, 128, 64); c.fillStyle = '#2a1652'; c.font = 'bold 34px sans-serif'; c.textAlign = 'center'; c.fillText('ぬけ道', 64, 44);
+      const sg = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.2), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv) })); sg.position.set(0, 4.6, 0.3); g.add(sg); }
+    this.track.frame(s, fr);
+    g.position.copy(fr.p).addScaledVector(fr.r, d).addScaledVector(fr.u, this.track.lerpArr(this.track.off, s));
+    g.lookAt(g.position.clone().addScaledVector(fr.t, exit ? 1 : -1));
+    this.scene.add(g); return g;
+  },
+  updateShortcuts() {
+    for (const k of this.karts) {
+      const prev = k._scPrev ?? k.dist; k._scPrev = k.dist;
+      if (k.isRemote || k.out || k.respawnT > 0 || k.ufoT > 0) continue;
+      for (const c of this.shortcuts) {
+        if (prev < c.s0 && k.dist >= c.s0 && Math.abs(k.d - c.d0) < 3.2 && k.h < 3) {
+          k.dist = c.s1 + 2; k._scPrev = k.dist; k.d = c.d1; k.h = 0; k.vh = 0; k.grounded = true; k.yaw = 0; k.boostT = Math.max(k.boostT, 0.6);
+          if (k.isPlayer) { SND.play('boost'); HUD.flash(); HUD.toast(`🕳️ 抜け道トンネル！約${Math.round(c.gain)}m近道`); this.lookBackT = 0; }
+        }
+      }
     }
   },
 
   updateGimmicks(dt) {
+    if (this.shortcuts) this.updateShortcuts();
     const G = this.gim, cfg = G.cfg, tr = this.track;
     const online = !!this.cfg.netId;
     // ジャンプ台

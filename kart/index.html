@@ -47,6 +47,15 @@ h2{margin:44px 0 14px;font-size:24px;text-align:center}
 #courseList{width:min(900px,100%);display:grid;gap:14px;padding-bottom:30px}
 .cup h4{margin:4px 0 8px}
 .crow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.opick{background:linear-gradient(135deg,#fff7e8,#f3e6ff);border-radius:22px;padding:12px;min-width:0;max-width:100%;overflow:hidden;box-sizing:border-box}
+.prow{max-width:100%;display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x mandatory}
+.pc{position:relative;flex:0 0 92px;border-radius:14px;overflow:hidden;background:var(--card);padding:0;scroll-snap-align:start;border:3px solid transparent;transition:transform .15s}
+.pc img{width:100%;height:58px;object-fit:cover;display:block}
+.pc span{display:block;font-size:11px;font-weight:800;padding:3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc i{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:900;font-size:14px;background:#ff4f9a;color:#fff;opacity:0;transform:scale(.4);transition:all .2s}
+.pc.on{border-color:#ff4f9a;transform:translateY(-2px)}.pc.on i{opacity:1;transform:none}
+.pgo{display:block;width:100%;margin-top:6px;padding:12px;border-radius:16px;border:0;background:linear-gradient(135deg,#ff4f9a,#ff9a3a);color:#fff;font-size:16px;font-weight:900;box-shadow:0 4px 12px rgba(255,79,154,.3)}.pgo:disabled{opacity:.45}
+.opick h4{font-size:14px}
 @media (max-width:640px){.crow{grid-template-columns:repeat(2,1fr)}#charGrid{grid-template-columns:repeat(6,1fr)}}
 .course{background:var(--card);border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;box-shadow:0 4px 14px rgba(80,50,20,.07);transition:transform .15s}
 .course:hover{transform:translateY(-3px)}
@@ -88,7 +97,7 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #hitemn{position:absolute;right:-4px;bottom:-6px;font-size:18px;font-weight:900}
 #hspeed{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:94px;font-size:22px;font-weight:900;font-style:italic}
 #hspeed small{font-size:12px;margin-left:3px}
-#hmap{position:absolute;left:max(10px,env(safe-area-inset-left));bottom:10px;width:150px;height:150px;opacity:.95}
+#hmap{position:absolute;left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 58px);width:124px;height:124px;opacity:.95;background:rgba(20,10,40,.25);border-radius:14px}
 #hmsg{position:absolute;left:0;right:0;top:32%;text-align:center;font-size:clamp(48px,12vw,120px);font-weight:900;font-style:italic;opacity:0;transform:scale(.6);transition:opacity .15s,transform .25s cubic-bezier(.2,1.6,.4,1)}
 #hmsg.show{opacity:1;transform:scale(1)}
 #hmsg.small{font-size:clamp(26px,6vw,48px)}
@@ -117,11 +126,12 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #hmagic.full{box-shadow:0 0 0 2px #e0b0ff,0 0 18px #b05aff;animation:mg 0.8s infinite alternate}
 @keyframes mg{to{box-shadow:0 0 0 2px #fff,0 0 28px #d08aff}}
 body.touch #hmagic{display:none}
-#bMagic{left:auto;right:max(10px,env(safe-area-inset-right));bottom:40%;width:58px;height:170px;border-radius:29px;--p:0%;background:linear-gradient(0deg,#7a3aff 0,#c070ff var(--p),rgba(20,16,30,.35) var(--p));justify-content:flex-end;padding-bottom:10px;transition:background .2s}
-#bMagic b{font-size:24px}
-#bMagic::after{content:attr(data-pct);position:absolute;top:8px;left:0;right:0;text-align:center;font-size:11px;font-weight:900}
+#bMagic{left:auto;right:max(4px,env(safe-area-inset-right));top:50%;bottom:auto;transform:translateY(-50%);width:30px;height:200px;border-radius:6px!important;--p:0%;background:linear-gradient(0deg,#7a3aff 0,#c070ff var(--p),rgba(20,16,30,.35) var(--p));justify-content:flex-end;padding-bottom:10px;transition:background .2s}
+#bMagic b{font-size:16px}
+#bMagic::after{content:attr(data-pct);position:absolute;top:6px;left:-4px;right:-4px;text-align:center;font-size:9px;font-weight:900}
+#bMagic small{font-size:9px;writing-mode:vertical-rl}
 #bMagic.full{background:linear-gradient(0deg,#ff4f9a,#ffd23a,#7dffb0,#5ad8ff);border-color:#fff;box-shadow:0 0 26px #ffd23a,0 0 10px #fff;animation:mgf .5s infinite alternate}
-@keyframes mgf{to{transform:scale(1.07);box-shadow:0 0 36px #ff7af0,0 0 14px #fff}}
+@keyframes mgf{to{transform:translateY(-50%) scale(1.07);box-shadow:0 0 36px #ff7af0,0 0 14px #fff}}
 #hfun{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #hfun .eraser{position:absolute;top:30%;left:-40%;width:38%;height:34%;border-radius:14px;background:linear-gradient(90deg,#fff 0 62%,#2a5ad8 62% 100%);box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:flex-start;padding-left:6%;font-family:"Dela Gothic One",sans-serif;font-size:60px;color:#2a1652;text-shadow:none}
 #hfun.er .eraser{animation:era 1.5s ease-in-out forwards}
@@ -129,13 +139,19 @@ body.touch #hmagic{display:none}
 #hfun .slash{position:absolute;left:-10%;right:-10%;top:48%;height:10px;background:linear-gradient(90deg,transparent,#fff 30%,#fff 70%,transparent);box-shadow:0 0 24px #fff;transform:rotate(-14deg) scaleX(0)}
 #hfun.sl .slash{animation:sla .7s ease-out forwards}
 @keyframes sla{0%{transform:rotate(-14deg) scaleX(0)}30%{transform:rotate(-14deg) scaleX(1)}100%{transform:rotate(-14deg) scaleX(1);opacity:0}}
-#hnote{position:absolute;left:max(16px,env(safe-area-inset-left));top:calc(max(14px,env(safe-area-inset-top)) + 64px);display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:14px;background:rgba(20,10,40,.62);opacity:0;transform:translateX(-30px)}
+#hnote{position:absolute;left:0;right:0;margin:0 auto;width:max-content;white-space:nowrap;top:calc(max(14px,env(safe-area-inset-top)) + 150px);display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:14px;background:rgba(20,10,40,.62);opacity:0;transform:translateX(-30px)}
 #hnote.on{animation:nt 2.4s ease forwards}
 #hnote i{font-style:normal;font-size:26px;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#ffd23a;color:#2a1652;font-weight:900}
 #hnote b{font-size:18px;font-weight:900;letter-spacing:.04em}
+#hicard{position:absolute;left:50%;top:44%;transform:translate(-50%,0);display:flex;align-items:center;gap:10px;padding:8px 16px 8px 10px;border-radius:18px;background:rgba(20,10,40,.45);backdrop-filter:blur(4px);opacity:0;pointer-events:none;max-width:86vw}
+#hicard.on{animation:ic 2.2s ease forwards}
+#hicard i{font-style:normal;font-size:40px;line-height:1}
+#hicard b{display:block;font-size:17px;font-weight:900;color:#ffd23a}
+#hicard span{display:block;font-size:12px;font-weight:800}
+@keyframes ic{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}12%{opacity:1;transform:translate(-50%,0) scale(1.06)}20%,80%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px)}}
 #hnote.hot i{background:#ff3a5a;color:#fff}
 @keyframes nt{0%{opacity:0;transform:translateX(-30px)}10%,80%{opacity:1;transform:none}100%{opacity:0}}
-body.touch #hnote{top:calc(max(10px,env(safe-area-inset-top)) + 168px)}
+body.touch #hnote{top:calc(max(10px,env(safe-area-inset-top)) + 150px)}
 #hcutin{position:absolute;left:0;right:0;top:calc(max(10px,env(safe-area-inset-top)) + 160px);height:64px;pointer-events:none;opacity:0}
 #hcutin.on{animation:cut 2.1s cubic-bezier(.2,.9,.3,1) forwards}
 @keyframes cut{0%{opacity:1;transform:translateX(100%)}14%{transform:translateX(0)}80%{opacity:1;transform:translateX(-3%)}100%{opacity:0;transform:translateX(-110%)}}
@@ -212,8 +228,7 @@ body.touch #hflow i{width:64px}
 body.touch #hbags{left:50%;margin-left:0;transform:translateX(-50%);top:calc(max(10px,env(safe-area-inset-top)) + 104px)}
 body.touch .hbag{width:40px;height:40px;font-size:21px}
 body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 112px)}
-body.battle #hmap{top:calc(max(10px,env(safe-area-inset-top)) + 58px);bottom:auto;left:max(10px,env(safe-area-inset-left));width:124px;height:124px;background:rgba(20,10,40,.25);border-radius:14px}
-body.battle #htoasts,body.battle #hbanner{top:calc(max(10px,env(safe-area-inset-top)) + 190px)}
+#htoasts,#hbanner,body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 190px)}
 #tind{position:absolute;bottom:18%;width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.85);background:rgba(255,255,255,.15);opacity:0;transition:opacity .15s;pointer-events:none}
 #tind i{position:absolute;left:50%;top:4px;width:6px;height:18px;margin-left:-3px;border-radius:3px;background:#ff4f7a}
 #tzL,#tzR{position:absolute;top:0;bottom:0;width:50%;transition:background .1s}
@@ -314,7 +329,7 @@ body.battle #htoasts,body.battle #hbanner{top:calc(max(10px,env(safe-area-inset-
   <canvas id="hmap" width="170" height="170"></canvas>
   <div id="hmtw"><div id="hmt"></div></div>
   <div id="hflow"><span>ノリノリ</span><i><b id="hflowb"></b></i></div>
-  <div id="hnote"></div><div id="hcutin"></div><div id="hfun"></div><div id="hmagic" title="M キーで魔法"><i></i><span>魔法 <kbd>M</kbd></span><b id="hmagicN"></b></div><div id="hgas"></div><div id="hdrops"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
+  <div id="hnote"></div><div id="hicard"></div><div id="hcutin"></div><div id="hfun"></div><div id="hmagic" title="M キーで魔法"><i></i><span>魔法 <kbd>M</kbd></span><b id="hmagicN"></b></div><div id="hgas"></div><div id="hdrops"></div><div id="hhorror"></div><div id="hblind"><i>号外！ 柴犬、ついにハンドルを握る　木星で記録的な大雨　くねくね星人、観光大使に就任</i></div>
   <div id="hmsg"></div><div id="hink"></div><div id="hflash"></div><div id="hbanner"></div><div id="htoasts"></div>
 </div>
 <button id="btnPause">Ⅱ</button>

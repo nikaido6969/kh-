@@ -399,6 +399,7 @@ const UI = {
   openCourse() {
     const box = this.$('courseList'); box.innerHTML = '';
     this.$('courseTitle').textContent = this.sel.mode === 'gp' ? 'カップをえらぶ' : 'コースをえらぶ';
+    if (this.sel.mode === 'gp') box.appendChild(this.orderPicker('🔢 じぶんで順番を決める', COURSES.map(c => [c.id, c]), ids => this.startGP(-1, ids)));
     CUPS.forEach((cup, ci) => {
       const sec = document.createElement('div'); sec.className = 'cup';
       const cs = COURSES.filter(c => c.cup === ci);
@@ -427,6 +428,8 @@ const UI = {
   openArena() {
     const box = this.$('courseList'); box.innerHTML = '';
     this.$('courseTitle').textContent = 'バトルステージをえらぶ';
+    this.bseries = null;
+    box.appendChild(this.orderPicker('🔢 じぶんで順番を決めて連続バトル', ARENAS.map(a => [a.id, a]).concat(COURSES.map(c => ['bc_' + c.id, c])), ids => { this.bseries = { list: ids, i: 0 }; this.sel.course = ids[0]; this.startBattle(); }));
     const section = (title, list) => {
       const sec = document.createElement('div'); sec.className = 'cup'; sec.innerHTML = `<h4>${title}</h4>`;
       const row = document.createElement('div'); row.className = 'crow';
@@ -442,6 +445,20 @@ const UI = {
     section('🏁 レースコースで戦う（幅を広げた一本道）', COURSES.map(c => ['bc_' + c.id, c, '1.3km区間・両端は岩の壁']));
     this.show('s-course');
   },
+  orderPicker(title, list, go) {
+    const sec = document.createElement('div'); sec.className = 'cup opick'; sec.innerHTML = `<h4>${title}</h4>`;
+    const row = document.createElement('div'); row.className = 'prow'; const picked = [];
+    const btn = document.createElement('button'); btn.className = 'big pgo'; btn.disabled = true;
+    const refresh = () => { row.querySelectorAll('.pc').forEach(e => { const n = picked.indexOf(e.dataset.id); e.querySelector('i').textContent = n >= 0 ? n + 1 : ''; e.classList.toggle('on', n >= 0); }); btn.disabled = !picked.length; btn.textContent = picked.length ? `▶ ${picked.length}コースでスタート` : 'コースをタップして順番を決めてね'; };
+    list.forEach(([id, def]) => {
+      const b = document.createElement('button'); b.className = 'pc'; b.dataset.id = id;
+      b.innerHTML = `<img src="${this.courseArt(def)}" alt=""><i></i><span>${def.name}</span>`;
+      b.onclick = () => { SND.play('select'); const n = picked.indexOf(id); if (n >= 0) picked.splice(n, 1); else if (picked.length < 8) picked.push(id); refresh(); };
+      row.appendChild(b);
+    });
+    btn.onclick = () => { if (picked.length) { SND.play('select'); go(picked.slice()); } };
+    sec.appendChild(row); sec.appendChild(btn); refresh(); return sec;
+  },
   startBattle() {
     const racers = this.makeField(8).map((a, i) => Object.assign({ id: 'ai' + i }, a)).concat([{ ch: this.sel.ch, type: 'player', name: 'あなた', id: 'P' }]);
     this.launch(racers);
@@ -452,9 +469,9 @@ const UI = {
     const ai = others.map((c, i) => ({ ch: c.id, type: 'ai', name: c.name, skill: (this.sel.cc === 200 ? 0.97 : 0.95) + (i / n) * 0.045 }));
     return ai;
   },
-  startGP(cup) {
+  startGP(cup, ids) {
     const field = this.makeField(12);
-    this.gp = { cup, race: 0, courses: COURSES.filter(c => c.cup === cup).map(c => c.id), pts: {}, field };
+    this.gp = { cup, race: 0, courses: ids || COURSES.filter(c => c.cup === cup).map(c => c.id), name: cup >= 0 ? CUPS[cup].name : 'マイグランプリ', pts: {}, field };
     this.gp.order = field.map(a => a.ch).concat(['P']);
     this.runGPRace();
   },
@@ -494,7 +511,7 @@ const UI = {
   quit() {
     GAME.dispose(); HUD.hide(); this.$('btnPause').style.display = 'none';
     if (NET.active) { NET.leave(); }
-    this.gp = null; this.show('s-title'); this.titleMusic();
+    this.gp = null; this.bseries = null; this.show('s-title'); this.titleMusic();
   },
   retry() {
     if (this.gp) { this.runGPRace(); return; }
@@ -529,8 +546,8 @@ const UI = {
     }
     if (g) {
       res.forEach((x, i) => { const id = x.k.isPlayer ? 'P' : x.k.ch.id; g.pts[id] = (g.pts[id] || 0) + (pts[i] || 0); });
-      this.$('resNext').textContent = g.race < 3 ? '次のレースへ' : '最終結果へ';
-    } else this.$('resNext').textContent = NET.active ? (NET.isHost ? 'ロビーへ戻る' : '待機') : this.sel.mode === 'battle' ? 'ステージ選択へ' : 'コース選択へ';
+      this.$('resNext').textContent = g.race < g.courses.length - 1 ? '次のレースへ' : '最終結果へ';
+    } else this.$('resNext').textContent = NET.active ? (NET.isHost ? 'ロビーへ戻る' : '待機') : this.sel.mode === 'battle' ? (this.bseries && this.bseries.i < this.bseries.list.length - 1 ? `次のステージへ（${this.bseries.i + 2}/${this.bseries.list.length}）` : 'ステージ選択へ') : 'コース選択へ';
     this.$('resNext').style.display = NET.active && !NET.isHost ? 'none' : '';
     this.$('resRetry').style.display = NET.active ? 'none' : '';
     this.$('resHead').innerHTML = `<th>順位</th><th></th><th>名前</th><th>${this.sel.mode === 'battle' ? '風船' : 'タイム'}</th>${g ? '<th>pt</th>' : ''}`;
@@ -541,10 +558,10 @@ const UI = {
   resultsNext() {
     const g = this.gp;
     if (NET.active) { NET.send({ t: 'back' }); this.netBackToLobby(); return; }
-    if (!g) { GAME.dispose(); HUD.hide(); if (this.sel.mode === 'battle') this.openArena(); else this.openCourse(); return; }
+    if (!g) { GAME.dispose(); HUD.hide(); if (this.sel.mode === 'battle' && this.bseries && this.bseries.i < this.bseries.list.length - 1) { const s = this.bseries; s.i++; this.sel.course = s.list[s.i]; this.startBattle(); return; } if (this.sel.mode === 'battle') this.openArena(); else this.openCourse(); return; }
     if (this.$('resNext').dataset.stage === 'stand') {
       this.$('resNext').dataset.stage = '';
-      if (g.race >= 3) { GAME.dispose(); HUD.hide(); this.gp = null; this.show('s-title'); return; }
+      if (g.race >= g.courses.length - 1) { GAME.dispose(); HUD.hide(); this.gp = null; this.show('s-title'); return; }
       g.race++; g.order = Object.entries(g.pts).sort((a, b) => a[1] - b[1]).map(e => e[0]);
       this.runGPRace(); return;
     }
@@ -553,8 +570,8 @@ const UI = {
     this.$('resHead').innerHTML = '<th>総合</th><th></th><th>名前</th><th>ポイント</th>';
     this.$('resBody').innerHTML = st.map(([id, p], i) => { const ch = id === 'P' ? this.sel.ch : id; const c = CHARS.find(x => x.id === ch); return `<tr class="${id === 'P' ? 'me' : ''}"><td>${i + 1}</td><td><img src="${this.thumbs[ch]}"></td><td>${id === 'P' ? 'あなた' : c.name}</td><td>${p}</td></tr>`; }).join('');
     const myRank = st.findIndex(e => e[0] === 'P') + 1;
-    this.$('resTitle').textContent = g.race >= 3 ? `${CUPS[g.cup].name} 総合${myRank}位 ${myRank === 1 ? '🏆🏆🏆' : myRank <= 3 ? '🥉' : ''}` : `総合順位（${g.race + 1}/4戦）`;
-    this.$('resNext').textContent = g.race >= 3 ? 'タイトルへ' : '次のレースへ';
+    this.$('resTitle').textContent = g.race >= g.courses.length - 1 ? `${g.name} 総合${myRank}位 ${myRank === 1 ? '🏆🏆🏆' : myRank <= 3 ? '🥉' : ''}` : `総合順位（${g.race + 1}/${g.courses.length}戦）`;
+    this.$('resNext').textContent = g.race >= g.courses.length - 1 ? 'タイトルへ' : '次のレースへ';
     this.$('resNext').dataset.stage = 'stand';
     this.$('resRetry').style.display = 'none';
   },

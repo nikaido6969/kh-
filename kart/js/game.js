@@ -131,7 +131,7 @@ class Game {
     this.cfg = cfg;
     this.def = stageDef(cfg.course);
     this.battle = cfg.mode === 'battle';
-    this.ccBase = CC_BASE[cfg.cc] || 34.5;
+    this.ccBase = (CC_BASE[cfg.cc] || 34.5) * (this.battle ? 0.7 : 1);
     this.laps = cfg.laps || 3;
     const scene = new THREE.Scene(); this.scene = scene;
     const th = this.def.theme;
@@ -162,7 +162,8 @@ class Game {
     const bmat = new THREE.MeshStandardMaterial({ map: U.itemBoxTex(), transparent: true, opacity: 0.85, emissive: 0xffffff, emissiveMap: U.itemBoxTex(), emissiveIntensity: 0.5 });
     for (const j of this.track.itemRows) {
       const hw = this.track.hw[j];
-      for (const f of (hw > 15 ? [-0.75, -0.45, -0.15, 0.15, 0.45, 0.75] : [-0.66, -0.22, 0.22, 0.66])) {
+      const nB = hw > 15 ? 12 : 8;
+      for (let bi = 0; bi < nB; bi++) { const f = -0.86 + 1.72 * bi / (nB - 1);
         const m = new THREE.Mesh(bgeo, bmat); scene.add(m);
         const b = { s: j * this.track.ds, d: f * hw, alive: true, t: 0, mesh: m };
         this.placeOnTrack(m, b.s, b.d, 1.3); this.boxes.push(b);
@@ -269,7 +270,6 @@ class Game {
         if (this.player && this.rocket.first !== null) {
           const t = this.rocket.first;
           if (t > -1.7 && t < -0.9) { this.player.boostT = 1.0; this.player.v = this.player.vmax * 0.8; SND.play('boost'); HUD.msg('ロケットスタート！', 1.2, 'small'); }
-          else if (t <= -2.6) { this.player.spinT = 0.8; HUD.msg('エンスト…', 1.0, 'small'); }
         }
         for (const k of this.karts) if (k.isAI && Math.random() < 0.5) k.boostT = 0.6 + Math.random() * 0.4;
       }
@@ -768,7 +768,7 @@ class Game {
     if (k.trick) m.root.rotateZ(k.trickT * 14);
     const lift = k.respawnT > 0 ? k.respawnT * 6 : 0;
     m.root.position.copy(fr.p).addScaledVector(fr.r, k.d).addScaledVector(fr.u, k.h + lift + (k.ufoT > 0 ? 0 : 0));
-    const sc = k.giantT > 0 ? 10 : k.shrinkT > 0 ? 0.5 : 1;
+    const sc = (k.giantT > 0 ? 10 : k.shrinkT > 0 ? 0.5 : 1) * 1.2;
     const cur = k.scaleBase = U.damp(k.scaleBase ?? 1, sc, 5, dt);
     let gx = 1, gz = 1, gy = 1;
     if (k.puffT > 0) { k.puffT -= dt; const p = 1 + Math.min(1.5, k.puffT * 1.4); gx = gy = gz = p; }
@@ -925,6 +925,7 @@ const HUD = {
     if (cv.style.filter !== f) cv.style.filter = f;
     document.getElementById('hgas').style.opacity = k.gasT > 0 ? 0.55 : 0;
   },
+  itemCard(icon, name, line) { const e = document.getElementById('hicard'); if (!e) return; e.innerHTML = `<i>${icon}</i><div><b>${name}</b><span>${line || ''}</span></div>`; e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); },
   horror(on) { const e = document.getElementById('hhorror'); if (e) e.classList.toggle('on', on); },
   banner(name, line) { const e = document.getElementById('hbanner'); e.innerHTML = `<b>${name}</b><span>${this.short(line)}</span>`; e.className = 'on'; clearTimeout(this.banT); this.banT = setTimeout(() => e.className = '', 3200); },
   glitch() { const e = document.getElementById('hflash'); e.style.transition = 'none'; e.style.background = '#000'; e.style.opacity = 0.7; requestAnimationFrame(() => { e.style.transition = 'opacity 0.3s'; e.style.opacity = 0; setTimeout(() => e.style.background = '#fff', 300); }); },

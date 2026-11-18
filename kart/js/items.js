@@ -97,7 +97,7 @@ Object.assign(Game.prototype, {
   useItem(k, inp) {
     const it = k.item, back = inp.back || inp.brake;
     const info = ITEMS[it];
-    this.toast(k, `${info.icon} ${info.name}！`);
+    if (k.isPlayer) HUD.itemCard(info.icon, info.name, info.line); else this.toast(k, `${info.icon} ${info.name}！`);
     const P = (o) => { o.owner = k.id; this.spawnProj(o); this.netProj(o); return o; };
     const fwd = (sp) => ({ dist: k.dist + (back ? -2.8 : 2.8), d: k.d, yaw: back ? 0 : k.yaw, v: back ? -sp * 0.7 : sp + Math.max(0, k.v) });
     const R = Math.random();

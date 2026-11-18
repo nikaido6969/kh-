@@ -90,7 +90,6 @@ Object.assign(Game.prototype, {
     if (b === 'side' || b === 'cheer' || b === 'gift' || b === 'curse' || b === 'zashiki') n.d = P.d + n.side * 7;
     if (b === 'teleport') { n.dist = P.dist + 20; n.life = 8; }
     this.npcs.push(n);
-    if (this.dDist(n.dist, P.dist) < 0) this.lookBackT = 1.7;
     this.horror(true);
     HUD.banner(def.name, def.line);
     SND.play('stinger'); setTimeout(() => SND.play(def.type === 'ghost' ? 'whisper' : 'laugh'), 500);
@@ -106,10 +105,9 @@ Object.assign(Game.prototype, {
   horror(on) {
     if (this.horrorOn === on) return;
     this.horrorOn = on;
-    HUD.horror(on);
     SND.scary(on);
     const f = this.scene.fog;
-    if (on) { this.baseFog.saveFar = this.baseFog.far; this.baseFog.far = Math.min(this.baseFog.far, 220); this.baseFog.saveC = this.baseFog.c.clone(); this.baseFog.c = this.baseFog.c.clone().multiplyScalar(0.25); }
+    if (false) { this.baseFog.saveFar = this.baseFog.far; this.baseFog.far = Math.min(this.baseFog.far, 220); this.baseFog.saveC = this.baseFog.c.clone(); this.baseFog.c = this.baseFog.c.clone().multiplyScalar(0.25); }
     else if (this.baseFog.saveFar) { this.baseFog.far = this.baseFog.saveFar; this.baseFog.c = this.baseFog.saveC; }
   },
 
