@@ -389,7 +389,7 @@ class Game {
     const shSurf = def.shSurf;
     const hardSh = ['sidewalk', 'steel', 'neon2', 'rock2', 'jupiter2'].includes(shSurf);
     let pen = 1;
-    if (off && k.grounded && k.boostT <= 0 && k.starT <= 0 && k.ufoT <= 0) pen = hardSh ? 0.88 : shSurf === 'mud' ? 0.45 : 0.55;
+    if (off && (k.grounded || k.jumped || k.hop) && k.boostT <= 0 && k.starT <= 0 && k.ufoT <= 0) pen = hardSh ? 0.88 : shSurf === 'mud' ? 0.45 : 0.55;
     vm *= pen;
     const wy = this._worldY(k);
     const inWater = def.water != null && wy < def.water;
@@ -438,7 +438,7 @@ class Game {
     // ジャンプ & ドリフト
     if (!locked && !ufo && inp.jumpEdge) {
       if (k.grounded) { k.vh = 10.5 * Math.sqrt(def.gravity / 30) + Math.max(0, k.wvy || 0); k.grounded = false; k.airT = 0; k.hop = false; k.jumped = true; if (k.isPlayer) SND.play('hop'); }
-      else if (!k.trick && k.airT < 0.7) { k.trick = true; k.trickT = 0; if (k.isPlayer) { SND.play('hop'); HUD.toast('🤸 ジャンプアクション！着地で加速'); } }
+      else if (!k.trick && k.airT < 0.7) { k.trick = true; k.trickT = 0; if (k.isPlayer) { SND.play('hop'); HUD.toast('🤸 ジャンプアクション！'); } }
       inp.jumpEdge = false;
     }
     if (!locked && !ufo && inp.driftEdge && k.grounded) {
@@ -539,7 +539,7 @@ class Game {
         k.jumped = false;
         if (k.airT > 0.6 && k.isPlayer) { HUD.shake(Math.min(0.5, k.airT * 0.25)); this.dust(k, 0xd8c8a8); this.dust(k, 0xd8c8a8); }
         if (k.airT > 0.35 && k.isPlayer) SND.play('land');
-        if (k.trick) { this.chargeMagic(k, 0.06); k.boostT = Math.max(k.boostT, 0.9); k.boostCol = 1; if (k.isPlayer) SND.play('boost'); }
+        if (k.trick) this.chargeMagic(k, 0.03);
         k.trick = false; k.hop = false; k.airT = 0;
       }
       if (k.h < -14) { this.fallOut(k, !!(fl2 & 1)); return; }
