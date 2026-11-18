@@ -371,7 +371,8 @@ class Game {
     if (k.rollT > 0) { k.rollT -= dt; if (k.rollT <= 0) { k.rollT = 0; if (k.isPlayer) SND.play('item'); k.aiItemT = 0.8 + Math.random() * 2.5; } else if (k.isPlayer && Math.random() < 0.5) SND.play('roll'); }
     this.updateStatus(k, dt);
     if (k.out) { k.v = 0; return; }
-    const locked = !this.started || k.spinT > 0 || k.knockT > 0 || k.sleepT > 0 || k.flatT > 1.6;
+    k.wobbleT = Math.max(0, (k.wobbleT || 0) - dt); k.stumbleT = Math.max(0, (k.stumbleT || 0) - dt);
+    const locked = !this.started || k.spinT > 0 || k.knockT > 0 || k.sleepT > 0 || k.flatT > 0.8;
     // アイテム使用
     if (!locked && inp.itemEdge && k.item && k.rollT <= 0) this.useItem(k, inp);
     this.updateMagic(k, dt, inp);
@@ -410,7 +411,7 @@ class Game {
       } else k.v -= Math.sign(k.v) * Math.min(Math.abs(k.v), 9 * dt);
       if (k.boostT > 0 && k.v < vm) k.v += 75 * dt;
     } else {
-      k.v *= Math.exp(-(k.knockT > 0 ? 4 : 2.2) * dt);
+      k.v *= Math.exp(-(k.knockT > 0 ? 1.0 : 1.2) * dt);
     }
     if (k.v > vm) k.v -= (k.v - vm) * Math.min(1, (pen < 1 ? 3.5 : 1.8) * dt);
     if (k.grounded && !ufo && !(fl & 16) && tr.Uv[i * 3 + 1] > 0.5) {
@@ -751,7 +752,8 @@ class Game {
   visual(k, dt) {
     const tr = this.track, fr = tr.frame(k.dist, this.fr);
     const m = k.model;
-    k.spinVis += (k.spinT > 0 ? 16 : 0) * dt; if (k.spinT <= 0) k.spinVis = U.damp(k.spinVis, Math.round(k.spinVis / (Math.PI * 2)) * Math.PI * 2, 8, dt);
+    k.spinVis += (k.spinT > 0 ? 16 : 0) * dt;
+    if (k.wobbleT > 0) k.spinVis = Math.sin(this.time * 38) * 0.28 * (k.wobbleT / 0.5); if (k.spinT <= 0) k.spinVis = U.damp(k.spinVis, Math.round(k.spinVis / (Math.PI * 2)) * Math.PI * 2, 8, dt);
     k.flipVis = k.knockT > 0 ? k.flipVis + 9 * dt : U.damp(k.flipVis, Math.round(k.flipVis / (Math.PI * 2)) * Math.PI * 2, 10, dt);
     const fy = k.yaw + k.slide + k.spinVis;
     const F = this.tmp.a.copy(fr.t).multiplyScalar(Math.cos(fy)).addScaledVector(fr.r, Math.sin(fy));
@@ -759,6 +761,7 @@ class Game {
     this.tmp.m.makeBasis(Lf, fr.u, F);
     m.root.quaternion.setFromRotationMatrix(this.tmp.m);
     if (k.flipVis) m.root.rotateX(-k.flipVis);
+    if (k.stumbleT > 0) m.root.rotateX(-Math.sin(k.stumbleT / 0.35 * Math.PI) * 0.35);
     m.root.rotateZ(k.steerVis * (k.drift ? 0.2 : 0.09) * Math.min(1, Math.abs(k.v) / 25));
     if (!k.grounded && !k.trick) m.root.rotateX(U.clamp(-k.vh * 0.02, -0.3, 0.3));
     if (k.trick) m.root.rotateZ(k.trickT * 14);
@@ -893,6 +896,7 @@ const HUD = {
     for (const id of ['bMagic', 'hmagic']) {
       const e = document.getElementById(id); if (!e) continue;
       e.style.setProperty('--p', (v * 100).toFixed(1) + '%'); e.classList.toggle('full', full);
+      if (id === 'bMagic') { const pc = full ? '' : Math.floor(v * 100) + '%'; if (e.dataset.pct !== pc) e.dataset.pct = pc; const sm = e.querySelector('small'); const tx = full ? '発動！' : '魔法'; if (sm && sm.textContent !== tx) sm.textContent = tx; }
     }
     const n = document.getElementById('hmagicN'); if (n && M && n.textContent !== M.name) n.textContent = M.name;
   },
@@ -904,7 +908,12 @@ const HUD = {
   eraser() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="eraser">消</div>'; e.className = 'on er'; setTimeout(() => e.className = '', 1600); },
   slash() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="slash"></div>'; e.className = 'on sl'; setTimeout(() => e.className = '', 900); },
   note(n) { const e = document.getElementById('hnote'); if (!e) return; e.innerHTML = `<i>${n.ic}</i><b>${n.t}</b>`; e.className = ''; void e.offsetWidth; e.className = 'on' + (n.lv && n.lv <= 2 ? ' hot' : ''); },
-  toast(t) { const box = document.getElementById('htoasts'); const e = document.createElement('div'); e.className = 'toast'; e.textContent = t; box.appendChild(e); while (box.children.length > 3) box.firstChild.remove(); setTimeout(() => e.remove(), 2600); },
+  short(t) {
+    t = String(t).replace(/（[^）]*）|\([^)]*\)/g, '').replace(/「|」/g, '').trim();
+    const cut = t.search(/[！!。…]/); if (cut > 3) t = t.slice(0, cut + (t[cut] === '！' || t[cut] === '!' ? 1 : 0));
+    return t.length > 15 ? t.slice(0, 14) + '…' : t;
+  },
+  toast(t) { const box = document.getElementById('htoasts'); const e = document.createElement('div'); e.className = 'toast'; e.textContent = this.short(t); box.appendChild(e); while (box.children.length > 2) box.firstChild.remove(); setTimeout(() => e.remove(), 1900); },
   blind(style) { const e = document.getElementById('hblind'); e.className = 'on ' + style; clearTimeout(this.bT); },
   clearBlind() { const e = document.getElementById('hblind'); if (e) e.className = ''; },
   status(k) {
@@ -916,7 +925,7 @@ const HUD = {
     document.getElementById('hgas').style.opacity = k.gasT > 0 ? 0.55 : 0;
   },
   horror(on) { const e = document.getElementById('hhorror'); if (e) e.classList.toggle('on', on); },
-  banner(name, line) { const e = document.getElementById('hbanner'); e.innerHTML = `<b>${name}</b><span>「${line}」</span>`; e.className = 'on'; clearTimeout(this.banT); this.banT = setTimeout(() => e.className = '', 3200); },
+  banner(name, line) { const e = document.getElementById('hbanner'); e.innerHTML = `<b>${name}</b><span>${this.short(line)}</span>`; e.className = 'on'; clearTimeout(this.banT); this.banT = setTimeout(() => e.className = '', 3200); },
   glitch() { const e = document.getElementById('hflash'); e.style.transition = 'none'; e.style.background = '#000'; e.style.opacity = 0.7; requestAnimationFrame(() => { e.style.transition = 'opacity 0.3s'; e.style.opacity = 0; setTimeout(() => e.style.background = '#fff', 300); }); },
   msg(t, dur, cls) { const e = this.el.hmsg; e.textContent = t; e.className = 'show ' + (cls || ''); this.msgT = dur; },
   shake(a) { this.shakeT = Math.max(this.shakeT, a); },

@@ -103,8 +103,8 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #hink{position:absolute;inset:0;opacity:0;background:radial-gradient(circle at 30% 40%,#111 0 12%,transparent 13%),radial-gradient(circle at 65% 55%,#111 0 16%,transparent 17%),radial-gradient(circle at 45% 75%,#111 0 10%,transparent 11%),radial-gradient(circle at 80% 25%,#111 0 9%,transparent 10%)}
 #hflash{position:absolute;inset:0;background:#fff;opacity:0}
 #hlines{position:absolute;inset:0;opacity:0;transition:opacity .2s;background:repeating-conic-gradient(from 0deg at 50% 55%,rgba(255,255,255,.18) 0 1.2deg,transparent 1.2deg 9deg);-webkit-mask:radial-gradient(circle at 50% 55%,transparent 32%,#000 70%);mask:radial-gradient(circle at 50% 55%,transparent 32%,#000 70%)}
-#htoasts{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;width:min(92vw,520px)}
-.toast{background:rgba(20,16,30,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 14px;border-radius:999px;font-weight:800;font-size:15px;animation:tin .25s cubic-bezier(.2,1.5,.4,1)}
+#htoasts{position:absolute;left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 112px);display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:52vw;pointer-events:none}
+.toast{background:rgba(20,10,40,.28);padding:3px 9px;border-radius:9px;font-weight:800;font-size:12px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-shadow:0 1px 2px rgba(0,0,0,.6);animation:tin .2s ease-out}
 @keyframes tin{from{transform:scale(.5);opacity:0}to{transform:none;opacity:1}}
 #hdrops{position:absolute;inset:0;pointer-events:none}
 #hdrops i{position:absolute;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),rgba(200,230,255,.35) 40%,rgba(160,210,255,.12) 70%,transparent);box-shadow:inset 0 -3px 6px rgba(255,255,255,.35);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0}
@@ -117,8 +117,11 @@ input,select{font:inherit;padding:12px 14px;border-radius:14px;border:1px solid 
 #hmagic.full{box-shadow:0 0 0 2px #e0b0ff,0 0 18px #b05aff;animation:mg 0.8s infinite alternate}
 @keyframes mg{to{box-shadow:0 0 0 2px #fff,0 0 28px #d08aff}}
 body.touch #hmagic{display:none}
-#bMagic{left:auto;right:max(14px,env(safe-area-inset-right));bottom:46%;width:76px;height:76px;--p:0%;background:conic-gradient(#b05aff var(--p),rgba(20,16,30,.42) var(--p))}
-#bMagic.full{border-color:#f0d0ff;box-shadow:0 0 22px #b05aff;animation:mg 0.8s infinite alternate}
+#bMagic{left:auto;right:max(10px,env(safe-area-inset-right));bottom:40%;width:58px;height:170px;border-radius:29px;--p:0%;background:linear-gradient(0deg,#7a3aff 0,#c070ff var(--p),rgba(20,16,30,.35) var(--p));justify-content:flex-end;padding-bottom:10px;transition:background .2s}
+#bMagic b{font-size:24px}
+#bMagic::after{content:attr(data-pct);position:absolute;top:8px;left:0;right:0;text-align:center;font-size:11px;font-weight:900}
+#bMagic.full{background:linear-gradient(0deg,#ff4f9a,#ffd23a,#7dffb0,#5ad8ff);border-color:#fff;box-shadow:0 0 26px #ffd23a,0 0 10px #fff;animation:mgf .5s infinite alternate}
+@keyframes mgf{to{transform:scale(1.07);box-shadow:0 0 36px #ff7af0,0 0 14px #fff}}
 #hfun{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #hfun .eraser{position:absolute;top:30%;left:-40%;width:38%;height:34%;border-radius:14px;background:linear-gradient(90deg,#fff 0 62%,#2a5ad8 62% 100%);box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:flex-start;padding-left:6%;font-family:"Dela Gothic One",sans-serif;font-size:60px;color:#2a1652;text-shadow:none}
 #hfun.er .eraser{animation:era 1.5s ease-in-out forwards}
@@ -133,14 +136,14 @@ body.touch #hmagic{display:none}
 #hnote.hot i{background:#ff3a5a;color:#fff}
 @keyframes nt{0%{opacity:0;transform:translateX(-30px)}10%,80%{opacity:1;transform:none}100%{opacity:0}}
 body.touch #hnote{top:calc(max(10px,env(safe-area-inset-top)) + 168px)}
-#hcutin{position:absolute;left:0;right:0;top:30%;height:130px;pointer-events:none;opacity:0}
+#hcutin{position:absolute;left:0;right:0;top:calc(max(10px,env(safe-area-inset-top)) + 160px);height:64px;pointer-events:none;opacity:0}
 #hcutin.on{animation:cut 2.1s cubic-bezier(.2,.9,.3,1) forwards}
 @keyframes cut{0%{opacity:1;transform:translateX(100%)}14%{transform:translateX(0)}80%{opacity:1;transform:translateX(-3%)}100%{opacity:0;transform:translateX(-110%)}}
-#hcutin .cbg{position:absolute;inset:0;background:linear-gradient(100deg,transparent 0,var(--mc) 12%,var(--mc) 88%,transparent 100%);transform:skewY(-4deg);opacity:.92;box-shadow:0 0 0 4px #fff inset}
-#hcutin img{position:absolute;left:12%;top:-25px;height:170px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
-#hcutin .ctx{position:absolute;left:calc(12% + 180px);top:18px;right:6%;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.45)}
+#hcutin .cbg{position:absolute;inset:0;background:linear-gradient(100deg,transparent 0,var(--mc) 12%,var(--mc) 88%,transparent 100%);transform:skewY(-4deg);opacity:.55;box-shadow:0 0 0 4px #fff inset}
+#hcutin img{position:absolute;left:4%;top:-14px;height:88px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+#hcutin .ctx{position:absolute;left:calc(4% + 92px);top:6px;right:6%;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.45)}
 #hcutin .ctx small{font-family:"Dela Gothic One",sans-serif;letter-spacing:.3em;font-size:13px}
-#hcutin .ctx b{display:block;font-family:"Dela Gothic One",sans-serif;font-size:clamp(26px,5vw,48px);line-height:1.1}
+#hcutin .ctx b{display:block;font-family:"Dela Gothic One",sans-serif;font-size:clamp(17px,4vw,26px);line-height:1.1}
 #hcutin .ctx span{font-size:14px;font-weight:800}
 #hcutin.rare .cbg{background:linear-gradient(100deg,transparent 0,#3a0a7a 12%,#b05aff 50%,#3a0a7a 88%,transparent 100%)}
 .cc{position:relative}
@@ -160,10 +163,10 @@ body.touch #hnote{top:calc(max(10px,env(safe-area-inset-top)) + 168px)}
 #hblind.blanket{background:repeating-linear-gradient(45deg,#5a8ad8 0 40px,#4a7ac8 40px 80px)}
 #hblind.flash{background:radial-gradient(circle,#fff 40%,rgba(255,255,255,.7))}
 #hblind.ghost{background:radial-gradient(circle,rgba(220,230,255,.85),rgba(20,20,40,.95))}
-#hbanner{position:absolute;left:0;right:0;top:18%;text-align:center;opacity:0;transform:scale(1.3);transition:all .3s}
+#hbanner{position:absolute;left:max(10px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 64px);max-width:60vw;text-align:left;opacity:0;transform:translateX(-20px);transition:all .25s;background:rgba(40,0,10,.3);padding:4px 10px;border-radius:10px}
 #hbanner.on{opacity:1;transform:none}
-#hbanner b{display:block;font-size:clamp(30px,7vw,64px);color:#ff3a3a;font-weight:900;letter-spacing:.05em;text-shadow:0 0 18px #000,0 3px 0 #000}
-#hbanner span{display:inline-block;margin-top:6px;font-size:clamp(15px,3.4vw,22px);font-weight:800;background:rgba(0,0,0,.55);padding:4px 14px;border-radius:12px}
+#hbanner b{display:block;font-size:15px;color:#ff6a6a;font-weight:900;text-shadow:0 1px 3px #000}
+#hbanner span{display:block;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #cv{transition:filter .3s}
 #btnPause{position:fixed;right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));z-index:15;display:none;background:rgba(255,255,255,.3);color:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;font-weight:900}
 /* タッチ */
@@ -187,7 +190,6 @@ body.touch #hpos small{font-size:18px}
 body.touch #hspeed{top:calc(max(8px,env(safe-area-inset-top)) + 52px);bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px);font-size:16px}
 body.touch #hflow{top:calc(max(8px,env(safe-area-inset-top)) + 76px);bottom:auto;right:calc(max(12px,env(safe-area-inset-right)) + 56px)}
 body.touch #hmtw{bottom:150px}
-body.touch #htoasts{bottom:auto;top:calc(max(10px,env(safe-area-inset-top)) + 90px)}
 body.touch #thint{bottom:auto;top:46%;font-size:13px}
 #tpad{width:46vw!important;height:30vh!important;bottom:max(14px,env(safe-area-inset-bottom))!important}
 #tjump{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));width:46vw;height:30vh;border-radius:24px;border:2px dashed rgba(255,255,255,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900;pointer-events:none;opacity:.75;transition:opacity .2s,background .1s}
@@ -209,7 +211,7 @@ body.touch #hflow span{display:none}
 body.touch #hflow i{width:64px}
 body.touch #hbags{left:50%;margin-left:0;transform:translateX(-50%);top:calc(max(10px,env(safe-area-inset-top)) + 104px)}
 body.touch .hbag{width:40px;height:40px;font-size:21px}
-body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 152px)!important}
+body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 112px)}
 #tind{position:absolute;bottom:18%;width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.85);background:rgba(255,255,255,.15);opacity:0;transition:opacity .15s;pointer-events:none}
 #tind i{position:absolute;left:50%;top:4px;width:6px;height:18px;margin-left:-3px;border-radius:3px;background:#ff4f7a}
 #tzL,#tzR{position:absolute;top:0;bottom:0;width:50%;transition:background .1s}
@@ -424,7 +426,7 @@ body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 152px)!importa
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
     🏁 <b>コース</b>：周回ではなくスタートからゴールまでの一本道（3〜5km）。ヘアピン・崖からの空中ダイブ・道なき大自然を切り裂くラリー区間あり。左上にコ・ドライバーの指示（「右3」「ジャンプ！」など）が出る。<br>
     ✨ <b>魔法</b>：キャラごとに固有の魔法あり。走る・アイテム箱・ミニターボでゲージが溜まり、満タンで「魔法」ボタン（キーボードはM）。紫のレアキャラ「おむにえさん」は全能の魔法を使える。<br>
-    📱 iPhone（縦向き専用）：左下に親指を置いて左右にスライドでハンドル。右下をタップでジャンプ。ジャンプの着地でハンドルを切るとドリフト、切ったままでミニターボが溜まり、まっすぐに戻すと加速。上のアイテム枠をタップで使う（アイテムは3つまでキープ、横の小さい枠をタップで入れ替え）。右の✨ボタンで魔法。アクセルは自動。</p>
+    📱 iPhone（縦向き専用）：左下に親指を置いて左右にスライドでハンドル。右下をタップでジャンプ。ジャンプの着地でハンドルを切るとドリフト、切ったままでミニターボが溜まり、まっすぐに戻すと加速。上のアイテム枠をタップ、または左下をダブルタップで使う（アイテムは3つまでキープ、横の小さい枠をタップで入れ替え）。右の縦ゲージが満タンで光ったらタップで魔法。アクセルは自動。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
     <p><b>重火器（レース・バトル共通）</b>：🔫機関銃（前方に連射）　💥バズーカ（一直線のロケット弾・大爆発）　⚠️地雷（後ろに3個・踏むと爆発）　🚀ミサイル（前の相手を追尾）</p>
     <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>

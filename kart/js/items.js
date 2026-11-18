@@ -261,16 +261,19 @@ Object.assign(Game.prototype, {
       if (k.shieldT > 0) { k.shieldT = 0; SND.play('peta'); this.toast(k, '🩹 湿布が守ってくれた！'); this.spark(k, 0xffffff, 10); return; }
       if (k.hoverT > 0 && ['spin', 'slip', 'nattoT'].includes(kind)) return;
     }
+    if ((kind === 'spin' || kind === 'slip' || kind === 'burn') && Math.random() < 0.3 + k.weight * 0.06) kind = 'wobble';   // スピンしにくく（重いほど耐える）
     switch (kind) {
-      case 'spin': case 'slip': k.spinT = 0.8; break;
-      case 'knock': k.knockT = 1.0; k.vh = 4.2; k.grounded = false; k.airT = 0; break;
-      case 'flat': k.flatT = 2.4; k.spinT = 0.4; break;
-      case 'shock': k.flatT = 2.0; k.spinT = 0.8; this.spark(k, 0x9ad8ff, 30); break;
+      case 'spin': case 'slip': k.spinT = 0.4; k.v *= 0.9; break;                 // 1：スピン（回転は半分・時間も半分）
+      case 'wobble': k.wobbleT = 0.5; k.v *= 0.78; if (k.isPlayer) { SND.play('wall'); HUD.shake(0.2); } this.spark(k, 0xffe060, 6); k.invT = this.battle ? 1.2 : 0.4; if (this.battle && !opt.noBalloon) this.popBalloons(k, opt.balloons || 1); return;   // 1/2：よろけ
+      case 'stumble': k.v *= 0.85; if (k.grounded) { k.vh = 2.6; k.grounded = false; k.airT = 0; } k.stumbleT = 0.35; if (k.isPlayer) SND.play('land'); k.invT = this.battle ? 1.2 : 0.3; if (this.battle && !opt.noBalloon) this.popBalloons(k, opt.balloons || 1); return;   // 1/3：つまずき
+      case 'knock': k.knockT = 0.6; k.vh = 4.2; k.grounded = false; k.airT = 0; break;
+      case 'flat': k.flatT = 1.2; k.spinT = 0.2; k.v *= 0.9; break;
+      case 'shock': k.flatT = 1.0; k.spinT = 0.4; k.v *= 0.9; this.spark(k, 0x9ad8ff, 30); break;
       case 'sleep': k.sleepT = opt.t || 1.8; break;
-      case 'burn': k.spinT = 0.6; break;
+      case 'burn': k.spinT = 0.3; k.v *= 0.85; break;
       case 'blind': k.blindT = opt.t || 3.5; if (k.isPlayer) HUD.blind(opt.style || 'paper'); return;
       case 'gas': k.gasT = 1.2; return;
-      case 'natto': k.slick = true; k.spinT = 0.7; break;
+      case 'natto': k.slick = true; k.wobbleT = 0.5; k.v *= 0.78; break;
       case 'grab': k.grabT = 1.5; break;
     }
     if (kind !== 'grab') { k.drift = 0; k.mt = 0; k.boostT = 0; }
@@ -430,7 +433,7 @@ Object.assign(Game.prototype, {
               if (window.NET && NET.active) NET.send({ t: 'phit', id: p.id });
               break;
             }
-            const kind = { banana: 'slip', natto: 'natto', eda: 'slip', moufu: 'sleep', bullet: 'spin', cap: 'spin', dango: 'spin' }[T] || 'spin';
+            const kind = { banana: 'slip', natto: 'natto', eda: 'stumble', moufu: 'sleep', bullet: 'stumble', cap: 'wobble', dango: 'wobble' }[T] || 'wobble';
             if (T === 'moufu') { this.damage(k, 'blind', { t: 1.8, style: 'blanket' }); SND.play('fwash'); }
             if (T === 'eda' && k.starT <= 0 && k.invT <= 0 && k.shieldT <= 0) { k.giantT = 8; this.toast(k, '🫛 枝豆うまっ！体が10倍に…でも弱い！'); SND.play('eat'); }
             this.damage(k, kind, { balloons: T === 'eda' ? 1 : 1 });

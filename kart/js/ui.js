@@ -213,6 +213,11 @@ const UI = {
       SND.init();
       for (const t of e.changedTouches) {
         if (t.clientX >= innerWidth * 0.5 && t.clientY > innerHeight * 0.5) { Input.touch.jump = true; setTimeout(() => Input.touch.jump = false, 120); const tj = this.$('tjump'); tj.classList.add('on'); setTimeout(() => tj.classList.remove('on'), 160); continue; }
+        if (t.clientX < innerWidth * 0.5 && t.clientY > innerHeight * 0.45) {   // 左下ダブルタップ＝アイテム
+          const now = performance.now(), lt = this._lastTap;
+          if (lt && now - lt.t < 320 && Math.hypot(t.clientX - lt.x, t.clientY - lt.y) < 60) { Input.touch.item = true; setTimeout(() => Input.touch.item = false, 120); this._lastTap = null; }
+          else this._lastTap = { t: now, x: t.clientX, y: t.clientY };
+        }
         if (!this._stick && t.clientX < innerWidth * 0.5) this._stick = { id: t.identifier, ox: t.clientX, oy: t.clientY, x: t.clientX };
       }
       stickUpd(); this.$('thint').style.opacity = 0; e.preventDefault();
