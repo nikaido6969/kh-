@@ -40,6 +40,7 @@ const UI = {
     const loop = (t) => {
       const dt = Math.min(0.05, (t - last) / 1000); last = t;
       const racing = GAME.running && !this.cur; if (racing !== this._racingCls) { this._racingCls = racing; document.body.classList.toggle('racing', racing); }
+      const bt = !!(GAME.running && GAME.battle); if (bt !== this._battleCls) { this._battleCls = bt; document.body.classList.toggle('battle', bt); }
       const st = !!(GAME.running && GAME.started); if (st !== this._startedCls) { this._startedCls = st; document.body.classList.toggle('started', st); }
       if (GAME.running) {
         if (GAME.cfg.waitGo) GAME.raceT = -4;

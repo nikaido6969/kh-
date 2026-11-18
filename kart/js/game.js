@@ -421,10 +421,11 @@ class Game {
     // ハンドリング
     const sp = Math.abs(k.v);
     let turnRate = k.turn * Math.min(1, sp / 13) * (1 - 0.16 * Math.min(1.3, sp / k.vmax));
+    turnRate *= 1.6;   // 曲がりやすさ（旋回半径を約0.6倍に）
     if (!k.grounded) turnRate *= 0.55;
     if (inWater) turnRate *= 0.9;
     let yawRate = 0;
-    if (k.isPlayer && !k.finished) { const tg = inp.steer || 0; k.steerS = U.damp(k.steerS || 0, tg, Math.abs(tg) < Math.abs(k.steerS || 0) ? 14 : 9, dt); } else k.steerS = inp.steer || 0;
+    if (k.isPlayer && !k.finished) { const tg = inp.steer || 0; k.steerS = U.damp(k.steerS || 0, tg, Math.abs(tg) < Math.abs(k.steerS || 0) ? 16 : 14, dt); } else k.steerS = inp.steer || 0;
     let steer = locked ? 0 : k.steerS;
     if (k.reverseT > 0) steer = -steer;
     if (k.gasT > 0 || k.eyeburnT > 0) steer += Math.sin(this.time * 4 + k.weight) * 0.5;
@@ -941,7 +942,7 @@ const HUD = {
     this.el.hpos.className = 'r' + Math.min(k.rank + 1, 4);
     if (g.battle) {
       this.el.hlap.innerHTML = '🎈×' + k.balloons;
-      const bt = Math.max(0, g.battleT); this.el.htime.textContent = '残り ' + Math.floor(bt / 60) + ':' + String(Math.floor(bt % 60)).padStart(2, '0') + '　生存 ' + g.karts.filter(o => !o.out).length + '人';
+      const bt = Math.max(0, g.battleT); this.el.htime.textContent = '残り ' + Math.floor(bt / 60) + ':' + String(Math.floor(bt % 60)).padStart(2, '0') + '　👤' + g.karts.filter(o => !o.out).length;
     } else {
       if (g.track.open) { const togo = Math.max(0, g.track.finishS - Math.max(g.track.startS, k.dist)); this.el.hlap.innerHTML = '🏁 残り <b>' + (togo >= 1000 ? (togo / 1000).toFixed(2) + '</b>km' : Math.round(togo) + '</b>m'); }
       else this.el.hlap.textContent = 'LAP ' + U.clamp(k.lap, 1, g.laps) + '/' + g.laps;
