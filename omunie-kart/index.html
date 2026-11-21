@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <script>
 (function(){var go=function(){if(!document.getElementById('s-online')||document.readyState==='loading'){return setTimeout(go,50)}
-fetch('game.js?v=1').then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(t){t.split('\n//@@SPLIT@@\n').forEach(function(c){var e=document.createElement('script');e.textContent=c;document.body.appendChild(e)})}).catch(function(e){document.body.insertAdjacentHTML('beforeend','<p style="position:fixed;top:40%;left:0;right:0;text-align:center;z-index:99">読み込みに失敗しました。ページを開き直してください</p>')})};go()})();
+fetch('game.js?v=1795261550').then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(t){t.split('\n//@@SPLIT@@\n').forEach(function(c){var e=document.createElement('script');e.textContent=c;document.body.appendChild(e)})}).catch(function(e){document.body.insertAdjacentHTML('beforeend','<p style="position:fixed;top:40%;left:0;right:0;text-align:center;z-index:99">読み込みに失敗しました。ページを開き直してください</p>')})};go()})();
 </script>
 
 <meta name="theme-color" content="#f6efe4">
@@ -338,7 +338,7 @@ body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 112px)}
   <div id="tpad"><span>左下：親指を置いて<br>左右にスライド＝ハンドル</span></div>
   <div id="tjump"><b>⤴︎</b><span>右下をタップ＝ジャンプ</span></div>
   <button class="tbtn" id="bMagic"><b>✨</b><small>魔法</small></button>
-  <div id="thint">左下：親指を置いて左右にスライドでハンドル<br>右下：タップでジャンプ<br>ジャンプの着地でハンドルを切るとドリフト<br>切ったままでミニターボが溜まり、戻すと加速！</div>
+  <div id="thint">左下：親指を置いて左右にスライドでハンドル<br>右下：タップでジャンプ<br>ジャンプの着地でハンドルを切るとドリフト（煙モクモク）</div>
 </div>
 <div id="landwarn"><i>📱</i><b>スマホを縦にしてね</b><span>おむにえカートは縦向き専用です</span></div>
 <div id="loading">コース生成中…</div>
@@ -439,11 +439,11 @@ body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 112px)}
     ⚡ <b>ノリノリ加速</b>：ぶつからずに走り続けるほどゲージが溜まり最高速が伸びる。ぶつかると減る。<br>
     💨 <b>スリップストリーム</b>：相手の真後ろに1秒つくと加速。<br>
     🚀 <b>ロケットスタート</b>：カウント「2」が出たらアクセル。<br>
-    🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → 着地で加速。<br>
+    🤸 <b>ジャンプアクション</b>：ジャンプ台の頂点でドリフトボタン → クルッと回転（ジャンプでは加速しない）。<br>
     🎯 アイテムは <kbd>↓</kbd> を押しながら使うと後ろに投げられる。<br>
     🏁 <b>コース</b>：周回ではなくスタートからゴールまでの一本道（3〜5km）。ヘアピン・崖からの空中ダイブ・道なき大自然を切り裂くラリー区間あり。左上にコ・ドライバーの指示（「右3」「ジャンプ！」など）が出る。<br>
     ✨ <b>魔法</b>：キャラごとに固有の魔法あり。走る・アイテム箱・ミニターボでゲージが溜まり、満タンで「魔法」ボタン（キーボードはM）。紫のレアキャラ「おむにえさん」は全能の魔法を使える。<br>
-    📱 iPhone（縦向き専用）：左下に親指を置いて左右にスライドでハンドル。右下をタップでジャンプ。ジャンプの着地でハンドルを切るとドリフト、切ったままでミニターボが溜まり、まっすぐに戻すと加速。上のアイテム枠をタップ、または左下をダブルタップで使う（アイテムは3つまでキープ、横の小さい枠をタップで入れ替え）。右の縦ゲージが満タンで光ったらタップで魔法。アクセルは自動。</p>
+    📱 iPhone（縦向き専用）：左下に親指を置いて左右にスライドでハンドル。右下をタップでジャンプ。ジャンプの着地でハンドルを切るとドリフトして煙が出る（ジャンプでは加速しない）。上のアイテム枠をタップ、または左下をダブルタップで使う（アイテムは3つまでキープ、横の小さい枠をタップで入れ替え）。右の縦ゲージが満タンで光ったらタップで魔法。アクセルは自動。</p>
     <p><b>レースアイテム</b>：🎯狙撃ライフル　💣爆弾　🍡団子　🍌バナナの房　🧃ジュースのキャップ　📰新聞紙（天から顔面に）　💊胃薬　☠️毒ガス　🩹湿布（バリア）　🛌毛布（眠らせる）　🟪座布団（浮遊）　💧目薬　🌀扇風機　📺テレビ（落下＆ビリビリ）　🍗からあげ君</p>
     <p><b>重火器（レース・バトル共通）</b>：🔫機関銃（前方に連射）　💥バズーカ（一直線のロケット弾・大爆発）　⚠️地雷（後ろに3個・踏むと爆発）　🚀ミサイル（前の相手を追尾）</p>
     <p><b>バトル武器</b>：🔨特大バナナ叩き　🔫マシンガン連打　⛽ガソリン垂れ流しファイヤー　🎈大量特大水風船　🫛枝豆コロコロ（食べた相手は10倍＆弱体化）　🐙アツアツたこ焼き（自分もやけど）　🫘納豆（触れたら最後まで滑る）</p>

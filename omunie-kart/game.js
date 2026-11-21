@@ -1149,7 +1149,7 @@ class Track {
     for (const [type, count0] of def.deco || []) {
       const count = Math.round(count0 * scale);
       const parts = DECO[type] ? DECO[type]() : null; if (!parts) continue;
-      const far = ['mountain', 'mesa', 'cloud', 'asteroid', 'satellite', 'ferris', 'tentacle', 'floatrock', 'cloudpuff', 'rainbow', 'bigtree'].includes(type);
+      const far = ['mountain', 'mesa', 'cloud', 'asteroid', 'satellite', 'ferris', 'tentacle', 'floatrock', 'cloudpuff', 'rainbow', 'bigtree'].includes(type) || (typeof LANDMARK !== 'undefined' && LANDMARK.has(type));
       const mats = [];
       let tries = 0;
       while (mats.length < count && tries < count * 12) {
@@ -1835,7 +1835,10 @@ const SND = {
       case 'select': T(880, 0.07, 'square', 0.1); T(1320, 0.07, 'sine', 0.06, 0, 0.03); break;
       case 'back': T(440, 0.07, 'square', 0.1); break;
       case 'splash': this.splash(0.8); break;
-      case 'land': N(0.15, 0.35, 180, 1); T(70, 0.15, 'sine', 0.3, 0.5); break;
+      case 'land': N(0.15, 0.35, 180, 1); T(70, 0.15, 'sine', 0.3, 0.5); N(0.25, 0.25, 600, 0.6, 0.4, 0.02, 'lowpass'); break;
+      case 'skid': N(0.55, 0.22, 2600, 6, 0.8); N(0.5, 0.12, 3400, 9, 0.7, 0.04); T(1900, 0.4, 'sawtooth', 0.025, 0.85); break;
+      case 'rumble': N(2.2, 0.55, 90, 0.7, 0.6, 0, 'lowpass'); N(1.6, 0.25, 260, 1, 0.5, 0.2, 'lowpass'); T(42, 1.8, 'sine', 0.35, 0.7); break;
+      case 'thunder': this.thunder(0.7, 0.2); break;
       // --- アイテム ---
       case 'scope': T(2400, 0.06, 'sine', 0.08); T(2400, 0.06, 'sine', 0.08, 0, 0.15); T(2400, 0.3, 'sine', 0.08, 0, 0.3); break;
       case 'gunshot': N(0.08, 0.9, 3000, 0.5, 0.2, 0, 'lowpass'); N(0.6, 0.5, 800, 0.5, 0.2); T(60, 0.4, 'sine', 0.6, 0.4); T(3000, 0.35, 'sine', 0.05, 0.3, 0.05); break;
@@ -1905,9 +1908,12 @@ const SND = {
     o1.type = 'sawtooth'; o2.type = 'square';
     const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 800;
     const g = this.ctx.createGain(); g.gain.value = 0.0;
-    o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.sfx);
-    o1.start(); o2.start();
-    this.engine = { o1, o2, g, f };
+    const o3 = this.ctx.createOscillator(); o3.type = 'triangle'; const g3 = this.ctx.createGain(); g3.gain.value = 0.35; o3.connect(g3); g3.connect(f);
+    const nz = this.ctx.createBufferSource(); nz.buffer = this.noiseBuf; nz.loop = true; const nf = this.ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 300; nf.Q.value = 1.5; const ng = this.ctx.createGain(); ng.gain.value = 0.25; nz.connect(nf); nf.connect(ng); ng.connect(f);
+    const ws = this.ctx.createWaveShaper(); const cv = new Float32Array(256); for (let i = 0; i < 256; i++) { const x = i / 128 - 1; cv[i] = Math.tanh(x * 2.2); } ws.curve = cv;
+    o1.connect(f); o2.connect(f); f.connect(ws); ws.connect(g); g.connect(this.sfx);
+    o1.start(); o2.start(); o3.start(); nz.start();
+    this.engine = { o1, o2, o3, nz, nf, g, f };
   },
   setEngine(sp, boost) {
     if (!this.engine) return;
@@ -1915,6 +1921,7 @@ const SND = {
     const base = 55 + Math.abs(sp) * 2.5 + (boost ? 40 : 0);
     this.engine.o1.frequency.setTargetAtTime(base, t, 0.05);
     this.engine.o2.frequency.setTargetAtTime(base * 0.5 + 3, t, 0.05);
+    if (this.engine.o3) { this.engine.o3.frequency.setTargetAtTime(base * 1.5 + 2, t, 0.05); this.engine.nf.frequency.setTargetAtTime(200 + Math.abs(sp) * 9, t, 0.1); }
     this.engine.f.frequency.setTargetAtTime(500 + Math.abs(sp) * 20, t, 0.1);
     this.engine.g.gain.setTargetAtTime(0.04 + Math.min(0.06, Math.abs(sp) * 0.0013), t, 0.1);
   },
@@ -1944,8 +1951,49 @@ const SND = {
     this.wake.g.gain.setTargetAtTime(level * 0.38, t, 0.08);
     this.wake.bp.frequency.setTargetAtTime(900 + level * 1600, t, 0.1);
   },
+  // ---- 雷：バリッ（近いほど鋭い）＋ゴロゴロ（遅れて長く） ----
+  thunder(near = 1, delay = 0) {
+    if (!this.ctx) return;
+    const N = (...a) => this.noise(...a), T = (...a) => this.tone(...a);
+    if (near > 0.5) { N(0.12, 0.9 * near, 3000, 0.5, 0.3, delay, 'highpass'); N(0.35, 0.7 * near, 1200, 0.4, 0.2, delay); }
+    N(3.2, 0.75 * near, 140, 0.6, 0.5, delay + 0.08, 'lowpass');
+    N(2.6, 0.45 * near, 320, 0.8, 0.4, delay + 0.4, 'lowpass');
+    T(38, 2.4, 'sine', 0.4 * near, 0.6, delay + 0.1);
+  },
+  // ---- 環境音：雨（サーッ）と風（ビュー）を常時ループ ----
+  loopNoise(type, f, q) {
+    const s = this.ctx.createBufferSource(); s.buffer = this.noiseBuf; s.loop = true;
+    const fl = this.ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q;
+    const g = this.ctx.createGain(); g.gain.value = 0; s.connect(fl); fl.connect(g); g.connect(this.sfx); s.start();
+    return { s, fl, g };
+  },
+  setAmbience(rain, wind) {
+    if (!this.ctx) return;
+    if (!this.amb) {
+      this.amb = { rain: this.loopNoise('highpass', 2400, 0.4), rain2: this.loopNoise('bandpass', 900, 0.5), wind: this.loopNoise('bandpass', 420, 2.5) };
+      const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain(); lfo.frequency.value = 0.23; lg.gain.value = 260; lfo.connect(lg); lg.connect(this.amb.wind.fl.frequency); lfo.start(); this.amb.lfo = lfo;
+    }
+    const t = this.now(), A = this.amb;
+    A.rain.g.gain.setTargetAtTime(rain * 0.32, t, 0.4); A.rain2.g.gain.setTargetAtTime(rain * 0.16, t, 0.4);
+    A.wind.g.gain.setTargetAtTime(wind * 0.5, t, 0.5);
+  },
+  setTwister(lv) {
+    if (!this.ctx) return;
+    if (!this.tw) { this.tw = this.loopNoise('bandpass', 180, 1.2); const l = this.ctx.createOscillator(), lg = this.ctx.createGain(); l.frequency.value = 1.7; lg.gain.value = 90; l.connect(lg); lg.connect(this.tw.fl.frequency); l.start(); this.tw.l = l; }
+    this.tw.g.gain.setTargetAtTime(lv * 0.9, this.now(), 0.2);
+  },
+  // ---- ドリフト中のタイヤのキーッ（ループ） ----
+  setSkid(lv) {
+    if (!this.ctx) return;
+    if (!this.skid) { this.skid = this.loopNoise('bandpass', 2300, 7); const o = this.ctx.createOscillator(), og = this.ctx.createGain(); o.type = 'sawtooth'; o.frequency.value = 1750; og.gain.value = 0; o.connect(og); og.connect(this.sfx); o.start(); this.skid.o = o; this.skid.og = og; }
+    const t = this.now(); this.skid.g.gain.setTargetAtTime(lv * 0.16, t, 0.05); this.skid.og.gain.setTargetAtTime(lv * 0.012, t, 0.05);
+    this.skid.o.frequency.setTargetAtTime(1600 + Math.random() * 300, t, 0.05);
+  },
   stopEngine() {
-    if (this.wake) { try { this.wake.s.stop(); this.wake.lfo.stop(); } catch (e) { } this.wake = null; } if (this.engine) { this.engine.o1.stop(); this.engine.o2.stop(); this.engine = null; } },
+    try { for (const x of [this.amb && this.amb.rain, this.amb && this.amb.rain2, this.amb && this.amb.wind, this.tw, this.skid]) if (x) { x.s.stop(); if (x.o) x.o.stop(); if (x.l) x.l.stop(); } if (this.amb && this.amb.lfo) this.amb.lfo.stop(); } catch (e) { }
+    this.amb = null; this.tw = null; this.skid = null;
+    if (this.engine && this.engine.o3) { try { this.engine.o3.stop(); this.engine.nz.stop(); } catch (e) { } }
+    if (this.wake) { try { this.wake.s.stop(); this.wake.lfo.stop(); } catch (e) { } this.wake = null; } if (this.engine) { try { this.engine.o1.stop(); this.engine.o2.stop(); } catch (e) { } this.engine = null; } },
 
   // ---- BGM：イントロ→Aメロ→Bメロ→サビ の構成で自動作曲 ----
   startBGM(m) {
@@ -2132,7 +2180,7 @@ class Particles {
   constructor(scene) {
     this.pool = []; this.scene = scene;
     const tex = U.glowTex();
-    for (let i = 0; i < 520; i++) {
+    for (let i = 0; i < 900; i++) {
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
       sp.visible = false; sp.renderOrder = 6; scene.add(sp);
       this.pool.push({ sp, life: 0, max: 1, v: new THREE.Vector3(), g: 0, s0: 1, s1: 0 });
@@ -2232,7 +2280,9 @@ class Game {
     this.boxes = [];
     const bgeo = new THREE.BoxGeometry(1.7, 1.7, 1.7);
     const bmat = new THREE.MeshStandardMaterial({ map: U.itemBoxTex(), transparent: true, opacity: 0.85, emissive: 0xffffff, emissiveMap: U.itemBoxTex(), emissiveIntensity: 0.5 });
-    for (const j of this.track.itemRows) {
+    let rows = this.track.itemRows;
+    if (this.battle && rows.length) { const N = this.track.N, cnt = rows.length * 4; rows = []; for (let q = 0; q < cnt; q++) { let j = Math.round((q + 0.5) * N / cnt) % N, t = 0; while ((this.track.flags[j] & (1 | 8 | 16)) && t++ < 40) j = (j + 1) % N; rows.push(j); } }
+    for (const j of rows) {
       const hw = this.track.hw[j];
       const nB = hw > 15 ? 12 : 8;
       for (let bi = 0; bi < nB; bi++) { const f = -0.86 + 1.72 * bi / (nB - 1);
@@ -2268,6 +2318,7 @@ class Game {
     }
     this.setupGimmicks();
     this.setupScenery();
+    this.setupWeather();
     // UFO
     this.ufoMesh = new THREE.Group();
     mk(this.ufoMesh, GEO.sph(1.6, 16, 8), 0xc0c8d8, 0, 0, 0, { s: [1.6, 0.35, 1.6], mo: { m: 0.8, r: 0.2 } });
@@ -2372,6 +2423,8 @@ class Game {
     this.particles.update(dt);
     this.updateCamera(dt);
     this.updateScenery(dt);
+    if (this.wx) this.updateWeather(dt);
+    if (this.player) SND.setSkid(this.player.drift && this.player.grounded && Math.abs(this.player.v) > 8 ? Math.min(1, Math.abs(this.player.v) / 30) : 0);
     this.updateMagicFx(dt);
     HUD.update(this, dt);
     if (this.player) { SND.setEngine(this.player.v, this.player.boostT > 0); const p = this.player; SND.setWake(p.inWater && p.waterDepth < 2.4 && p.grounded ? U.clamp(Math.abs(p.v) / 40, 0, 1) : 0); }
@@ -2477,11 +2530,11 @@ class Game {
       k.v = U.damp(k.v, vm, 3, dt);
     } else if (!locked) {
       if (inp.accel && !inp.brake) {
-        if (k.v < vm) { const x = U.clamp(k.v / vm, 0, 1); k.v += k.accK * vm * (0.9 * Math.pow(1 - x, 0.75) + 0.015) * dt; }
+        if (k.v < vm && k.grounded) { const x = U.clamp(k.v / vm, 0, 1); k.v += k.accK * vm * (0.9 * Math.pow(1 - x, 0.75) + 0.015) * dt; }
       } else if (inp.brake) {
         if (k.v > 0) k.v -= 42 * dt; else k.v = Math.max(-11, k.v - 16 * dt);
       } else k.v -= Math.sign(k.v) * Math.min(Math.abs(k.v), 9 * dt);
-      if (k.boostT > 0 && k.v < vm) k.v += 75 * dt;
+      if (k.boostT > 0 && k.v < vm && k.grounded) k.v += 75 * dt;
     } else {
       k.v *= Math.exp(-(k.knockT > 0 ? 1.0 : 1.2) * dt);
     }
@@ -2495,6 +2548,7 @@ class Game {
     let turnRate = k.turn * Math.min(1, sp / 13) * (1 - 0.16 * Math.min(1.3, sp / k.vmax));
     turnRate *= 1.6;   // 曲がりやすさ（旋回半径を約0.6倍に）
     if (!k.grounded) turnRate *= 0.55;
+    turnRate *= this.wetGrip || 1;
     if (inWater) turnRate *= 0.9;
     let yawRate = 0;
     if (k.isPlayer && !k.finished) { const tg = inp.steer || 0; k.steerS = U.damp(k.steerS || 0, tg, Math.abs(tg) < Math.abs(k.steerS || 0) ? 16 : 14, dt); } else k.steerS = inp.steer || 0;
@@ -2523,18 +2577,18 @@ class Game {
     }
     if (k.landT > 0) {   // ジャンプ着地から0.3秒以内にハンドルを切るとドリフト
       k.landT -= dt;
-      if (k.grounded && !k.drift && !locked && !ufo && Math.abs(inp.steer || 0) > 0.3 && k.v > 14) { k.drift = Math.sign(inp.steer); k.driftCharge = 0; k.mt = 0; k.autoDrift = true; k.landT = 0; if (k.isPlayer) { SND.play('hop'); this.dust(k, 0xd8c8a8); } }
+      if (k.grounded && !k.drift && !locked && !ufo && Math.abs(inp.steer || 0) > 0.3 && k.v > 14) { k.drift = Math.sign(inp.steer); k.driftCharge = 0; k.mt = 0; k.autoDrift = true; k.landDrift = true; k.landT = 0; this.smokeBurst(k, 10); if (k.isPlayer) { SND.play('hop'); this.dust(k, 0xd8c8a8); } }
     }
     if (k.drift) {
       const held = inp.drift || (k.autoDrift && Math.abs(steer) > 0.15 && steer * k.drift > -0.25);
       if (!held || k.v < 10 || locked || ufo) {
         k.autoDrift = false;
-        if (k.mt > 0 && !locked) { this.chargeMagic(k, 0.04 * k.mt); k.boostT = Math.max(k.boostT, MT_TIME[k.mt]); k.boostCol = k.mt; if (k.isPlayer) SND.play('boost'); }
-        k.drift = 0; k.mt = 0; k.driftCharge = 0;
+        if (k.mt > 0 && !locked && !k.landDrift) { this.chargeMagic(k, 0.04 * k.mt); k.boostT = Math.max(k.boostT, MT_TIME[k.mt]); k.boostCol = k.mt; if (k.isPlayer) SND.play('boost'); }
+        k.drift = 0; k.mt = 0; k.driftCharge = 0; k.landDrift = false;
       } else {
         const base = 0.8 + 0.48 * steer * k.drift;
         yawRate = k.drift * turnRate * base * 1.08;
-        if (k.grounded) k.driftCharge += dt * (0.75 + 0.95 * Math.max(0, steer * k.drift)) * (k.isAI ? 0 : 1);
+        if (k.grounded && !k.landDrift) k.driftCharge += dt * (0.75 + 0.95 * Math.max(0, steer * k.drift)) * (k.isAI ? 0 : 1);
         const lv = k.driftCharge > 3.0 ? 3 : k.driftCharge > 1.9 ? 2 : k.driftCharge > 0.95 ? 1 : 0;
         if (lv > k.mt) { k.mt = lv; if (k.isPlayer) SND.play('mt1'); }
       }
@@ -2881,6 +2935,13 @@ class Game {
         this.particles.emit(p, vel, col, 0.25, k.mt ? 0.9 : 0.5, 0.1, 10);
       }
     }
+    if (k.drift && k.grounded && Math.random() < (k.isPlayer ? 0.95 : 0.45)) {   // タイヤの煙
+      for (const sd of [-1, 1]) {
+        const p = this.tmp.c.copy(m.root.position).addScaledVector(F, -1.2).addScaledVector(Lf, sd * 0.9).addScaledVector(fr.u, 0.35);
+        const vel = new THREE.Vector3().copy(F).multiplyScalar(-2 - Math.random() * 2).addScaledVector(fr.u, 1.2 + Math.random() * 1.6).addScaledVector(Lf, -k.drift * (2 + Math.random() * 2));
+        this.particles.emit(p, vel, this.smokeCol || 0xd8d4cc, 1.1 + Math.random() * 0.5, 0.9, 3.6 + Math.random() * 1.5, -0.6, false);
+      }
+    }
     if (k.boostT > 0 && Math.random() < 0.6) {
       const p = this.tmp.c.copy(m.root.position).addScaledVector(F, -1.7).addScaledVector(fr.u, 0.5);
       this.particles.emit(p, new THREE.Vector3().copy(F).multiplyScalar(-6), bc, 0.25, 1.2, 0.2, 0);
@@ -2891,6 +2952,11 @@ class Game {
   spark(k, col, n) {
     const pos = k.model.root.position;
     for (let i = 0; i < n; i++) this.particles.emit(pos, new THREE.Vector3((Math.random() - 0.5) * 12, Math.random() * 8, (Math.random() - 0.5) * 12), col, 0.4, 0.8, 0.1, 15);
+  }
+  smokeBurst(k, n) {
+    const p = k.model.root.position;
+    for (let i = 0; i < n; i++) this.particles.emit(p.clone().add(new THREE.Vector3((Math.random() - 0.5) * 2.5, 0.4, (Math.random() - 0.5) * 2.5)), new THREE.Vector3((Math.random() - 0.5) * 6, 1 + Math.random() * 2.5, (Math.random() - 0.5) * 6), this.smokeCol || 0xd8d4cc, 1.3, 1.2, 4.5, -0.5, false);
+    if (k.isPlayer) SND.play('skid');
   }
   dust(k, col) {
     const p = k.model.root.position.clone();
@@ -4065,7 +4131,7 @@ Object.assign(Game.prototype, {
         if (k.isRemote || k.out || !k.grounded || k.respawnT > 0 || k.ufoT > 0) continue;
         if (Math.abs(this.dDist(k.dist, p.s)) < 2.4 && Math.abs(k.d - p.d) < 2.4) {
           k.vh = 13 * Math.sqrt(this.def.gravity / 30); k.grounded = false; k.airT = 0; k.hop = false; p.t = 0.5;
-          if (k.isPlayer) { SND.play('poyon'); HUD.toast('🍄 大ジャンプ！空中でドリフトボタン→着地で加速'); }
+          if (k.isPlayer) { SND.play('poyon'); HUD.toast('🍄 大ジャンプ！'); }
         }
       }
     }
@@ -4129,6 +4195,244 @@ Object.assign(Game.prototype, {
       if (k.isRemote || k.out || !k.inWater) continue;
       k.d += Math.sin(k.dist * 0.02) * cfg.current * dt;
     }
+  },
+});
+
+//@@SPLIT@@
+// ===== ランダム天候 & 突発ハプニング（グランプリ・VS・バトル共通） =====
+// 天候：晴れ / 大雨 / 嵐（雨＋横風＋カミナリ） / 砂嵐 / 竜巻   … レース中にランダムで移り変わる
+// ハプニング：大岩が転がってくる・カミナリが落ちる（どの天候でもたまに起きる）
+const WEATHER = {
+  clear: { name: '晴れ', icon: '☀️' },
+  rain: { name: '大雨', icon: '🌧️', rain: 1, dark: 0.35, fog: 0x8a96a6, far: 260, grip: 0.9 },
+  storm: { name: '嵐', icon: '⛈️', rain: 1.6, dark: 0.6, fog: 0x4a5262, far: 190, wind: 7, bolts: 4, grip: 0.86 },
+  sand: { name: '砂嵐', icon: '🌪️', sand: 1, dark: 0.25, fog: 0xc89a5a, far: 120, wind: 9, grip: 0.92 },
+  tornado: { name: '竜巻', icon: '🌀', rain: 0.5, dark: 0.45, fog: 0x6a6e6a, far: 240, wind: 4, twisters: 1 },
+};
+const WX_INDOOR = ['sea', 'cave', 'alien', 'moon', 'gas', 'crystal'];
+
+Object.assign(Game.prototype, {
+  setupWeather() {
+    const biome = (typeof BIOME !== 'undefined' && (BIOME[this.def.id] || BIOME[this.def.baseId])) || this.def.biome || 'meadow';
+    this.wx = {
+      indoor: WX_INDOOR.includes(biome) || !!this.def.space, online: !!this.cfg.netId,
+      kind: 'clear', lv: 0, nextT: 3 + Math.random() * 6, boltT: 9 + Math.random() * 8, rockT: 14 + Math.random() * 10,
+      twT: 6, rocks: [], strikes: [], twisters: [], flashT: 0,
+      base: { c: this.baseFog.c.clone(), far: this.baseFog.far, sun: this.sun ? this.sun.intensity : 1 },
+    };
+    this.hemi = this.scene.children.find(o => o.isHemisphereLight); if (this.hemi) this.wx.base.hemi = this.hemi.intensity;
+    // 最初の天候：半分くらいの確率で荒れ模様
+    this.wx.kind = this.pickWeather(true);
+    // 雨（線）
+    const NR = 1500, rg = new THREE.BufferGeometry(), rp = new Float32Array(NR * 6);
+    rg.setAttribute('position', new THREE.BufferAttribute(rp, 3));
+    this.rainMesh = new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0xc8d8ee, transparent: true, opacity: 0, depthWrite: false }));
+    this.rainMesh.frustumCulled = false; this.rainMesh.renderOrder = 7; this.scene.add(this.rainMesh);
+    this.rainDrops = []; for (let i = 0; i < NR; i++) this.rainDrops.push({ x: (Math.random() - 0.5) * 80, y: Math.random() * 40, z: (Math.random() - 0.5) * 80, v: 38 + Math.random() * 18 });
+    // 砂（点）
+    const NS = 1400, sg = new THREE.BufferGeometry(), sp = new Float32Array(NS * 3);
+    sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+    this.sandMesh = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xe0b070, size: 0.9, map: U.glowTex(), transparent: true, opacity: 0, depthWrite: false }));
+    this.sandMesh.frustumCulled = false; this.sandMesh.renderOrder = 7; this.scene.add(this.sandMesh);
+    this.sandDust = []; for (let i = 0; i < NS; i++) this.sandDust.push({ x: (Math.random() - 0.5) * 70, y: Math.random() * 14, z: (Math.random() - 0.5) * 70, v: 0.6 + Math.random() });
+  },
+
+  pickWeather(first) {
+    const W = this.wx; if (W.indoor) return 'clear';
+    const t = [['clear', first ? 45 : 30], ['rain', 22], ['storm', 16], ['sand', 13], ['tornado', 12]].filter(x => x[0] !== W.kind || first);
+    let tot = 0; t.forEach(x => tot += x[1]); let r = Math.random() * tot;
+    for (const [k, w] of t) { r -= w; if (r <= 0) return k; }
+    return 'clear';
+  },
+
+  setWeather(kind) {
+    const W = this.wx; if (W.kind === kind) return;
+    W.kind = kind;
+    if (this.player && this.started) { const d = WEATHER[kind]; HUD.toast(`${d.icon} 天気が変わった：${d.name}`); if (kind === 'storm' || kind === 'tornado') SND.play('thunder'); }
+  },
+
+  updateWeather(dt) {
+    const W = this.wx; if (!W) return;
+    const D = WEATHER[W.kind];
+    const target = W.kind === 'clear' ? 0 : 1;
+    W.lv += (target - W.lv) * Math.min(1, dt * 0.5);
+    // 天候の移り変わり
+    if (this.started) { W.nextT -= dt; if (W.nextT <= 0) { W.nextT = 28 + Math.random() * 30; this.setWeather(this.pickWeather(false)); } }
+    // 空の暗さと霧
+    const lv = W.lv, dk = (D.dark || 0) * lv;
+    if (D.fog) { this.baseFog.c.copy(W.base.c).lerp(new THREE.Color(D.fog), lv * 0.85); this.baseFog.far = W.base.far + (Math.min(W.base.far, D.far) - W.base.far) * lv; }
+    else { this.baseFog.c.lerp(W.base.c, Math.min(1, dt)); this.baseFog.far += (W.base.far - this.baseFog.far) * Math.min(1, dt); }
+    if (this.track.sky) { const sc = this.track.sky.material.color; sc.setRGB(1, 1, 1); if (D.fog) sc.lerp(new THREE.Color(D.fog), lv * 0.8); if (W.flashT > 0) sc.lerp(new THREE.Color(0xffffff), 0.6); }
+    W.flashT = Math.max(0, W.flashT - dt);
+    const fl = W.flashT > 0 ? 2.4 * W.flashT / 0.35 : 0;
+    if (this.sun) this.sun.intensity = W.base.sun * (1 - dk) + fl;
+    if (this.hemi) this.hemi.intensity = W.base.hemi * (1 - dk * 0.6) + fl * 0.5;
+    this.smokeCol = D.rain ? 0xe8eef6 : D.sand ? 0xd8b080 : 0xd8d4cc;
+    this.wetGrip = 1 - (1 - (D.grip || 1)) * lv;
+    // 雨・砂を描く
+    const cam = this.camera.position, rainA = (D.rain || 0) * lv, sandA = (D.sand || 0) * lv, wind = (D.wind || 0) * lv;
+    this.rainMesh.material.opacity = Math.min(0.55, rainA * 0.4);
+    if (rainA > 0.02) {
+      const a = this.rainMesh.geometry.attributes.position.array; let i = 0;
+      for (const r of this.rainDrops) {
+        r.y -= r.v * dt * (0.8 + rainA * 0.3); r.x += wind * dt * 0.6;
+        if (r.y < -6) { r.y = 30 + Math.random() * 10; r.x = (Math.random() - 0.5) * 80; r.z = (Math.random() - 0.5) * 80; }
+        const x = cam.x + r.x, y = cam.y + r.y - 8, z = cam.z + r.z;
+        a[i++] = x; a[i++] = y; a[i++] = z; a[i++] = x - wind * 0.05; a[i++] = y + 1.1 + rainA * 0.5; a[i++] = z;
+      }
+      this.rainMesh.geometry.attributes.position.needsUpdate = true; this.rainMesh.visible = true;
+    } else this.rainMesh.visible = false;
+    this.sandMesh.material.opacity = Math.min(0.85, sandA * 0.8);
+    if (sandA > 0.02) {
+      const a = this.sandMesh.geometry.attributes.position.array; let i = 0;
+      for (const s of this.sandDust) {
+        s.x += (wind * 2.2 + s.v * 6) * dt; s.y += Math.sin(this.time * 3 + s.v * 9) * dt * 1.5;
+        if (s.x > 35) { s.x = -35; s.z = (Math.random() - 0.5) * 70; s.y = Math.random() * 14; }
+        a[i++] = cam.x + s.x; a[i++] = cam.y + s.y - 6; a[i++] = cam.z + s.z;
+      }
+      this.sandMesh.geometry.attributes.position.needsUpdate = true; this.sandMesh.visible = true;
+    } else this.sandMesh.visible = false;
+    // 横風（嵐・砂嵐・竜巻）
+    if (wind > 0.3 && this.started) {
+      W.gust = (W.gust || 0) + dt; const g = Math.sin(W.gust * 0.7) * 0.6 + Math.sin(W.gust * 1.9) * 0.4;
+      for (const k of this.karts) if (!k.isRemote && !k.out && k.ufoT <= 0) k.d += g * wind * 0.22 * dt * (3 / (2 + k.weight));
+    }
+    // 雨のしぶき
+    if (rainA > 0.3 && this.player && this.player.grounded && Math.abs(this.player.v) > 12 && Math.random() < 0.7) {
+      const p = this.player.model.root.position.clone(); p.y += 0.3;
+      this.particles.emit(p, new THREE.Vector3((Math.random() - 0.5) * 5, 2 + Math.random() * 3, (Math.random() - 0.5) * 5), 0xe8f0ff, 0.5, 0.4, 1.6, 6, false);
+    }
+    SND.setAmbience(rainA, Math.max(wind / 9, sandA * 0.8));
+    if (!this.started) return;
+    const local = !W.online;
+    // カミナリ（嵐で多め、それ以外でもたまに）
+    W.boltT -= dt * (D.bolts ? D.bolts : 1);
+    if (W.boltT <= 0) { W.boltT = 14 + Math.random() * 14; if (!W.indoor || this.def.id !== 'kaitei') this.lightningStrike(local); }
+    // 大岩（どの天候でもたまに）
+    W.rockT -= dt; if (W.rockT <= 0) { W.rockT = 22 + Math.random() * 18; if (local) this.spawnBoulder(); }
+    // 竜巻
+    if (D.twisters && local) { W.twT -= dt; if (W.twT <= 0 && W.twisters.length < 2) { W.twT = 14 + Math.random() * 10; this.spawnTwister(); } }
+    this.updateBoulders(dt); this.updateStrikes(dt); this.updateTwisters(dt);
+  },
+
+  // ---- カミナリ ----
+  lightningStrike(local) {
+    const W = this.wx, tr = this.track;
+    const cands = this.karts.filter(k => !k.out && !k.finished);
+    const k = this.player && !this.player.out && Math.random() < 0.5 ? this.player : cands[Math.floor(Math.random() * cands.length)];
+    if (!k) return;
+    const lead = this.battle ? (Math.random() - 0.5) * 16 : Math.max(8, k.v * 1.1) + Math.random() * 10;
+    const s = k.dist + lead, hw = tr.lerpArr(tr.hw, s), d = U.clamp(k.d + (Math.random() - 0.5) * 7, -hw + 2, hw - 2);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.3, 28), new THREE.MeshBasicMaterial({ color: 0xffe14a, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false }));
+    this.scene.add(ring); this.placeOnTrack(ring, s, d, 0.15); ring.rotateX(Math.PI / 2);
+    W.strikes.push({ s, d, t: 1.1, ring, local });
+    if (k.isPlayer) HUD.toast('⚡ カミナリが落ちる！よけろ！');
+  },
+  updateStrikes(dt) {
+    const W = this.wx;
+    for (const o of W.strikes) {
+      o.t -= dt;
+      o.ring.material.opacity = 0.35 + 0.45 * Math.abs(Math.sin(this.time * 22)); o.ring.scale.setScalar(0.6 + Math.max(0, o.t) * 0.5);
+      if (o.t <= 0 && !o.hit) {
+        o.hit = true; W.flashT = 0.35;
+        const fr = this.track.frame(o.s, this.fr), base = fr.p.clone().addScaledVector(fr.r, o.d).addScaledVector(fr.u, this.track.lerpArr(this.track.off, o.s));
+        const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: 0xfaf6ff });
+        let x = 0, z = 0; for (let y = 70; y > 0; y -= 6) { const nx = (Math.random() - 0.5) * 5, nz = (Math.random() - 0.5) * 5; const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 6.6, 4), m); seg.position.set((x + nx) / 2, y - 3, (z + nz) / 2); seg.rotation.z = Math.atan2(nx - x, 6); seg.rotation.x = Math.atan2(nz - z, 6); g.add(seg); x = nx; z = nz; }
+        const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: U.glowTex(), color: 0xc8d8ff, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); glow.scale.set(26, 26, 26); glow.position.y = 2; g.add(glow);
+        g.position.copy(base); this.scene.add(g); o.bolt = g;
+        const near = this.player ? this.player.model.root.position.distanceTo(base) : 0;
+        SND.thunder(near < 30 ? 1 : near < 120 ? 0.6 : 0.3, near / 340);
+        if (near < 20) HUD.shake(0.55);
+        for (let i = 0; i < 30; i++) this.particles.emit(base, new THREE.Vector3((Math.random() - 0.5) * 24, Math.random() * 16, (Math.random() - 0.5) * 24), i % 2 ? 0xfff6a0 : 0xaad8ff, 0.6, 1.6, 0.3, 14);
+        if (o.local) for (const k of this.karts) {
+          if (k.isRemote || k.out) continue;
+          if (Math.abs(this.dDist(k.dist, o.s)) < 3.8 && Math.abs(k.d - o.d) < 3.8 && k.h < 5) { this.damage(k, 'shock', { balloons: 1 }); if (k.isPlayer) HUD.toast('⚡ ビリビリッ！カミナリ直撃！'); }
+        }
+      }
+      if (o.bolt) o.bolt.visible = Math.floor(o.t * 40) % 3 !== 0;
+      if (o.t < -0.35) { this.scene.remove(o.ring); if (o.bolt) this.scene.remove(o.bolt); o.dead = true; }
+    }
+    W.strikes = W.strikes.filter(o => !o.dead);
+  },
+
+  // ---- 転がってくる大岩 ----
+  spawnBoulder() {
+    const W = this.wx, tr = this.track, P = this.player && !this.player.out ? this.player : this.karts.find(k => !k.out);
+    if (!P) return;
+    const s = P.dist + 110 + Math.random() * 40;
+    if (!this.battle && (s > tr.finishS - 40 || (tr.flagAt && tr.flagAt(s) & (1 | 16)))) return;
+    const hw = tr.lerpArr(tr.hw, s), r = 3.2 + Math.random() * 1.2;
+    const g = new THREE.Group();
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 1), new THREE.MeshStandardMaterial({ color: 0x7a6e62, roughness: 0.95, flatShading: true }));
+    const pos = rock.geometry.attributes.position; for (let i = 0; i < pos.count; i++) { const f = 0.85 + Math.random() * 0.3; pos.setXYZ(i, pos.getX(i) * f, pos.getY(i) * f, pos.getZ(i) * f); } rock.geometry.computeVertexNormals();
+    rock.castShadow = true; g.add(rock); this.scene.add(g); this.placeOnTrack(g, s, P.d, r);
+    const shadow = new THREE.Mesh(new THREE.CircleGeometry(r * 1.1, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35, depthWrite: false })); this.scene.add(shadow);
+    W.rocks.push({ g, rock, shadow, s, d: U.clamp(P.d + (Math.random() - 0.5) * hw, -hw + r, hw - r), v: -(22 + Math.random() * 10), r, t: 0, sway: (Math.random() - 0.5) * 3 });
+    HUD.toast('🪨 ゴゴゴ…大岩が転がってきた！');
+    SND.play('rumble');
+  },
+  updateBoulders(dt) {
+    const W = this.wx, tr = this.track;
+    for (const b of W.rocks) {
+      b.t += dt; b.s += b.v * dt; b.d += Math.sin(b.t * 0.9) * b.sway * dt;
+      const hw = tr.lerpArr(tr.hw, b.s); b.d = U.clamp(b.d, -hw + b.r * 0.6, hw - b.r * 0.6);
+      const bounce = Math.abs(Math.sin(b.t * 2.6)) * 1.4;
+      this.placeOnTrack(b.g, b.s, b.d, b.r * 0.85 + bounce, Math.PI);
+      b.rock.rotation.x -= b.v / b.r * dt;
+      this.placeOnTrack(b.shadow, b.s, b.d, 0.08); b.shadow.rotateX(-Math.PI / 2);
+      if (Math.random() < 0.5) this.particles.emit(b.g.position.clone().add(new THREE.Vector3(0, -b.r * 0.7, 0)), new THREE.Vector3((Math.random() - 0.5) * 6, 2 + Math.random() * 2, (Math.random() - 0.5) * 6), 0xb8a888, 1.0, 1.2, 4, -0.4, false);
+      if (this.player) { const dd = this.player.model.root.position.distanceTo(b.g.position); if (dd < 40) HUD.shake(Math.min(0.25, (40 - dd) / 160)); }
+      for (const k of this.karts) {
+        if (k.isRemote || k.out || k.h > b.r + 1) continue;
+        if (Math.abs(this.dDist(k.dist, b.s)) < b.r + 1 && Math.abs(k.d - b.d) < b.r + 0.8 && !(b.hitIds || (b.hitIds = new Set())).has(k.id)) {
+          b.hitIds.add(k.id); this.damage(k, 'flat', { balloons: 2 }); if (k.isPlayer) { HUD.toast('🪨 大岩にひかれてペチャンコ！'); SND.play('crash'); }
+        }
+      }
+      const behind = this.player ? this.dDist(b.s, this.player.dist) : -999;
+      if (b.t > 14 || behind < -80 || (!this.battle && b.s < tr.startS)) { this.scene.remove(b.g); this.scene.remove(b.shadow); b.dead = true; }
+    }
+    W.rocks = W.rocks.filter(b => !b.dead);
+  },
+
+  // ---- 竜巻 ----
+  spawnTwister() {
+    const W = this.wx, tr = this.track, P = this.player && !this.player.out ? this.player : this.karts.find(k => !k.out);
+    if (!P) return;
+    const s = P.dist + 90 + Math.random() * 60, hw = tr.lerpArr(tr.hw, s);
+    const g = new THREE.Group(), layers = [];
+    for (let i = 0; i < 14; i++) {
+      const rr = 1.2 + i * i * 0.07 + i * 0.35;
+      const m = new THREE.Mesh(new THREE.TorusGeometry(rr, 0.35 + i * 0.06, 6, 18), new THREE.MeshBasicMaterial({ color: i % 2 ? 0x8a8a84 : 0xa8a49a, transparent: true, opacity: 0.55 - i * 0.015, depthWrite: false }));
+      m.rotation.x = Math.PI / 2; m.position.y = i * 2.6; g.add(m); layers.push(m);
+    }
+    this.scene.add(g); this.placeOnTrack(g, s, U.clamp(P.d, -hw + 4, hw - 4), 0);
+    W.twisters.push({ g, layers, s, d: U.clamp(P.d, -hw + 4, hw - 4), v: -(6 + Math.random() * 6), t: 0, life: 16, caught: new Set() });
+    HUD.toast('🌪️ 竜巻が近づいてくる！');
+    SND.play('fan');
+  },
+  updateTwisters(dt) {
+    const W = this.wx, tr = this.track;
+    for (const w of W.twisters) {
+      w.t += dt; w.s += w.v * dt; w.d += Math.sin(w.t * 0.6) * 5 * dt;
+      const hw = tr.lerpArr(tr.hw, w.s); w.d = U.clamp(w.d, -hw + 3, hw - 3);
+      this.placeOnTrack(w.g, w.s, w.d, 0);
+      w.layers.forEach((m, i) => { m.rotation.z += dt * (4 + i * 0.3); m.position.x = Math.sin(w.t * 2 + i * 0.5) * i * 0.18; });
+      if (Math.random() < 0.8) { const a = Math.random() * 6.28, rr = 2 + Math.random() * 4; this.particles.emit(w.g.position.clone().add(new THREE.Vector3(Math.cos(a) * rr, Math.random() * 3, Math.sin(a) * rr)), new THREE.Vector3(-Math.sin(a) * 10, 6 + Math.random() * 8, Math.cos(a) * 10), 0x9a948a, 1.2, 1.5, 4, -1, false); }
+      if (this.player) { const dd = this.player.model.root.position.distanceTo(w.g.position); SND.setTwister(Math.max(0, 1 - dd / 90)); if (dd < 30) HUD.shake(0.12); }
+      for (const k of this.karts) {
+        if (k.isRemote || k.out || k.respawnT > 0) continue;
+        const ds = this.dDist(k.dist, w.s), dd = k.d - w.d, dist = Math.hypot(ds, dd);
+        if (dist < 14 && k.ufoT <= 0) k.d -= Math.sign(dd || 1) * (14 - dist) * 0.25 * dt;   // 吸い寄せ
+        if (dist < 4.2 && !w.caught.has(k.id)) {
+          w.caught.add(k.id); this.damage(k, 'knock', { balloons: 1 });
+          if (k.knockT > 0 || !k.grounded) { k.vh = 16; k.grounded = false; k.airT = 0; k.trick = true; k.trickT = 0; }
+          if (k.isPlayer) { HUD.toast('🌪️ 竜巻に巻き上げられた！'); SND.play('fan'); }
+        }
+      }
+      if (w.t > w.life || (this.player && this.dDist(w.s, this.player.dist) < -60)) { this.scene.remove(w.g); w.dead = true; }
+    }
+    W.twisters = W.twisters.filter(w => !w.dead);
+    if (!W.twisters.length) SND.setTwister(0);
   },
 });
 
@@ -4476,6 +4780,160 @@ Object.assign(Game.prototype, {
   },
 
   fireworks(at) { if (this.scn) this.scn.fx.push({ at: at.clone(), t: 5, next: 0 }); },
+});
+
+//@@SPLIT@@
+// ===== 新コース12本：ジャングル探検 & 世界の名所めぐり =====
+// 路面テクスチャ
+Object.assign(SURF, {
+  cobble: (g, s) => { g.fillStyle = '#7a7468'; g.fillRect(0, 0, s, s); const r = U.rng(41); for (let y = 0; y < s; y += 16) for (let x = (y / 16 % 2) * 8; x < s; x += 16) { const c = 100 + r() * 50 | 0; g.fillStyle = `rgb(${c},${c - 6},${c - 16})`; g.beginPath(); g.ellipse(x + 8, y + 8, 7, 6.5, 0, 0, 7); g.fill(); } },
+  brickroad: (g, s) => { g.fillStyle = '#6a5a4a'; g.fillRect(0, 0, s, s); const r = U.rng(43); for (let y = 0; y < s; y += 20) for (let x = (y / 20 % 2) * 22; x < s; x += 44) { const c = 130 + r() * 40 | 0; g.fillStyle = `rgb(${c},${c - 24},${c - 50})`; g.fillRect(x + 1, y + 1, 42, 18); } },
+  jungle: (g, s) => { noise(g, s, '#6a4a2a', 0.35, 8000, 3); const r = U.rng(47); g.fillStyle = 'rgba(60,110,40,0.55)'; for (let i = 0; i < 40; i++) g.fillRect(r() * s, r() * s, 6 + r() * 10, 3 + r() * 6); },
+  junglefloor: (g, s) => { noise(g, s, '#2f5a22', 0.4, 9000, 3); const r = U.rng(49); g.fillStyle = 'rgba(120,80,40,0.4)'; for (let i = 0; i < 30; i++) g.fillRect(r() * s, r() * s, 10 + r() * 20, 4); },
+  desertroad: (g, s) => { noise(g, s, '#c8a068', 0.25, 7000, 3); g.fillStyle = 'rgba(120,80,40,0.35)'; g.fillRect(s * 0.28, 0, 14, s); g.fillRect(s * 0.66, 0, 14, s); },
+  dune: (g, s) => { noise(g, s, '#e4c48a', 0.2, 6000, 3); g.strokeStyle = 'rgba(180,140,80,0.4)'; g.lineWidth = 3; for (let y = 10; y < s; y += 22) { g.beginPath(); for (let x = 0; x <= s; x += 8) { const yy = y + Math.sin(x / 20) * 4; x ? g.lineTo(x, yy) : g.moveTo(x, yy); } g.stroke(); } },
+  cityroad: (g, s) => { noise(g, s, '#3e4046', 0.2, 6000); g.fillStyle = '#f4f4f0'; g.fillRect(6, 0, 5, s); g.fillRect(s - 11, 0, 5, s); g.fillStyle = '#ffd23a'; g.fillRect(s / 2 - 5, 0, 4, s * 0.6); g.fillRect(s / 2 + 1, 0, 4, s * 0.6); },
+  plaza: (g, s) => { g.fillStyle = '#c8c0b0'; g.fillRect(0, 0, s, s); g.strokeStyle = '#a89e8c'; g.lineWidth = 2; for (let i = 0; i <= s; i += 32) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, s); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(s, i); g.stroke(); } },
+  stoneroad: (g, s) => { noise(g, s, '#8a8478', 0.3, 8000, 3); const r = U.rng(53); g.strokeStyle = 'rgba(50,45,40,0.5)'; g.lineWidth = 2; for (let i = 0; i < 18; i++) { g.strokeRect(r() * s, r() * s, 20 + r() * 30, 14 + r() * 20); } },
+});
+
+const LANDMARK = new Set(['eiffel', 'pyramid', 'sphinx', 'greatwall', 'fuji', 'colosseum', 'bigben', 'liberty', 'skyscraper', 'opera', 'angkor', 'waterfall', 'pagoda', 'harbourbridge', 'londoneye']);
+
+// 名所や景色の3Dモデル（ローポリ）
+(() => {
+  const M4 = (x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1, ry = 0, rx = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+  const P = (geo, col, m, o) => ({ geo, mat: U.mat(col, o || {}), m });
+  const PM = (geo, mat, m) => ({ geo, mat, m });
+  const winTex = (key, bg, lit) => makeTex(key, 128, (g, s) => { g.fillStyle = bg; g.fillRect(0, 0, s, s); const r = U.rng(key.length * 7); for (let y = 6; y < s; y += 14) for (let x = 6; x < s; x += 12) { g.fillStyle = r() < 0.45 ? lit : 'rgba(20,30,50,0.85)'; g.fillRect(x, y, 7, 9); } });
+  const archTex = makeTex('arch', 256, (g, s) => { g.fillStyle = '#d8c49a'; g.fillRect(0, 0, s, s); g.fillStyle = '#3a2e22'; for (let row = 0; row < 3; row++) for (let i = 0; i < 8; i++) { const x = i * 32 + 6, y = row * 80 + 14; g.fillRect(x, y + 14, 20, 44); g.beginPath(); g.arc(x + 10, y + 14, 10, Math.PI, 0); g.fill(); } g.fillStyle = 'rgba(120,90,50,0.35)'; for (let row = 1; row < 3; row++) g.fillRect(0, row * 80 + 4, s, 6); });
+  const clockTex = makeTex('clockface', 128, (g, s) => { g.fillStyle = '#c8a860'; g.fillRect(0, 0, s, s); g.fillStyle = '#fffbe8'; g.beginPath(); g.arc(64, 64, 50, 0, 7); g.fill(); g.strokeStyle = '#222'; g.lineWidth = 3; g.beginPath(); g.arc(64, 64, 50, 0, 7); g.stroke(); for (let i = 0; i < 12; i++) { const a = i / 12 * 6.28; g.fillStyle = '#222'; g.fillRect(64 + Math.cos(a) * 42 - 2, 64 + Math.sin(a) * 42 - 2, 4, 4); } g.lineWidth = 5; g.beginPath(); g.moveTo(64, 64); g.lineTo(64, 28); g.moveTo(64, 64); g.lineTo(90, 70); g.stroke(); }, false);
+  const fallTex = makeTex('waterfallTex', 128, (g, s) => { const r = U.rng(5); g.fillStyle = '#bfe6ff'; g.fillRect(0, 0, s, s); for (let i = 0; i < 80; i++) { g.fillStyle = `rgba(255,255,255,${0.3 + r() * 0.6})`; g.fillRect(r() * s, r() * s, 2 + r() * 3, 20 + r() * 50); } });
+  const stdMat = (map, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ map, roughness: 0.85 }, o));
+  Object.assign(DECO, {
+    // ---- ジャングル ----
+    jungletree: () => [P(new THREE.CylinderGeometry(0.7, 1.2, 16, 7), 0x6a4a2a, M4(0, 8, 0)), P(new THREE.IcosahedronGeometry(6, 0), 0x2f7a2a, M4(0, 17, 0, 1.3, 0.5, 1.3), { flat: true }), P(new THREE.IcosahedronGeometry(4.5, 0), 0x3f9a34, M4(2, 19.5, 1, 1.2, 0.5, 1.2), { flat: true }), P(new THREE.CylinderGeometry(0.08, 0.08, 9, 3), 0x3a7a2a, M4(3, 12, 0)), P(new THREE.CylinderGeometry(0.08, 0.08, 7, 3), 0x3a7a2a, M4(-2.5, 13, 1))],
+    fern: () => [0, 1, 2, 3, 4, 5].map(i => P(new THREE.ConeGeometry(0.5, 3.2, 3), i % 2 ? 0x3a9a3a : 0x2f8a30, M4(Math.cos(i) * 0.9, 1.1, Math.sin(i) * 0.9, 1, 1, 0.25, i, Math.cos(i) * 0.9, Math.sin(i) * 0.9), { flat: true })),
+    banana: () => [P(new THREE.CylinderGeometry(0.25, 0.35, 5, 6), 0x6a8a3a, M4(0, 2.5, 0))].concat([0, 1, 2, 3, 4].map(i => P(new THREE.BoxGeometry(0.9, 0.1, 4), 0x4aaa3a, M4(Math.cos(i * 1.26) * 1.6, 5, Math.sin(i * 1.26) * 1.6, 1, 1, 1, -i * 1.26 + Math.PI / 2, 0.5), { flat: true }))),
+    jflower: () => [P(new THREE.ConeGeometry(0.6, 1, 5), 0xff3a6a, M4(0, 0.6, 0, 1, 1, 1, 0, Math.PI), { e: 0x401020 }), P(new THREE.SphereGeometry(0.2, 6, 4), 0xffe04a, M4(0, 0.7, 0))],
+    // ---- 遺跡・滝 ----
+    angkor: () => {
+      const st = 0x8a8a74, a = [P(new THREE.BoxGeometry(110, 8, 90), st, M4(0, 4, 0), { flat: true }), P(new THREE.BoxGeometry(80, 10, 64), 0x7a7a66, M4(0, 13, 0), { flat: true }), P(new THREE.BoxGeometry(54, 10, 42), st, M4(0, 23, 0), { flat: true })];
+      for (const [x, z, h] of [[0, 0, 46], [-22, -16, 30], [22, -16, 30], [-22, 16, 30], [22, 16, 30]]) { a.push(P(new THREE.CylinderGeometry(2, 7, h, 8), 0x7a7a64, M4(x, 28 + h / 2, z), { flat: true })); for (let i = 1; i < 5; i++) a.push(P(new THREE.TorusGeometry(7 - i * 1.25, 0.9, 4, 8), 0x6a6a56, M4(x, 28 + h * i / 5, z, 1, 1, 1, 0, Math.PI / 2))); }
+      return a;
+    },
+    waterfall: () => [P(new THREE.BoxGeometry(90, 70, 30), 0x5a5a4a, M4(0, 35, -12), { flat: true }), P(new THREE.BoxGeometry(92, 4, 34), 0x3f7a2f, M4(0, 71, -12), { flat: true }), PM(new THREE.PlaneGeometry(60, 70), stdMat(fallTex, { emissive: 0x6aa8d8, emissiveIntensity: 0.4, transparent: true, opacity: 0.92 }), M4(0, 35, 3.2)), P(new THREE.IcosahedronGeometry(16, 1), 0xffffff, M4(0, 4, 8, 2.2, 0.5, 1), { op: 0.55, e: 0x8aa8c0 })],
+    // ---- パリ ----
+    eiffel: () => {
+      const c = 0x6a5a4a, a = [];
+      for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) a.push(P(new THREE.BoxGeometry(5, 64, 5), c, M4(x * 18, 28, z * 18, 1, 1, 1, 0, -z * 0.32, x * 0.32), { m: 0.4 }));
+      a.push(P(new THREE.BoxGeometry(46, 4, 46), c, M4(0, 56, 0), { m: 0.4 }));
+      a.push(P(new THREE.CylinderGeometry(6, 15, 60, 4), c, M4(0, 88, 0, 1, 1, 1, Math.PI / 4), { m: 0.4, flat: true }));
+      a.push(P(new THREE.BoxGeometry(16, 3, 16), c, M4(0, 118, 0)));
+      a.push(P(new THREE.CylinderGeometry(1.2, 6, 62, 4), c, M4(0, 150, 0, 1, 1, 1, Math.PI / 4), { m: 0.4, flat: true }));
+      a.push(P(new THREE.CylinderGeometry(0.4, 0.6, 14, 4), 0xc8c0b0, M4(0, 188, 0)));
+      a.push(P(new THREE.SphereGeometry(1.4, 6, 4), 0xffe08a, M4(0, 196, 0), { e: 0xffc040, ei: 1 }));
+      return a;
+    },
+    lamp: () => [P(new THREE.CylinderGeometry(0.12, 0.18, 5, 6), 0x2a2a2a, M4(0, 2.5, 0), { m: 0.6 }), P(new THREE.SphereGeometry(0.45, 8, 6), 0xfff2c0, M4(0, 5.2, 0), { e: 0xffd880, ei: 0.9 })],
+    cafe: () => [P(new THREE.BoxGeometry(8, 7, 6), 0xf0e4d0, M4(0, 3.5, 0)), P(new THREE.BoxGeometry(8.4, 1.2, 2.4), 0xd83a4a, M4(0, 3.6, 3.6, 1, 1, 1, 0, 0.35)), P(new THREE.BoxGeometry(8.2, 1.4, 6.2), 0x5a6a8a, M4(0, 7.6, 0), { flat: true })],
+    // ---- エジプト ----
+    pyramid: () => [P(new THREE.ConeGeometry(70, 92, 4), 0xd8b070, M4(0, 46, 0, 1, 1, 1, Math.PI / 4), { flat: true }), P(new THREE.ConeGeometry(42, 56, 4), 0xc8a060, M4(95, 28, 40, 1, 1, 1, Math.PI / 4), { flat: true }), P(new THREE.ConeGeometry(26, 34, 4), 0xd0a868, M4(150, 17, 70, 1, 1, 1, Math.PI / 4), { flat: true })],
+    sphinx: () => [P(new THREE.BoxGeometry(10, 8, 30), 0xc8a060, M4(0, 4, 0), { flat: true }), P(new THREE.BoxGeometry(8, 10, 8), 0xd0a868, M4(0, 11, 13), { flat: true }), P(new THREE.ConeGeometry(7, 8, 4), 0x4a7ab0, M4(0, 15, 12, 1, 1, 1, Math.PI / 4), { flat: true }), P(new THREE.BoxGeometry(3, 2, 12), 0xc8a060, M4(-3.5, 1, 19)), P(new THREE.BoxGeometry(3, 2, 12), 0xc8a060, M4(3.5, 1, 19))],
+    obelisk: () => [P(new THREE.CylinderGeometry(0.9, 1.6, 14, 4), 0xc8a878, M4(0, 7, 0, 1, 1, 1, Math.PI / 4), { flat: true }), P(new THREE.ConeGeometry(1.2, 2, 4), 0xffd060, M4(0, 15, 0, 1, 1, 1, Math.PI / 4), { m: 0.6 })],
+    // ---- 中国 ----
+    greatwall: () => [P(new THREE.BoxGeometry(70, 9, 7), 0x9a8a72, M4(0, 4.5, 0), { flat: true }), ...[-30, -18, -6, 6, 18, 30].map(x => P(new THREE.BoxGeometry(4, 2.2, 7.4), 0x8a7a62, M4(x, 10, 0))), P(new THREE.BoxGeometry(12, 16, 12), 0x8a7a62, M4(36, 8, 0), { flat: true }), P(new THREE.ConeGeometry(9, 5, 4), 0x6a3a2a, M4(36, 18.5, 0, 1, 1, 1, Math.PI / 4), { flat: true })],
+    // ---- 日本 ----
+    fuji: () => [P(new THREE.ConeGeometry(160, 150, 9), 0x4a6a9a, M4(0, 60, 0), { flat: true }), P(new THREE.ConeGeometry(58, 54, 9), 0xf4f6ff, M4(0, 108, 0), { flat: true })],
+    torii: () => [P(new THREE.CylinderGeometry(0.5, 0.6, 9, 8), 0xd8322a, M4(-4, 4.5, 0)), P(new THREE.CylinderGeometry(0.5, 0.6, 9, 8), 0xd8322a, M4(4, 4.5, 0)), P(new THREE.BoxGeometry(11.5, 0.9, 1.2), 0x2a2222, M4(0, 9.3, 0)), P(new THREE.BoxGeometry(10, 0.6, 0.9), 0xd8322a, M4(0, 7.6, 0))],
+    pagoda: () => { const a = []; for (let i = 0; i < 5; i++) { const w = 14 - i * 2; a.push(P(new THREE.BoxGeometry(w * 0.6, 4, w * 0.6), 0xb8382a, M4(0, i * 6 + 2, 0))); a.push(P(new THREE.ConeGeometry(w * 0.85, 2.4, 4), 0x3a3a40, M4(0, i * 6 + 5, 0, 1, 1, 1, Math.PI / 4), { flat: true })); } a.push(P(new THREE.CylinderGeometry(0.3, 0.3, 7, 5), 0xc8a040, M4(0, 34, 0), { m: 0.6 })); return a; },
+    sakura: () => [P(new THREE.CylinderGeometry(0.4, 0.6, 4, 6), 0x5a3a2a, M4(0, 2, 0)), P(new THREE.IcosahedronGeometry(3, 1), 0xffb8d0, M4(0, 5.4, 0, 1.2, 0.8, 1.2), { flat: true }), P(new THREE.IcosahedronGeometry(2, 0), 0xffd0e0, M4(1.6, 6, 0.8), { flat: true })],
+    // ---- ローマ ----
+    colosseum: () => [PM(new THREE.CylinderGeometry(62, 62, 46, 32, 1, true), stdMat(archTex, { side: THREE.DoubleSide }), M4(0, 23, 0, 1, 1, 0.8)), P(new THREE.CylinderGeometry(50, 50, 30, 32, 1, true), 0xb8a47e, M4(0, 15, 0, 1, 1, 0.8), { ds: true }), P(new THREE.CylinderGeometry(62, 62, 2, 32), 0xc8b48a, M4(0, 1, 0, 1, 1, 0.8))],
+    cypress: () => [P(new THREE.CylinderGeometry(0.25, 0.35, 2, 5), 0x5a3a20, M4(0, 1, 0)), P(new THREE.ConeGeometry(1.2, 9, 7), 0x2a5a2a, M4(0, 6, 0), { flat: true })],
+    column: () => [P(new THREE.CylinderGeometry(1, 1.1, 12, 10), 0xe8dcc0, M4(0, 6, 0)), P(new THREE.BoxGeometry(2.8, 0.8, 2.8), 0xd8ccb0, M4(0, 12.4, 0))],
+    // ---- ロンドン ----
+    bigben: () => [P(new THREE.BoxGeometry(14, 80, 14), 0xc8a868, M4(0, 40, 0), { flat: true }), ...[0, 1, 2, 3].map(i => PM(new THREE.PlaneGeometry(10, 10), stdMat(clockTex, { emissive: 0x605030, emissiveIntensity: 0.3 }), M4(Math.sin(i * Math.PI / 2) * 7.05, 68, Math.cos(i * Math.PI / 2) * 7.05, 1, 1, 1, i * Math.PI / 2))), P(new THREE.ConeGeometry(10.5, 22, 4), 0x3a4a3a, M4(0, 91, 0, 1, 1, 1, Math.PI / 4), { flat: true }), P(new THREE.BoxGeometry(60, 26, 16), 0xc0a060, M4(-37, 13, 0), { flat: true })],
+    londoneye: () => [P(new THREE.TorusGeometry(55, 1.2, 6, 48), 0xe8eef6, M4(0, 62, 0), { m: 0.5 }), P(new THREE.BoxGeometry(2, 66, 2), 0xd8dde6, M4(-12, 31, 0, 1, 1, 1, 0, 0, -0.18)), P(new THREE.BoxGeometry(2, 66, 2), 0xd8dde6, M4(12, 31, 0, 1, 1, 1, 0, 0, 0.18)), ...Array.from({ length: 16 }, (_, i) => P(new THREE.SphereGeometry(2.4, 8, 6), 0xbfe6ff, M4(Math.cos(i / 16 * 6.28) * 55, 62 + Math.sin(i / 16 * 6.28) * 55, 0, 1.3, 1, 1), { op: 0.85 }))],
+    redbox: () => [P(new THREE.BoxGeometry(1.2, 3, 1.2), 0xd8202a, M4(0, 1.5, 0)), P(new THREE.BoxGeometry(1.4, 0.4, 1.4), 0xd8202a, M4(0, 3.2, 0))],
+    // ---- ニューヨーク ----
+    liberty: () => [P(new THREE.BoxGeometry(22, 26, 22), 0xb8ac94, M4(0, 13, 0), { flat: true }), P(new THREE.BoxGeometry(14, 10, 14), 0xa89c84, M4(0, 31, 0), { flat: true }), P(new THREE.CylinderGeometry(4, 7, 32, 8), 0x5aa88a, M4(0, 52, 0), { flat: true }), P(new THREE.SphereGeometry(3.4, 10, 8), 0x5aa88a, M4(0, 71, 0), { flat: true }), P(new THREE.ConeGeometry(4.4, 2.6, 7), 0x5aa88a, M4(0, 74, 0), { flat: true }), P(new THREE.CylinderGeometry(1.1, 1.3, 20, 6), 0x5aa88a, M4(5.5, 72, 0, 1, 1, 1, 0, 0, -0.2), { flat: true }), P(new THREE.SphereGeometry(2, 8, 6), 0xffc040, M4(7.6, 83, 0), { e: 0xffa020, ei: 1 })],
+    skyscraper: () => [PM(new THREE.BoxGeometry(22, 120, 22), stdMat(winTex('win1', '#4a5a72', 'rgba(255,230,150,0.9)'), { metalness: 0.3 }), M4(0, 60, 0)), PM(new THREE.BoxGeometry(16, 80, 16), stdMat(winTex('win2', '#6a7a8a', 'rgba(200,230,255,0.9)')), M4(30, 40, 10)), P(new THREE.ConeGeometry(4, 18, 4), 0xc8ccd6, M4(0, 129, 0, 1, 1, 1, Math.PI / 4), { m: 0.7 })],
+    taxi: () => [P(new THREE.BoxGeometry(2, 1, 4.2), 0xffc81a, M4(0, 0.8, 0)), P(new THREE.BoxGeometry(1.8, 0.8, 2.2), 0xffd84a, M4(0, 1.6, -0.2)), P(new THREE.BoxGeometry(0.8, 0.3, 0.4), 0xffffff, M4(0, 2.15, -0.2), { e: 0x808080 })],
+    // ---- シドニー ----
+    opera: () => { const a = [P(new THREE.BoxGeometry(90, 8, 50), 0xc8b8a0, M4(0, 4, 0), { flat: true })]; [[-28, 1], [-8, 1.25], [14, 1], [34, 0.8]].forEach(([x, s], i) => { a.push(P(new THREE.SphereGeometry(18 * s, 12, 8, 0, Math.PI, 0, Math.PI / 2), 0xf6f4ee, M4(x, 8, -6, 0.7, 1.6, 1, Math.PI / 2 + 0.2 * (i % 2 ? 1 : -1)), { ds: true, r: 0.3 })); a.push(P(new THREE.SphereGeometry(14 * s, 12, 8, 0, Math.PI, 0, Math.PI / 2), 0xeeeae2, M4(x + 4, 8, 10, 0.6, 1.3, 1, -Math.PI / 2), { ds: true, r: 0.3 })); }); return a; },
+    harbourbridge: () => [P(new THREE.TorusGeometry(70, 2.4, 6, 32, Math.PI), 0x6a7280, M4(0, 0, 0), { m: 0.5 }), P(new THREE.BoxGeometry(150, 3, 14), 0x5a6270, M4(0, 34, 0), { m: 0.4 }), P(new THREE.BoxGeometry(12, 44, 14), 0xb8ac94, M4(-75, 22, 0), { flat: true }), P(new THREE.BoxGeometry(12, 44, 14), 0xb8ac94, M4(75, 22, 0), { flat: true })],
+  });
+})();
+
+// コース一覧に追加（3つのカップ）
+CUPS.push({ name: 'ジャングル探検カップ', icon: '🌴' }, { name: '世界の名所カップA', icon: '🗼' }, { name: '世界の名所カップB', icon: '🗽' });
+const WORLD = [
+  { id: 'jungle', name: 'ジャングル大冒険', cup: 3, desc: '巨木とツタの密林を、道なき道で突っ走れ', w: 20, sh: 4, surf: 'jungle', shSurf: 'junglefloor', wildSurf: 'jungle', wall: 'none', edge: ['fern', 'banana', 'jflower'], gravity: 30, water: -1.2, waterColor: 0x3a6a3a,
+    theme: { skyTop: 0x5aa0c8, skyBot: 0xd8f0c0, fog: 0x8ab88a, fogFar: 300, ground: 0x2f5a22, groundTex: 'junglefloor', sun: 0.95, amb: 0.85, groundDrop: 2 },
+    deco: [['jungletree', 110], ['banana', 50], ['fern', 70], ['bigtree', 10]], music: { bpm: 150, root: 52, scale: 'dorian', seed: 301 }, biome: 'forest',
+    gen: { length: 3600, flat: true, mix: { rally: 4, rallyJump: 2, river: 2, scurve: 2, chicane: 1, tight90: 2, wild: 2 } } },
+  { id: 'amazon', name: 'アマゾン川くだり', cup: 3, desc: '大河をザブザブ渡り、ワニの川岸を駆け抜ける', w: 22, sh: 5, surf: 'mudpath', shSurf: 'junglefloor', wildSurf: 'mudpath', wall: 'none', edge: ['reed', 'fern'], gravity: 30, water: -0.8, waterColor: 0x7a6a3a,
+    theme: { skyTop: 0x6aa8d8, skyBot: 0xe8f0d0, fog: 0xa0b890, fogFar: 380, ground: 0x3a6a2a, groundTex: 'junglefloor', sun: 1.0, amb: 0.85, groundDrop: 2 },
+    deco: [['jungletree', 80], ['palm', 40], ['banana', 40], ['reed', 80]], music: { bpm: 138, root: 55, scale: 'dorian', seed: 307 }, biome: 'swamp',
+    gen: { length: 3800, flat: true, mix: { river: 5, sweeper: 2, scurve: 2, wild: 2, rally: 2, gapjump: 1 } } },
+  { id: 'angkor', name: 'アンコール遺跡', cup: 3, desc: '石の参道と崩れた遺跡。密林の奥にそびえる塔', w: 18, sh: 3, surf: 'stoneroad', shSurf: 'junglefloor', wildSurf: 'jungle', wall: 'none', edge: ['column', 'fern'], gravity: 30,
+    theme: { skyTop: 0x7ab0d8, skyBot: 0xf0e4c8, fog: 0xc8c0a0, fogFar: 460, ground: 0x4a6a2a, groundTex: 'junglefloor', sun: 1.05, amb: 0.8 },
+    deco: [['angkor', 3], ['jungletree', 70], ['palm', 30], ['rock', 30]], music: { bpm: 132, root: 57, scale: 'phrygian', seed: 311 }, biome: 'forest',
+    gen: { length: 3600, mix: { hairpins: 2, tunnel: 2, climb: 2, descent: 2, chicane: 2, scurve: 2, rallyJump: 1 } } },
+  { id: 'iguazu', name: 'イグアスの大滝', cup: 3, desc: '轟音の滝の前を、しぶきを浴びて大ジャンプ', w: 19, sh: 4, surf: 'trail', shSurf: 'junglefloor', wildSurf: 'jungle', wall: 'none', edge: ['fern', 'rock'], gravity: 30, water: -1.5, waterColor: 0x5a9ab0,
+    theme: { skyTop: 0x4a9ae8, skyBot: 0xe8f6f0, fog: 0xb8d8d0, fogFar: 420, ground: 0x3a6a2a, groundTex: 'junglefloor', sun: 1.05, amb: 0.85, groundDrop: 2 },
+    deco: [['waterfall', 6], ['jungletree', 70], ['banana', 30], ['rock', 40]], music: { bpm: 146, root: 59, scale: 'lydian', seed: 317 }, biome: 'forest',
+    gen: { length: 4000, mix: { cliff: 3, gapjump: 2, river: 2, descent: 2, climb: 2, sweeper: 1, rallyJump: 1 } } },
+  { id: 'paris', name: 'パリ・エッフェル塔', cup: 4, desc: '石畳の街並みを抜け、エッフェル塔の下を駆け抜ける', w: 18, sh: 2, surf: 'cobble', shSurf: 'sidewalk', wall: 'none', edge: ['lamp', 'cypress'], gravity: 30,
+    theme: { skyTop: 0x6aa0e0, skyBot: 0xf4ecf0, fog: 0xd8d4e0, fogFar: 520, ground: 0x6a8a4a, groundTex: 'meadow', sun: 1.05, amb: 0.85 },
+    deco: [['eiffel', 4], ['cafe', 40], ['house', 30], ['round', 40]], music: { bpm: 128, root: 60, scale: 'major', seed: 401 }, biome: 'city',
+    gen: { length: 3400, mix: { tight90: 3, chicane: 3, scurve: 2, sweeper: 2, tunnel: 1, crests: 1 } } },
+  { id: 'egypt', name: 'ピラミッド砂漠', cup: 4, desc: '砂丘を飛び越え、ピラミッドとスフィンクスの横を爆走', w: 22, sh: 6, surf: 'desertroad', shSurf: 'dune', wildSurf: 'dune', wall: 'none', edge: ['obelisk', 'cactus'], gravity: 30,
+    theme: { skyTop: 0x4a8ae0, skyBot: 0xf8e8c0, fog: 0xf0d8a8, fogFar: 600, ground: 0xe0c088, groundTex: 'dune', sun: 1.25, amb: 0.85 },
+    deco: [['pyramid', 4], ['sphinx', 3], ['palm', 20], ['mesa', 6]], music: { bpm: 140, root: 52, scale: 'phrygian', seed: 409 }, biome: 'desert',
+    gen: { length: 4200, mix: { wild: 4, crests: 3, rallyJump: 2, gapjump: 2, sweeper: 2, scurve: 1 } } },
+  { id: 'choujou', name: '万里の長城', cup: 4, desc: '山の尾根を這う長城沿いの激坂ヘアピン', w: 16, sh: 2, surf: 'brickroad', shSurf: 'cliff', wall: 'none', edge: ['rock', 'pine'], gravity: 30,
+    theme: { skyTop: 0x6aa8e8, skyBot: 0xf0ece0, fog: 0xc8d0c0, fogFar: 520, ground: 0x6a8a4a, groundTex: 'meadow', sun: 1.05, amb: 0.8 },
+    deco: [['greatwall', 40], ['mountain', 10], ['pine', 50], ['pagoda', 3]], music: { bpm: 134, root: 57, scale: 'yonanuki', seed: 413 }, biome: 'mountain',
+    gen: { length: 4200, mix: { hairpins: 3, hairpinsDown: 2, climb: 2, cliff: 2, dropoff: 1, sweeper: 1, tunnel: 1 } } },
+  { id: 'fuji', name: '富士山と鳥居', cup: 4, desc: '桜並木と千本鳥居、正面にそびえる富士山', w: 18, sh: 3, surf: 'jproad', shSurf: 'meadow', wall: 'none', edge: ['torii', 'sakura'], gravity: 30, water: -1.4, waterColor: 0x4a8ad8,
+    theme: { skyTop: 0x5a9aea, skyBot: 0xfff0f4, fog: 0xe0e4f0, fogFar: 600, ground: 0x5a8a3a, groundTex: 'meadow', sun: 1.1, amb: 0.85 },
+    deco: [['fuji', 2], ['pagoda', 4], ['sakura', 60], ['torii', 20], ['pine', 30]], music: { bpm: 136, root: 62, scale: 'yonanuki', seed: 419 }, biome: 'meadow',
+    gen: { length: 3800, mix: { sweeper: 3, scurve: 2, climb: 2, descent: 2, tunnel: 1, crests: 2, river: 1 } } },
+  { id: 'newyork', name: 'ニューヨーク摩天楼', cup: 5, desc: '超高層ビルの谷間を、イエローキャブと競り合え', w: 20, sh: 2, surf: 'cityroad', shSurf: 'sidewalk', wall: 'none', edge: ['lamp', 'taxi'], gravity: 30, water: -2, waterColor: 0x3a6a9a,
+    theme: { skyTop: 0x4a7ad0, skyBot: 0xf0e0d0, fog: 0xc8ccd8, fogFar: 640, ground: 0x6a7a5a, groundTex: 'meadow', sun: 1.05, amb: 0.9 },
+    deco: [['skyscraper', 60], ['liberty', 2], ['house', 10]], music: { bpm: 150, root: 57, scale: 'minor', seed: 503 }, biome: 'city',
+    gen: { length: 4000, mix: { tight90: 4, sweeper: 2, spiral: 1, tunnel: 2, chicane: 2, gapjump: 1, loop: 1 } } },
+  { id: 'rome', name: 'ローマ・コロッセオ', cup: 5, desc: '古代の石畳と円柱、コロッセオをぐるっと一周', w: 18, sh: 3, surf: 'cobble', shSurf: 'plaza', wall: 'none', edge: ['cypress', 'column'], gravity: 30,
+    theme: { skyTop: 0x5a9ae8, skyBot: 0xf8ecd8, fog: 0xe0d4c0, fogFar: 560, ground: 0x7a8a4a, groundTex: 'meadow', sun: 1.15, amb: 0.85 },
+    deco: [['colosseum', 3], ['column', 30], ['cypress', 60], ['house', 20]], music: { bpm: 132, root: 60, scale: 'major', seed: 509 }, biome: 'meadow',
+    gen: { length: 3600, mix: { sweeper: 3, chicane: 2, scurve: 2, tight90: 2, crests: 2, cliff: 1 } } },
+  { id: 'london', name: 'ロンドン・ビッグベン', cup: 5, desc: '時計塔と観覧車を横目に、テムズ河畔を疾走', w: 18, sh: 2, surf: 'cityroad', shSurf: 'sidewalk', wall: 'none', edge: ['lamp', 'redbox'], gravity: 30, water: -2, waterColor: 0x4a6a7a,
+    theme: { skyTop: 0x7a90b0, skyBot: 0xe8e8ec, fog: 0xc0c4cc, fogFar: 460, ground: 0x5a7a4a, groundTex: 'meadow', sun: 0.9, amb: 0.9 },
+    deco: [['bigben', 3], ['londoneye', 2], ['house', 40], ['round', 30]], music: { bpm: 142, root: 55, scale: 'minor', seed: 521 }, biome: 'city',
+    gen: { length: 3600, mix: { tight90: 3, chicane: 2, sweeper: 2, tunnel: 2, river: 1, scurve: 2 } } },
+  { id: 'sydney', name: 'シドニー・オペラハウス', cup: 5, desc: '青い湾と白い帆の屋根。ハーバーブリッジを越えて海沿いを飛ばせ', w: 20, sh: 3, surf: 'asphalt', shSurf: 'sand', wall: 'none', edge: ['palm', 'lamp'], gravity: 30, water: -1.6, waterColor: 0x2a8ad8,
+    theme: { skyTop: 0x2a8af0, skyBot: 0xe8f6ff, fog: 0xc8e4f4, fogFar: 640, ground: 0x6a9a4a, groundTex: 'meadow', sun: 1.2, amb: 0.85 },
+    deco: [['opera', 3], ['harbourbridge', 2], ['palm', 50], ['skyscraper', 12]], music: { bpm: 146, root: 62, scale: 'lydian', seed: 527 }, biome: 'meadow',
+    gen: { length: 3800, mix: { sweeper: 3, crests: 2, gapjump: 2, river: 2, scurve: 2, cliff: 1 } } },
+];
+WORLD.forEach((c, i) => {
+  c.open = true; c.gen.seed = 3000 + i * 131;
+  c.desc = c.desc + `（約${(c.gen.length / 1000).toFixed(1)}km）`;
+  COURSES.push(c);
+  BIOME[c.id] = c.biome;
+});
+// コースごとの仕掛け
+Object.assign(GIMMICKS, {
+  jungle: { roll: { mesh: 'inoshishi', n: 3, v: -22, kind: 'knock', msg: '🐗 イノシシ突進！' }, pads: { mesh: 'mushroom', n: 3 } },
+  amazon: { roll: { mesh: 'wani', n: 4, v: -5, kind: 'grab', msg: '🐊 ワニにかまれた！' }, current: 5 },
+  angkor: { roll: { mesh: 'boulder', n: 3, v: -18, kind: 'flat', msg: '🪨 遺跡の石が転がってきた！' } },
+  iguazu: { current: 6, pads: { mesh: 'geyser', n: 4 } },
+  egypt: { wind: { every: 10, dur: 2.4, msg: '🏜️ 砂まじりの突風！' } },
+  choujou: { roll: { mesh: 'boulder', n: 4, v: -20, kind: 'flat', msg: '🪨 長城の石が落ちてきた！' } },
+  fuji: { pads: { mesh: 'geyser', n: 2 } },
+  london: { wind: { every: 12, dur: 2, msg: '💨 テムズの川風！' } },
+  sydney: { pads: { mesh: 'geyser', n: 3 }, wind: { every: 14, dur: 2, msg: '🌊 海風！' } },
 });
 
 //@@SPLIT@@
