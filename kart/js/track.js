@@ -579,7 +579,7 @@ class Track {
     for (const [type, count0] of def.deco || []) {
       const count = Math.round(count0 * scale);
       const parts = DECO[type] ? DECO[type]() : null; if (!parts) continue;
-      const far = ['mountain', 'mesa', 'cloud', 'asteroid', 'satellite', 'ferris', 'tentacle', 'floatrock', 'cloudpuff', 'rainbow', 'bigtree'].includes(type);
+      const far = ['mountain', 'mesa', 'cloud', 'asteroid', 'satellite', 'ferris', 'tentacle', 'floatrock', 'cloudpuff', 'rainbow', 'bigtree'].includes(type) || (typeof LANDMARK !== 'undefined' && LANDMARK.has(type));
       const mats = [];
       let tries = 0;
       while (mats.length < count && tries < count * 12) {

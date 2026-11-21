@@ -2,6 +2,17 @@
 const NET = {
   peer: null, conns: [], isHost: false, active: false, myId: null, code: null, players: [], lobbyCb: null, sendT: 0, readySet: null,
   status(t) { const e = document.getElementById('netStatus'); if (e) e.textContent = t; },
+  // claude.ai の中では外部と通信できないので、通信できる公開ページへ案内する
+  PUBLIC_URL: 'https://htmlpreview.github.io/?https://github.com/nikaido6969/kh-/blob/claude/dazzling-hamilton-cnbgqf/omunie-kart/index.html',
+  fail(t) {
+    const e = document.getElementById('netStatus'); if (!e) return;
+    e.textContent = t;
+    if (location.href.indexOf('htmlpreview.github.io') >= 0) return;
+    const a = document.createElement('a'); a.href = this.PUBLIC_URL; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = '🌐 友達対戦ページを開く'; a.className = 'btn pri'; a.style.cssText = 'justify-content:center;margin-top:10px;text-decoration:none';
+    const m = document.createElement('div'); m.style.cssText = 'margin-top:8px;font-size:12px'; m.textContent = 'この画面では通信できません。下のボタンから開くと友達対戦ができます（友達にもそのページを送ってね）';
+    e.appendChild(m); e.appendChild(a);
+  },
   makePeer(id) {
     return new Promise((res, rej) => {
       const p = id ? new Peer(id, { debug: 0 }) : new Peer({ debug: 0 });
@@ -16,7 +27,7 @@ const NET = {
     const code = Array.from({ length: 5 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
     this.status('部屋を作成中…');
     try { this.peer = await this.makePeer('kkart-' + code); }
-    catch (e) { this.status('作成失敗：' + (e.type || e.message) + '（もう一度お試しください）'); return false; }
+    catch (e) { this.fail('作成失敗：' + (e.type || e.message)); return false; }
     this.code = code; this.myId = this.peer.id;
     this.players = [{ id: this.myId, name, ch, host: true }];
     this.peer.on('connection', (c) => this.setupConn(c));
@@ -30,13 +41,13 @@ const NET = {
     code = code.trim().toUpperCase();
     this.status('接続中…');
     try { this.peer = await this.makePeer(); }
-    catch (e) { this.status('接続失敗：' + (e.type || e.message)); return false; }
+    catch (e) { this.fail('接続失敗：' + (e.type || e.message)); return false; }
     this.myId = this.peer.id; this.code = code;
     const c = this.peer.connect('kkart-' + code, { reliable: true });
     return new Promise((res) => {
       const to = setTimeout(() => { this.status('部屋が見つかりません（コードを確認）'); res(false); }, 10000);
       c.on('open', () => { clearTimeout(to); this.setupConn(c); c.send({ t: 'hello', name, ch }); this.status('接続しました！ホストの開始を待っています'); res(true); });
-      this.peer.on('error', (e) => { clearTimeout(to); this.status('接続エラー：' + e.type); res(false); });
+      this.peer.on('error', (e) => { clearTimeout(to); if (e.type === 'peer-unavailable') this.status('部屋が見つかりません（コードを確認）'); else this.fail('接続エラー：' + e.type); res(false); });
     });
   },
   setupConn(c) {

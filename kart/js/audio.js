@@ -73,7 +73,10 @@ const SND = {
       case 'select': T(880, 0.07, 'square', 0.1); T(1320, 0.07, 'sine', 0.06, 0, 0.03); break;
       case 'back': T(440, 0.07, 'square', 0.1); break;
       case 'splash': this.splash(0.8); break;
-      case 'land': N(0.15, 0.35, 180, 1); T(70, 0.15, 'sine', 0.3, 0.5); break;
+      case 'land': N(0.15, 0.35, 180, 1); T(70, 0.15, 'sine', 0.3, 0.5); N(0.25, 0.25, 600, 0.6, 0.4, 0.02, 'lowpass'); break;
+      case 'skid': N(0.55, 0.22, 2600, 6, 0.8); N(0.5, 0.12, 3400, 9, 0.7, 0.04); T(1900, 0.4, 'sawtooth', 0.025, 0.85); break;
+      case 'rumble': N(2.2, 0.55, 90, 0.7, 0.6, 0, 'lowpass'); N(1.6, 0.25, 260, 1, 0.5, 0.2, 'lowpass'); T(42, 1.8, 'sine', 0.35, 0.7); break;
+      case 'thunder': this.thunder(0.7, 0.2); break;
       // --- アイテム ---
       case 'scope': T(2400, 0.06, 'sine', 0.08); T(2400, 0.06, 'sine', 0.08, 0, 0.15); T(2400, 0.3, 'sine', 0.08, 0, 0.3); break;
       case 'gunshot': N(0.08, 0.9, 3000, 0.5, 0.2, 0, 'lowpass'); N(0.6, 0.5, 800, 0.5, 0.2); T(60, 0.4, 'sine', 0.6, 0.4); T(3000, 0.35, 'sine', 0.05, 0.3, 0.05); break;
@@ -143,9 +146,12 @@ const SND = {
     o1.type = 'sawtooth'; o2.type = 'square';
     const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 800;
     const g = this.ctx.createGain(); g.gain.value = 0.0;
-    o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.sfx);
-    o1.start(); o2.start();
-    this.engine = { o1, o2, g, f };
+    const o3 = this.ctx.createOscillator(); o3.type = 'triangle'; const g3 = this.ctx.createGain(); g3.gain.value = 0.35; o3.connect(g3); g3.connect(f);
+    const nz = this.ctx.createBufferSource(); nz.buffer = this.noiseBuf; nz.loop = true; const nf = this.ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 300; nf.Q.value = 1.5; const ng = this.ctx.createGain(); ng.gain.value = 0.25; nz.connect(nf); nf.connect(ng); ng.connect(f);
+    const ws = this.ctx.createWaveShaper(); const cv = new Float32Array(256); for (let i = 0; i < 256; i++) { const x = i / 128 - 1; cv[i] = Math.tanh(x * 2.2); } ws.curve = cv;
+    o1.connect(f); o2.connect(f); f.connect(ws); ws.connect(g); g.connect(this.sfx);
+    o1.start(); o2.start(); o3.start(); nz.start();
+    this.engine = { o1, o2, o3, nz, nf, g, f };
   },
   setEngine(sp, boost) {
     if (!this.engine) return;
@@ -153,6 +159,7 @@ const SND = {
     const base = 55 + Math.abs(sp) * 2.5 + (boost ? 40 : 0);
     this.engine.o1.frequency.setTargetAtTime(base, t, 0.05);
     this.engine.o2.frequency.setTargetAtTime(base * 0.5 + 3, t, 0.05);
+    if (this.engine.o3) { this.engine.o3.frequency.setTargetAtTime(base * 1.5 + 2, t, 0.05); this.engine.nf.frequency.setTargetAtTime(200 + Math.abs(sp) * 9, t, 0.1); }
     this.engine.f.frequency.setTargetAtTime(500 + Math.abs(sp) * 20, t, 0.1);
     this.engine.g.gain.setTargetAtTime(0.04 + Math.min(0.06, Math.abs(sp) * 0.0013), t, 0.1);
   },
@@ -182,8 +189,49 @@ const SND = {
     this.wake.g.gain.setTargetAtTime(level * 0.38, t, 0.08);
     this.wake.bp.frequency.setTargetAtTime(900 + level * 1600, t, 0.1);
   },
+  // ---- 雷：バリッ（近いほど鋭い）＋ゴロゴロ（遅れて長く） ----
+  thunder(near = 1, delay = 0) {
+    if (!this.ctx) return;
+    const N = (...a) => this.noise(...a), T = (...a) => this.tone(...a);
+    if (near > 0.5) { N(0.12, 0.9 * near, 3000, 0.5, 0.3, delay, 'highpass'); N(0.35, 0.7 * near, 1200, 0.4, 0.2, delay); }
+    N(3.2, 0.75 * near, 140, 0.6, 0.5, delay + 0.08, 'lowpass');
+    N(2.6, 0.45 * near, 320, 0.8, 0.4, delay + 0.4, 'lowpass');
+    T(38, 2.4, 'sine', 0.4 * near, 0.6, delay + 0.1);
+  },
+  // ---- 環境音：雨（サーッ）と風（ビュー）を常時ループ ----
+  loopNoise(type, f, q) {
+    const s = this.ctx.createBufferSource(); s.buffer = this.noiseBuf; s.loop = true;
+    const fl = this.ctx.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q;
+    const g = this.ctx.createGain(); g.gain.value = 0; s.connect(fl); fl.connect(g); g.connect(this.sfx); s.start();
+    return { s, fl, g };
+  },
+  setAmbience(rain, wind) {
+    if (!this.ctx) return;
+    if (!this.amb) {
+      this.amb = { rain: this.loopNoise('highpass', 2400, 0.4), rain2: this.loopNoise('bandpass', 900, 0.5), wind: this.loopNoise('bandpass', 420, 2.5) };
+      const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain(); lfo.frequency.value = 0.23; lg.gain.value = 260; lfo.connect(lg); lg.connect(this.amb.wind.fl.frequency); lfo.start(); this.amb.lfo = lfo;
+    }
+    const t = this.now(), A = this.amb;
+    A.rain.g.gain.setTargetAtTime(rain * 0.32, t, 0.4); A.rain2.g.gain.setTargetAtTime(rain * 0.16, t, 0.4);
+    A.wind.g.gain.setTargetAtTime(wind * 0.5, t, 0.5);
+  },
+  setTwister(lv) {
+    if (!this.ctx) return;
+    if (!this.tw) { this.tw = this.loopNoise('bandpass', 180, 1.2); const l = this.ctx.createOscillator(), lg = this.ctx.createGain(); l.frequency.value = 1.7; lg.gain.value = 90; l.connect(lg); lg.connect(this.tw.fl.frequency); l.start(); this.tw.l = l; }
+    this.tw.g.gain.setTargetAtTime(lv * 0.9, this.now(), 0.2);
+  },
+  // ---- ドリフト中のタイヤのキーッ（ループ） ----
+  setSkid(lv) {
+    if (!this.ctx) return;
+    if (!this.skid) { this.skid = this.loopNoise('bandpass', 2300, 7); const o = this.ctx.createOscillator(), og = this.ctx.createGain(); o.type = 'sawtooth'; o.frequency.value = 1750; og.gain.value = 0; o.connect(og); og.connect(this.sfx); o.start(); this.skid.o = o; this.skid.og = og; }
+    const t = this.now(); this.skid.g.gain.setTargetAtTime(lv * 0.16, t, 0.05); this.skid.og.gain.setTargetAtTime(lv * 0.012, t, 0.05);
+    this.skid.o.frequency.setTargetAtTime(1600 + Math.random() * 300, t, 0.05);
+  },
   stopEngine() {
-    if (this.wake) { try { this.wake.s.stop(); this.wake.lfo.stop(); } catch (e) { } this.wake = null; } if (this.engine) { this.engine.o1.stop(); this.engine.o2.stop(); this.engine = null; } },
+    try { for (const x of [this.amb && this.amb.rain, this.amb && this.amb.rain2, this.amb && this.amb.wind, this.tw, this.skid]) if (x) { x.s.stop(); if (x.o) x.o.stop(); if (x.l) x.l.stop(); } if (this.amb && this.amb.lfo) this.amb.lfo.stop(); } catch (e) { }
+    this.amb = null; this.tw = null; this.skid = null;
+    if (this.engine && this.engine.o3) { try { this.engine.o3.stop(); this.engine.nz.stop(); } catch (e) { } }
+    if (this.wake) { try { this.wake.s.stop(); this.wake.lfo.stop(); } catch (e) { } this.wake = null; } if (this.engine) { try { this.engine.o1.stop(); this.engine.o2.stop(); } catch (e) { } this.engine = null; } },
 
   // ---- BGM：イントロ→Aメロ→Bメロ→サビ の構成で自動作曲 ----
   startBGM(m) {

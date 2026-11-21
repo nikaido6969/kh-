@@ -60,7 +60,7 @@ class Particles {
   constructor(scene) {
     this.pool = []; this.scene = scene;
     const tex = U.glowTex();
-    for (let i = 0; i < 520; i++) {
+    for (let i = 0; i < 900; i++) {
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, color: 0xffffff, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
       sp.visible = false; sp.renderOrder = 6; scene.add(sp);
       this.pool.push({ sp, life: 0, max: 1, v: new THREE.Vector3(), g: 0, s0: 1, s1: 0 });
@@ -160,7 +160,9 @@ class Game {
     this.boxes = [];
     const bgeo = new THREE.BoxGeometry(1.7, 1.7, 1.7);
     const bmat = new THREE.MeshStandardMaterial({ map: U.itemBoxTex(), transparent: true, opacity: 0.85, emissive: 0xffffff, emissiveMap: U.itemBoxTex(), emissiveIntensity: 0.5 });
-    for (const j of this.track.itemRows) {
+    let rows = this.track.itemRows;
+    if (this.battle && rows.length) { const N = this.track.N, cnt = rows.length * 4; rows = []; for (let q = 0; q < cnt; q++) { let j = Math.round((q + 0.5) * N / cnt) % N, t = 0; while ((this.track.flags[j] & (1 | 8 | 16)) && t++ < 40) j = (j + 1) % N; rows.push(j); } }
+    for (const j of rows) {
       const hw = this.track.hw[j];
       const nB = hw > 15 ? 12 : 8;
       for (let bi = 0; bi < nB; bi++) { const f = -0.86 + 1.72 * bi / (nB - 1);
@@ -196,6 +198,7 @@ class Game {
     }
     this.setupGimmicks();
     this.setupScenery();
+    this.setupWeather();
     // UFO
     this.ufoMesh = new THREE.Group();
     mk(this.ufoMesh, GEO.sph(1.6, 16, 8), 0xc0c8d8, 0, 0, 0, { s: [1.6, 0.35, 1.6], mo: { m: 0.8, r: 0.2 } });
@@ -300,6 +303,8 @@ class Game {
     this.particles.update(dt);
     this.updateCamera(dt);
     this.updateScenery(dt);
+    if (this.wx) this.updateWeather(dt);
+    if (this.player) SND.setSkid(this.player.drift && this.player.grounded && Math.abs(this.player.v) > 8 ? Math.min(1, Math.abs(this.player.v) / 30) : 0);
     this.updateMagicFx(dt);
     HUD.update(this, dt);
     if (this.player) { SND.setEngine(this.player.v, this.player.boostT > 0); const p = this.player; SND.setWake(p.inWater && p.waterDepth < 2.4 && p.grounded ? U.clamp(Math.abs(p.v) / 40, 0, 1) : 0); }
@@ -405,11 +410,11 @@ class Game {
       k.v = U.damp(k.v, vm, 3, dt);
     } else if (!locked) {
       if (inp.accel && !inp.brake) {
-        if (k.v < vm) { const x = U.clamp(k.v / vm, 0, 1); k.v += k.accK * vm * (0.9 * Math.pow(1 - x, 0.75) + 0.015) * dt; }
+        if (k.v < vm && k.grounded) { const x = U.clamp(k.v / vm, 0, 1); k.v += k.accK * vm * (0.9 * Math.pow(1 - x, 0.75) + 0.015) * dt; }
       } else if (inp.brake) {
         if (k.v > 0) k.v -= 42 * dt; else k.v = Math.max(-11, k.v - 16 * dt);
       } else k.v -= Math.sign(k.v) * Math.min(Math.abs(k.v), 9 * dt);
-      if (k.boostT > 0 && k.v < vm) k.v += 75 * dt;
+      if (k.boostT > 0 && k.v < vm && k.grounded) k.v += 75 * dt;
     } else {
       k.v *= Math.exp(-(k.knockT > 0 ? 1.0 : 1.2) * dt);
     }
@@ -423,6 +428,7 @@ class Game {
     let turnRate = k.turn * Math.min(1, sp / 13) * (1 - 0.16 * Math.min(1.3, sp / k.vmax));
     turnRate *= 1.6;   // 曲がりやすさ（旋回半径を約0.6倍に）
     if (!k.grounded) turnRate *= 0.55;
+    turnRate *= this.wetGrip || 1;
     if (inWater) turnRate *= 0.9;
     let yawRate = 0;
     if (k.isPlayer && !k.finished) { const tg = inp.steer || 0; k.steerS = U.damp(k.steerS || 0, tg, Math.abs(tg) < Math.abs(k.steerS || 0) ? 16 : 14, dt); } else k.steerS = inp.steer || 0;
@@ -451,18 +457,18 @@ class Game {
     }
     if (k.landT > 0) {   // ジャンプ着地から0.3秒以内にハンドルを切るとドリフト
       k.landT -= dt;
-      if (k.grounded && !k.drift && !locked && !ufo && Math.abs(inp.steer || 0) > 0.3 && k.v > 14) { k.drift = Math.sign(inp.steer); k.driftCharge = 0; k.mt = 0; k.autoDrift = true; k.landT = 0; if (k.isPlayer) { SND.play('hop'); this.dust(k, 0xd8c8a8); } }
+      if (k.grounded && !k.drift && !locked && !ufo && Math.abs(inp.steer || 0) > 0.3 && k.v > 14) { k.drift = Math.sign(inp.steer); k.driftCharge = 0; k.mt = 0; k.autoDrift = true; k.landDrift = true; k.landT = 0; this.smokeBurst(k, 10); if (k.isPlayer) { SND.play('hop'); this.dust(k, 0xd8c8a8); } }
     }
     if (k.drift) {
       const held = inp.drift || (k.autoDrift && Math.abs(steer) > 0.15 && steer * k.drift > -0.25);
       if (!held || k.v < 10 || locked || ufo) {
         k.autoDrift = false;
-        if (k.mt > 0 && !locked) { this.chargeMagic(k, 0.04 * k.mt); k.boostT = Math.max(k.boostT, MT_TIME[k.mt]); k.boostCol = k.mt; if (k.isPlayer) SND.play('boost'); }
-        k.drift = 0; k.mt = 0; k.driftCharge = 0;
+        if (k.mt > 0 && !locked && !k.landDrift) { this.chargeMagic(k, 0.04 * k.mt); k.boostT = Math.max(k.boostT, MT_TIME[k.mt]); k.boostCol = k.mt; if (k.isPlayer) SND.play('boost'); }
+        k.drift = 0; k.mt = 0; k.driftCharge = 0; k.landDrift = false;
       } else {
         const base = 0.8 + 0.48 * steer * k.drift;
         yawRate = k.drift * turnRate * base * 1.08;
-        if (k.grounded) k.driftCharge += dt * (0.75 + 0.95 * Math.max(0, steer * k.drift)) * (k.isAI ? 0 : 1);
+        if (k.grounded && !k.landDrift) k.driftCharge += dt * (0.75 + 0.95 * Math.max(0, steer * k.drift)) * (k.isAI ? 0 : 1);
         const lv = k.driftCharge > 3.0 ? 3 : k.driftCharge > 1.9 ? 2 : k.driftCharge > 0.95 ? 1 : 0;
         if (lv > k.mt) { k.mt = lv; if (k.isPlayer) SND.play('mt1'); }
       }
@@ -809,6 +815,13 @@ class Game {
         this.particles.emit(p, vel, col, 0.25, k.mt ? 0.9 : 0.5, 0.1, 10);
       }
     }
+    if (k.drift && k.grounded && Math.random() < (k.isPlayer ? 0.95 : 0.45)) {   // タイヤの煙
+      for (const sd of [-1, 1]) {
+        const p = this.tmp.c.copy(m.root.position).addScaledVector(F, -1.2).addScaledVector(Lf, sd * 0.9).addScaledVector(fr.u, 0.35);
+        const vel = new THREE.Vector3().copy(F).multiplyScalar(-2 - Math.random() * 2).addScaledVector(fr.u, 1.2 + Math.random() * 1.6).addScaledVector(Lf, -k.drift * (2 + Math.random() * 2));
+        this.particles.emit(p, vel, this.smokeCol || 0xd8d4cc, 1.1 + Math.random() * 0.5, 0.9, 3.6 + Math.random() * 1.5, -0.6, false);
+      }
+    }
     if (k.boostT > 0 && Math.random() < 0.6) {
       const p = this.tmp.c.copy(m.root.position).addScaledVector(F, -1.7).addScaledVector(fr.u, 0.5);
       this.particles.emit(p, new THREE.Vector3().copy(F).multiplyScalar(-6), bc, 0.25, 1.2, 0.2, 0);
@@ -819,6 +832,11 @@ class Game {
   spark(k, col, n) {
     const pos = k.model.root.position;
     for (let i = 0; i < n; i++) this.particles.emit(pos, new THREE.Vector3((Math.random() - 0.5) * 12, Math.random() * 8, (Math.random() - 0.5) * 12), col, 0.4, 0.8, 0.1, 15);
+  }
+  smokeBurst(k, n) {
+    const p = k.model.root.position;
+    for (let i = 0; i < n; i++) this.particles.emit(p.clone().add(new THREE.Vector3((Math.random() - 0.5) * 2.5, 0.4, (Math.random() - 0.5) * 2.5)), new THREE.Vector3((Math.random() - 0.5) * 6, 1 + Math.random() * 2.5, (Math.random() - 0.5) * 6), this.smokeCol || 0xd8d4cc, 1.3, 1.2, 4.5, -0.5, false);
+    if (k.isPlayer) SND.play('skid');
   }
   dust(k, col) {
     const p = k.model.root.position.clone();

@@ -145,7 +145,7 @@ Object.assign(Game.prototype, {
         if (k.isRemote || k.out || !k.grounded || k.respawnT > 0 || k.ufoT > 0) continue;
         if (Math.abs(this.dDist(k.dist, p.s)) < 2.4 && Math.abs(k.d - p.d) < 2.4) {
           k.vh = 13 * Math.sqrt(this.def.gravity / 30); k.grounded = false; k.airT = 0; k.hop = false; p.t = 0.5;
-          if (k.isPlayer) { SND.play('poyon'); HUD.toast('🍄 大ジャンプ！空中でドリフトボタン→着地で加速'); }
+          if (k.isPlayer) { SND.play('poyon'); HUD.toast('🍄 大ジャンプ！'); }
         }
       }
     }
