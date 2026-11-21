@@ -1,4 +1,9 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<script>
+(function(){var go=function(){if(!document.getElementById('s-online')||document.readyState==='loading'){return setTimeout(go,50)}
+fetch('game.js?v=1').then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(t){t.split('\n//@@SPLIT@@\n').forEach(function(c){var e=document.createElement('script');e.textContent=c;document.body.appendChild(e)})}).catch(function(e){document.body.insertAdjacentHTML('beforeend','<p style="position:fixed;top:40%;left:0;right:0;text-align:center;z-index:99">読み込みに失敗しました。ページを開き直してください</p>')})};go()})();
+</script>
+
 <meta name="theme-color" content="#f6efe4">
 <title>おむにえカート</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -485,8 +490,4 @@ body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 112px)}
 </div>
 
 
-<script>
-(function(){var go=function(){if(!document.getElementById('s-online')||document.readyState==='loading'){return setTimeout(go,50)}
-fetch('game.js?v=1').then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(t){t.split('\n//@@SPLIT@@\n').forEach(function(c){var e=document.createElement('script');e.textContent=c;document.body.appendChild(e)})}).catch(function(e){document.body.insertAdjacentHTML('beforeend','<p style="position:fixed;top:40%;left:0;right:0;text-align:center;z-index:99">読み込みに失敗しました。ページを開き直してください</p>')})};go()})();
-</script>
 </body></html>
