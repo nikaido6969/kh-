@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <script>
 (function(){var go=function(){if(!document.getElementById('s-online')||document.readyState==='loading'){return setTimeout(go,50)}
-fetch('game.js?v=1795261550').then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(t){t.split('\n//@@SPLIT@@\n').forEach(function(c){var e=document.createElement('script');e.textContent=c;document.body.appendChild(e)})}).catch(function(e){document.body.insertAdjacentHTML('beforeend','<p style="position:fixed;top:40%;left:0;right:0;text-align:center;z-index:99">読み込みに失敗しました。ページを開き直してください</p>')})};go()})();
+fetch('game.js?v=1795261936').then(function(r){if(!r.ok)throw r.status;return r.text()}).then(function(t){t.split('\n//@@SPLIT@@\n').forEach(function(c){var e=document.createElement('script');e.textContent=c;document.body.appendChild(e)})}).catch(function(e){document.body.insertAdjacentHTML('beforeend','<p style="position:fixed;top:40%;left:0;right:0;text-align:center;z-index:99">読み込みに失敗しました。ページを開き直してください</p>')})};go()})();
 </script>
 
 <meta name="theme-color" content="#f6efe4">
@@ -317,6 +317,9 @@ body.touch #htoasts{top:calc(max(10px,env(safe-area-inset-top)) + 112px)}
 @media (orientation:portrait){#s-title{flex-direction:column;justify-content:flex-start}.tlogo{flex:none;padding-top:8vh}.tmenu{flex:none;width:100%;max-width:520px;align-self:center;padding:10px 16px 24px}}
 @media (orientation:landscape) and (max-height:500px){.mbtn{padding:6px 12px 6px 7px;gap:10px}.mic{width:40px;height:40px;font-size:22px}.mbtn.big .mic{width:46px;height:46px;font-size:26px}.mtx b{font-size:16px}.mbtn.big .mtx b{font-size:19px}.mtx small{font-size:10.5px}.tmenu{gap:6px}}
 @media (prefers-reduced-motion:reduce){.tl1 span,.tl2 span,.tsp,.tpress,.tlogo::after{animation:none}}
+/* アイテム枠：指が届くよう画面中央の左端に */
+body.touch #hitem{left:max(10px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);width:84px;height:84px;font-size:48px;z-index:13}
+body.touch #hbags{left:max(10px,env(safe-area-inset-left))!important;margin-left:0!important;transform:none!important;top:calc(50% + 62px)!important}
 #s-pause,#s-results{justify-content:center;background:rgba(246,239,228,.4)}
 </style>
 <canvas id="cv"></canvas>
