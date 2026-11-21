@@ -77,8 +77,60 @@ Object.assign(Game.prototype, {
     }    this.setupShortcuts();
   },
 
+  // ---- 急カーブの外側に紅白ガードレール＋矢印看板 ----
+  setupCornerRails() {
+    const tr = this.track; this.railSide = null; if (this.battle) return;
+    const N = tr.N, side = new Int8Array(N), K = 1 / 48;
+    for (let j = 0; j < N; j++) {
+      if (tr.flags[j] & (1 | 8 | 16)) continue;
+      let m = 0; for (let o = -6; o <= 6; o += 2) { const q = Math.min(N - 1, Math.max(0, j + o)); if (Math.abs(tr.kap[q]) > Math.abs(m)) m = tr.kap[q]; }
+      if (Math.abs(m) > K) side[j] = m > 0 ? -1 : 1;   // 右カーブ→左側(外側)にレール
+    }
+    this.railSide = side;
+    const segs = [], signs = [], fr = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
+    for (let j = 0; j < N; j += 2) if (side[j]) { segs.push(j); if (j % 8 === 0) signs.push(j); }
+    if (!segs.length) return;
+    const len = tr.ds * 2.05, mtx = new THREE.Matrix4(), col = new THREE.Color();
+    const rail = new THREE.InstancedMesh(new THREE.BoxGeometry(0.28, 0.5, len), new THREE.MeshToonMaterial({ color: 0xffffff }), segs.length);
+    const post = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.09, 0.09, 1, 5), new THREE.MeshToonMaterial({ color: 0x9aa0a8 }), segs.length);
+    const cv = document.createElement('canvas'); cv.width = 64; cv.height = 64; const c = cv.getContext('2d');
+    c.fillStyle = '#ffd23a'; c.fillRect(0, 0, 64, 64); c.fillStyle = '#e0202a'; c.beginPath(); c.moveTo(14, 8); c.lineTo(46, 32); c.lineTo(14, 56); c.lineTo(26, 56); c.lineTo(56, 32); c.lineTo(26, 8); c.fill();
+    const sgeo = new THREE.PlaneGeometry(1.6, 1.6), smatR = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), side: THREE.DoubleSide });
+    const sign = new THREE.InstancedMesh(sgeo, smatR, signs.length);
+    segs.forEach((j, i) => {
+      const s = j * tr.ds + tr.ds; tr.frame(s, fr);
+      const d = side[j] * (tr.hw[j] + 0.7), y = tr.lerpArr(tr.off, s);
+      const pos = fr.p.clone().addScaledVector(fr.r, d).addScaledVector(fr.u, y + 0.75);
+      mtx.makeBasis(fr.r, fr.u, fr.t).setPosition(pos); rail.setMatrixAt(i, mtx);
+      rail.setColorAt(i, col.set(Math.floor(j / 2) % 2 ? 0xe0202a : 0xffffff));
+      mtx.makeBasis(fr.r, fr.u, fr.t).setPosition(pos.addScaledVector(fr.u, -0.35)); post.setMatrixAt(i, mtx);
+    });
+    signs.forEach((j, i) => {
+      const s = j * tr.ds; tr.frame(s, fr);
+      const d = side[j] * (tr.hw[j] + 1.6), y = tr.lerpArr(tr.off, s);
+      const pos = fr.p.clone().addScaledVector(fr.r, d).addScaledVector(fr.u, y + 1.9);
+      const xr = fr.r.clone().multiplyScalar(-side[j]);   // 矢印がカーブ方向を指す
+      mtx.makeBasis(xr, fr.u, xr.clone().cross(fr.u)).setPosition(pos); sign.setMatrixAt(i, mtx);
+    });
+    rail.instanceColor.needsUpdate = true;
+    this.scene.add(rail, post, sign);
+  },
+  railHit() {
+    const tr = this.track, side = this.railSide; if (!side) return;
+    for (const k of this.karts) {
+      if (k.isRemote || k.out || k.h > 2 || k.respawnT > 0) continue;
+      const j = tr.idx(k.dist)[0], sd = side[j]; if (!sd) continue;
+      const lim = tr.hw[j] + 0.3;
+      if (k.d * sd > lim) {
+        k.d = sd * lim; k.v *= 0.985; k.yaw *= 0.8;
+        if (k.isPlayer && this.time - (this.railAt || 0) > 0.6) { this.railAt = this.time; SND.play('wall'); }
+      }
+    }
+  },
+
   // ---- 隠し抜け道トンネル（カーブの内側の路肩に入口。入ると先へワープ）----
   setupShortcuts() {
+    this.setupCornerRails();
     this.shortcuts = [];
     const tr = this.track; if (this.battle || !tr.open) return;
     const fa = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() }, fb = { p: new THREE.Vector3(), t: new THREE.Vector3(), u: new THREE.Vector3(), r: new THREE.Vector3() };
@@ -134,6 +186,7 @@ Object.assign(Game.prototype, {
 
   updateGimmicks(dt) {
     if (this.shortcuts) this.updateShortcuts();
+    this.railHit();
     const G = this.gim, cfg = G.cfg, tr = this.track;
     const online = !!this.cfg.netId;
     // ジャンプ台

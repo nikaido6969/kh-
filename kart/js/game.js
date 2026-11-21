@@ -1,5 +1,6 @@
 // ===== レースエンジン =====
 const CC_BASE = { 100: 26.5, 150: 34.5, 200: 44 }; // 従来比 -20%（ノリノリ加速で伸びる）
+const GRASSY = ['grass', 'meadow', 'swampgrass', 'leaves', 'islandgrass', 'junglefloor']; // 芝生・草地は減速なし
 const LOOSE = ['gravel', 'dirt', 'trail', 'mudpath', 'forest', 'moon', 'meadow', 'sand', 'seabed', 'redsand', 'cliff'];
 const DUSTCOL = { gravel: 0xc8bca8, dirt: 0xa07a4a, trail: 0xb89a70, mudpath: 0x6a5030, forest: 0x8a6a40, moon: 0xb8b8c0, meadow: 0xa8b878, sand: 0xe8d4a0, redsand: 0xd08a50, cliff: 0xb0a090 };
 const MT_COL = [0xffffff, 0x4ac8ff, 0xffa020, 0xd060ff];
@@ -394,7 +395,7 @@ class Game {
     const shSurf = def.shSurf;
     const hardSh = ['sidewalk', 'steel', 'neon2', 'rock2', 'jupiter2'].includes(shSurf);
     let pen = 1;
-    if (off && (k.grounded || k.jumped || k.hop) && k.boostT <= 0 && k.starT <= 0 && k.ufoT <= 0) pen = hardSh ? 0.88 : shSurf === 'mud' ? 0.45 : 0.55;
+    if (off && (k.grounded || k.jumped || k.hop) && k.boostT <= 0 && k.starT <= 0 && k.ufoT <= 0) pen = GRASSY.includes(shSurf) ? 1 : hardSh ? 0.88 : shSurf === 'mud' ? 0.45 : 0.55;
     vm *= pen;
     const wy = this._worldY(k);
     const inWater = def.water != null && wy < def.water;
@@ -926,7 +927,7 @@ const HUD = {
   },
   eraser() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="eraser">消</div>'; e.className = 'on er'; setTimeout(() => e.className = '', 1600); },
   slash() { const e = document.getElementById('hfun'); e.innerHTML = '<div class="slash"></div>'; e.className = 'on sl'; setTimeout(() => e.className = '', 900); },
-  note(n) { const e = document.getElementById('hnote'); if (!e) return; e.innerHTML = `<i>${n.ic}</i><b>${n.t}</b>`; e.className = ''; void e.offsetWidth; e.className = 'on' + (n.lv && n.lv <= 2 ? ' hot' : ''); },
+  note(n) { const e = document.getElementById('hnote'); if (!e) return; e.innerHTML = `<i>${n.ic}</i><b>${n.t}</b>`; e.className = ''; void e.offsetWidth; e.className = 'on' + (n.lv && n.lv <= 2 ? ' hot' : n.lv ? ' curve' : ''); },
   short(t) {
     t = String(t).replace(/（[^）]*）|\([^)]*\)/g, '').replace(/「|」/g, '').trim();
     const cut = t.search(/[！!。…]/); if (cut > 3) t = t.slice(0, cut + (t[cut] === '！' || t[cut] === '!' ? 1 : 0));

@@ -212,7 +212,7 @@ const SND = {
       const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain(); lfo.frequency.value = 0.23; lg.gain.value = 260; lfo.connect(lg); lg.connect(this.amb.wind.fl.frequency); lfo.start(); this.amb.lfo = lfo;
     }
     const t = this.now(), A = this.amb;
-    A.rain.g.gain.setTargetAtTime(rain * 0.32, t, 0.4); A.rain2.g.gain.setTargetAtTime(rain * 0.16, t, 0.4);
+    A.rain.g.gain.setTargetAtTime(0, t, 0.4); A.rain2.g.gain.setTargetAtTime(0, t, 0.4); // 雨音なし
     A.wind.g.gain.setTargetAtTime(wind * 0.5, t, 0.5);
   },
   setTwister(lv) {
